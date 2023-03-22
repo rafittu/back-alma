@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { PrismaService } from '../../../prisma.service';
 import { IUserRepository } from '../structure/repository.structure';
 import { ICreateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { AppError } from 'src/common/errors/Error';
+import { AppError } from '../../../common/errors/Error';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
