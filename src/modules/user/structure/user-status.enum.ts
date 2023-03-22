@@ -3,5 +3,5 @@ export enum UserStatus {
   ACTIVE = 'ACTIVE',
   BLOCKED = 'BLOCKED',
   CANCELLED = 'CANCELLED',
-  BANNED = 'CANCELLED',
+  BANNED = 'BANNED',
 }
