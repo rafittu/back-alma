@@ -1,13 +1,21 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Req, UseFilters } from '@nestjs/common';
+import { Request } from 'express';
+import * as requestIp from 'request-ip';
+import { AppError } from '../../common/errors/Error';
+import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserService } from './services/create-user.service';
 
-@Controller('user')
+@Controller()
+@UseFilters(new HttpExceptionFilter(new AppError()))
 export class UserController {
   constructor(private readonly createUserService: CreateUserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.createUserService.execute(createUserDto);
+  @Post('/signup')
+  create(@Req() req: Request) {
+    const createUserDto: CreateUserDto = req.body;
+    const ipAddress = requestIp.getClientIp(req);
+
+    return this.createUserService.execute({ ...createUserDto, ipAddress });
   }
 }
