@@ -13,6 +13,7 @@ export class UserController {
 
   @Post('/signup')
   create(@Req() req: Request) {
+    // transformar getIpAddress em decorator
     const createUserDto: CreateUserDto = req.body;
     const ipAddress = requestIp.getClientIp(req);
 

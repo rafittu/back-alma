@@ -21,7 +21,7 @@ export class CreateUserService {
         'passwords do not match',
       );
     }
-
+    // corrigir validação de ip (IPv6)
     const validateIp = (ip: string): boolean => {
       const ipRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
       return ipRegex.test(ip);
