@@ -7,20 +7,13 @@ import { IUserRepository } from '../structure/repository.structure';
 import { ICreateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
+import { ipAddressToInteger } from '../../../modules/utils/helpers/user-module';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
   constructor(private prisma: PrismaService) {}
 
   async createUser(data: ICreateUser, status: UserStatus): Promise<User> {
-    const ipToInteger = (ip: string): number => {
-      return (
-        ip
-          .split('.')
-          .reduce((acc, cur) => (acc << 8) + parseInt(cur, 10), 0) >>> 0
-      );
-    };
-
     const salt = await bcrypt.genSalt();
 
     const createUser = {
@@ -34,7 +27,7 @@ export class UserRepository implements IUserRepository<User> {
       email: data.email,
       phone: data.phone,
       password: await bcrypt.hash(data.password, salt),
-      ip_address: ipToInteger(data.ipAddress),
+      ip_address: ipAddressToInteger(data.ipAddress),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
