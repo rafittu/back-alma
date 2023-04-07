@@ -15,7 +15,7 @@ export class UserController {
   create(@Req() req: Request) {
     // transformar getIpAddress em decorator
     const createUserDto: CreateUserDto = req.body;
-    const ipAddress = requestIp.getClientIp(req);
+    const ipAddress = req.socket.remoteAddress;
 
     return this.createUserService.execute({ ...createUserDto, ipAddress });
   }
