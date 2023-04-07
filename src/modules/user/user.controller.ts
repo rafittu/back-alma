@@ -1,6 +1,5 @@
 import { Controller, Post, Req, UseFilters } from '@nestjs/common';
 import { Request } from 'express';
-import * as requestIp from 'request-ip';
 import { AppError } from '../../common/errors/Error';
 import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
 import { CreateUserDto } from './dto/create-user.dto';
