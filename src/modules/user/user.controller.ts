@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UseFilters } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
 import { Request } from 'express';
 import { AppError } from '../../common/errors/Error';
 import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
@@ -11,9 +11,8 @@ export class UserController {
   constructor(private readonly createUserService: CreateUserService) {}
 
   @Post('/signup')
-  create(@Req() req: Request) {
-    // transformar getIpAddress em decorator
-    const createUserDto: CreateUserDto = req.body;
+  create(@Req() req: Request, @Body() body: CreateUserDto) {
+    const createUserDto = body;
     const ipAddress = req.socket.remoteAddress;
 
     return this.createUserService.execute({ ...createUserDto, ipAddress });
