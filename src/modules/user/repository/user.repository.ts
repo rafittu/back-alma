@@ -54,12 +54,28 @@ export class UserRepository implements IUserRepository<User> {
     try {
       const user = await this.prisma.user.create({
         data: userData,
+        include: {
+          contact: {
+            select: {
+              username: true,
+              email: true,
+            },
+          },
+          security: {
+            select: {
+              confirmation_token: true,
+            },
+          },
+        },
       });
 
-      delete user.password;
-      delete user.salt;
+      const { confirmation_token: confirmationToken } = user.security;
+      const userResponse = {
+        ...user,
+        security: { confirmationToken },
+      };
 
-      return user;
+      return userResponse;
     } catch (error) {
       if (error.code === 'P2002') {
         throw new AppError(
