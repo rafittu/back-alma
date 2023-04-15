@@ -1,42 +1,20 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { UserService } from './services/user.service';
+import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
+import { Request } from 'express';
+import { AppError } from '../../common/errors/Error';
+import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserService } from './services/create-user.service';
 
-@Controller('user')
+@Controller()
+@UseFilters(new HttpExceptionFilter(new AppError()))
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly createUserService: CreateUserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
+  @Post('/signup')
+  create(@Req() req: Request, @Body() body: CreateUserDto) {
+    const createUserDto = body;
+    const ipAddress = req.socket.remoteAddress;
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.createUserService.execute({ ...createUserDto, ipAddress });
   }
 }

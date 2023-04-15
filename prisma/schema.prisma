@@ -15,25 +15,60 @@ enum UserStatus {
   BANNED
 }
 
-model User {
-  id                 String     @id @unique @default(uuid()) @db.Uuid
-  first_name         String     @db.VarChar(125)
-  last_name          String     @db.VarChar(125)
-  social_name        String     @db.VarChar(250)
-  born_date          String     @db.VarChar(10)
-  mother_name        String     @db.VarChar(250)
-  status             UserStatus
-  username           String?    @db.VarChar(45)
-  email              String     @unique @db.VarChar(250)
-  phone              String?    @unique @db.VarChar(15)
-  password           String
-  ip_address         Int
-  salt               String
-  confirmation_token String?    @unique @db.VarChar(64)
-  recover_token      String?    @db.VarChar(64)
+model UserPersonalInfo {
+  id          String     @id @default(uuid()) @db.Uuid
+  first_name  String     @db.VarChar(125)
+  last_name   String     @db.VarChar(125)
+  social_name String?    @db.VarChar(250)
+  born_date   String     @db.VarChar(10)
+  mother_name String     @db.VarChar(250)
+  status      UserStatus
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  User       User[]
+
+  @@map("users_personal_info")
+}
+
+model UserContactInfo {
+  id       String  @id @default(uuid()) @db.Uuid
+  username String? @db.VarChar(45)
+  email    String  @unique @db.VarChar(250)
+  phone    String? @unique @db.VarChar(15)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  User       User[]
+
+  @@map("users_contact_info")
+}
+
+model UserSecurityInfo {
+  id                 String  @id @default(uuid()) @db.Uuid
+  password           String
+  salt               String
+  confirmation_token String? @unique @db.VarChar(64)
+  recover_token      String? @db.VarChar(64)
+  ip_address         BigInt  @db.BigInt()
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  User       User[]
+
+  @@map("users_security_info")
+}
+
+model User {
+  id       String           @id @unique @default(uuid()) @db.Uuid
+  personal UserPersonalInfo @relation(fields: [userPersonalInfoId], references: [id])
+  contact  UserContactInfo  @relation(fields: [userContactInfoId], references: [id])
+  security UserSecurityInfo @relation(fields: [userSecurityInfoId], references: [id])
+
+  updated_at         DateTime @updatedAt
+  userPersonalInfoId String   @db.Uuid
+  userContactInfoId  String   @db.Uuid
+  userSecurityInfoId String   @db.Uuid
 
   @@map("users")
 }
