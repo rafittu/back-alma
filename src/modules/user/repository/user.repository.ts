@@ -87,4 +87,20 @@ export class UserRepository implements IUserRepository<User> {
       throw new AppError('user-repository.createUser', 500, 'user not created');
     }
   }
+
+  async getUserById(data: string): Promise<User> {
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: { id: data },
+        include: {
+          personal: true,
+          contact: true,
+        },
+      });
+
+      return user;
+    } catch (error) {
+      throw new AppError('user-repository.getUserById', 404, 'user not found');
+    }
+  }
 }
