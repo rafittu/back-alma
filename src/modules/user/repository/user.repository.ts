@@ -16,25 +16,45 @@ export class UserRepository implements IUserRepository<User> {
   async createUser(data: ICreateUser, status: UserStatus): Promise<User> {
     const salt = await bcrypt.genSalt();
 
-    const createUser = {
+    const personalInfo = {
       first_name: data.firstName,
       last_name: data.lastName,
       social_name: data.socialName,
       born_date: data.bornDate,
       mother_name: data.motherName,
       status,
+    };
+
+    const contactInfo = {
       username: data.username,
       email: data.email,
       phone: data.phone,
+    };
+
+    const securityInfo = {
       password: await bcrypt.hash(data.password, salt),
-      ip_address: ipAddressToInteger(data.ipAddress),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
+      ip_address: ipAddressToInteger(data.ipAddress),
+    };
+
+    const userData = {
+      personal: {
+        create: personalInfo,
+      },
+      contact: {
+        create: contactInfo,
+      },
+      security: {
+        create: securityInfo,
+      },
     };
 
     try {
-      const user = await this.prisma.user.create({ data: createUser });
+      const user = await this.prisma.user.create({
+        data: userData,
+      });
 
       delete user.password;
       delete user.salt;
