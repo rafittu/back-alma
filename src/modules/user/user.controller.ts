@@ -7,6 +7,7 @@ import {
   Req,
   UseFilters,
 } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { Request } from 'express';
 import { AppError } from '../../common/errors/Error';
 import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
@@ -24,7 +25,7 @@ export class UserController {
   ) {}
 
   @Post('/signup')
-  create(@Req() req: Request, @Body() body: CreateUserDto) {
+  create(@Req() req: Request, @Body() body: CreateUserDto): Promise<User> {
     const createUserDto = body;
     const ipAddress = req.socket.remoteAddress;
 

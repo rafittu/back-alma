@@ -34,5 +34,6 @@ export interface PartialUser {
   personal: IUserPersonalInfo;
   contact: IUserContactInfo;
   status: string;
+  createdAt: Date;
   updatedAt: Date;
 }
