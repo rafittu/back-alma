@@ -8,7 +8,6 @@ import {
   Matches,
   MaxLength,
   MinLength,
-  ValidateNested,
 } from 'class-validator';
 import { UserStatus } from '../structure/user-status.enum';
 
@@ -85,6 +84,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @IsOptional()
   @IsEnum(UserStatus)
-  @ValidateNested()
   status: UserStatus;
 }
