@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseFilters,
@@ -12,8 +13,10 @@ import { Request } from 'express';
 import { AppError } from '../../common/errors/Error';
 import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserService } from './services/create-user.service';
 import { GetUserByIdService } from './services/get-user-by-id.service';
+import { UpdateUserService } from './services/update-user.service';
 import { PartialUser } from './structure/service.structure';
 
 @Controller('user')
@@ -22,6 +25,7 @@ export class UserController {
   constructor(
     private readonly createUserService: CreateUserService,
     private readonly getUserByIdService: GetUserByIdService,
+    private readonly updateUserService: UpdateUserService,
   ) {}
 
   @Post('/signup')
@@ -35,5 +39,10 @@ export class UserController {
   @Get('/:id')
   getById(@Param('id') userId: string): Promise<PartialUser> {
     return this.getUserByIdService.execute(userId);
+  }
+
+  @Patch('/:id')
+  async updateUser(@Param('id') userId: string, @Body() body: UpdateUserDto) {
+    return await this.updateUserService.execute(body, userId);
   }
 }
