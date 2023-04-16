@@ -149,12 +149,17 @@ export class UserRepository implements IUserRepository<User> {
       phone: data.phone,
     };
 
-    const securityInfo = {
-      password: await bcrypt.hash(data.password, salt),
-      salt,
-      confirmation_token: crypto.randomBytes(32).toString('hex'),
-      recover_token: null,
-    };
+    let securityInfo;
+
+    if (data.password) {
+      /*needs to verify if old password match before actually update it*/
+      securityInfo = {
+        password: await bcrypt.hash(data.password, salt),
+        salt,
+        confirmation_token: crypto.randomBytes(32).toString('hex'),
+        recover_token: null,
+      };
+    }
 
     const userData = {
       personal: {
@@ -197,6 +202,7 @@ export class UserRepository implements IUserRepository<User> {
 
       return userResponse;
     } catch (error) {
+      console.log(error);
       throw new AppError('user-repository.updateUser', 500, 'user not updated');
     }
   }
