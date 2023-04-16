@@ -1,3 +1,5 @@
+import { UserStatus } from './user-status.enum';
+
 export interface ICreateUser {
   firstName: string;
   lastName: string;
@@ -49,4 +51,5 @@ export interface IUpdateUser {
   phone?: string;
   password?: string;
   passwordConfirmation?: string;
+  status?: UserStatus;
 }

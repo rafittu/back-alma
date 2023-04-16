@@ -2,12 +2,15 @@ import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
 import {
   IsEmail,
+  IsEnum,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { UserStatus } from '../structure/user-status.enum';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
@@ -71,4 +74,9 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
       'password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
   })
   passwordConfirmation: string;
+
+  @IsOptional()
+  @IsEnum(UserStatus)
+  @ValidateNested()
+  status: UserStatus;
 }
