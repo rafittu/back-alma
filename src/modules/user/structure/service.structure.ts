@@ -49,6 +49,7 @@ export interface IUpdateUser {
   username?: string;
   email?: string;
   phone?: string;
+  oldPassword?: string;
   password?: string;
   passwordConfirmation?: string;
   status?: UserStatus;

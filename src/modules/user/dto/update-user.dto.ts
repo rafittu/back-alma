@@ -61,6 +61,14 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'invalid old password',
+  })
+  oldPassword: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(7)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message:
       'password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
   })
