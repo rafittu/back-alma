@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../../prisma.service';
 import { IUserRepository } from '../structure/repository.structure';
-import { ICreateUser } from '../structure/service.structure';
+import { ICreateUser, PartialUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { ipAddressToInteger } from '../../../modules/utils/helpers/user-module';
@@ -85,6 +85,45 @@ export class UserRepository implements IUserRepository<User> {
         );
       }
       throw new AppError('user-repository.createUser', 500, 'user not created');
+    }
+  }
+
+  async getUserById(data: string): Promise<PartialUser> {
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: { id: data },
+        include: {
+          personal: true,
+          contact: true,
+        },
+      });
+
+      const { updated_at: updatedAt } = user;
+      const {
+        first_name: firstName,
+        last_name: lastName,
+        social_name: socialName,
+        born_date: bornDate,
+        mother_name: motherName,
+        created_at: createdAt,
+        status,
+      } = user.personal;
+      const { username, email, phone } = user.contact;
+
+      delete user.updated_at;
+
+      const userResponse = {
+        ...user,
+        personal: { firstName, lastName, socialName, bornDate, motherName },
+        contact: { username, email, phone },
+        status,
+        createdAt,
+        updatedAt,
+      };
+
+      return userResponse;
+    } catch (error) {
+      throw new AppError('user-repository.getUserById', 404, 'user not found');
     }
   }
 }
