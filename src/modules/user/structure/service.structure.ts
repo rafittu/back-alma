@@ -37,3 +37,16 @@ export interface PartialUser {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IUpdateUser {
+  firstName?: string;
+  lastName?: string;
+  socialName?: string;
+  bornDate?: string;
+  motherName?: string;
+  username?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  passwordConfirmation?: string;
+}
