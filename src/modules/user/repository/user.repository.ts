@@ -105,6 +105,7 @@ export class UserRepository implements IUserRepository<User> {
         social_name: socialName,
         born_date: bornDate,
         mother_name: motherName,
+        created_at: createdAt,
         status,
       } = user.personal;
       const { username, email, phone } = user.contact;
@@ -116,6 +117,7 @@ export class UserRepository implements IUserRepository<User> {
         personal: { firstName, lastName, socialName, bornDate, motherName },
         contact: { username, email, phone },
         status,
+        createdAt,
         updatedAt,
       };
 
