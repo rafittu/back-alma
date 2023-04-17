@@ -59,6 +59,12 @@ export class UserRepository implements IUserRepository<User> {
       const user = await this.prisma.user.create({
         data: userData,
         include: {
+          personal: {
+            select: {
+              first_name: true,
+              social_name: true,
+            },
+          },
           contact: {
             select: {
               username: true,
@@ -73,10 +79,16 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
+      const { created_at: createdAt } = user;
+      const { first_name: firstName, social_name: socialName } = user.personal;
       const { confirmation_token: confirmationToken } = user.security;
+      delete user.created_at;
+
       const userResponse = {
         ...user,
+        personal: { firstName, socialName },
         security: { confirmationToken },
+        createdAt,
       };
 
       return userResponse;
@@ -99,6 +111,11 @@ export class UserRepository implements IUserRepository<User> {
         include: {
           personal: true,
           contact: true,
+          security: {
+            select: {
+              updated_at: true,
+            },
+          },
         },
       });
 
@@ -131,6 +148,7 @@ export class UserRepository implements IUserRepository<User> {
           phone,
           updatedAt: user.contact.updated_at,
         },
+        security: { updatedAt: user.security.updated_at },
         status,
         createdAt,
       };
@@ -142,8 +160,6 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   async updateUser(data: IUpdateUser, userId: string) {
-    const salt = await bcrypt.genSalt();
-
     const personalInfo = {
       first_name: data.firstName,
       last_name: data.lastName,
@@ -159,10 +175,11 @@ export class UserRepository implements IUserRepository<User> {
       phone: data.phone,
     };
 
-    let securityInfo;
-
+    let securityInfo = {};
     if (data.password) {
       /*needs to verify if old password match before actually update it*/
+      const salt = await bcrypt.genSalt();
+
       securityInfo = {
         password: await bcrypt.hash(data.password, salt),
         salt,
@@ -190,24 +207,45 @@ export class UserRepository implements IUserRepository<User> {
           id: userId,
         },
         include: {
+          personal: {
+            select: {
+              first_name: true,
+              social_name: true,
+              updated_at: true,
+            },
+          },
           contact: {
             select: {
               username: true,
               email: true,
+              updated_at: true,
             },
           },
           security: {
             select: {
               confirmation_token: true,
+              updated_at: true,
             },
           },
         },
       });
 
+      const { created_at: createdAt } = user;
+      const { first_name: firstName, social_name: socialName } = user.personal;
+      const { username, email } = user.contact;
       const { confirmation_token: confirmationToken } = user.security;
+      delete user.created_at;
+
       const userResponse = {
         ...user,
-        security: { confirmationToken },
+        personal: {
+          firstName,
+          socialName,
+          updatedAt: user.personal.updated_at,
+        },
+        contact: { username, email, updatedAt: user.contact.updated_at },
+        security: { confirmationToken, updatedAt: user.security.updated_at },
+        createdAt,
       };
 
       return userResponse;
