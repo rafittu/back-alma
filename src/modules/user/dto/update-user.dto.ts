@@ -3,6 +3,7 @@ import { CreateUserDto } from './create-user.dto';
 import {
   IsEmail,
   IsEnum,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
@@ -13,11 +14,13 @@ import { UserStatus } from '../structure/user-status.enum';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MaxLength(125)
   firstName: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MaxLength(125)
   lastName: string;
@@ -28,6 +31,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   socialName: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MaxLength(10, { message: 'must be a valid born date: yyyy-mm-dd' })
   @Matches(/([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))/, {
@@ -36,6 +40,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   bornDate: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MaxLength(250)
   motherName: string;
@@ -57,6 +62,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   phone: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
@@ -65,6 +71,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   oldPassword: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
@@ -74,6 +81,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   password: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
@@ -83,6 +91,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   passwordConfirmation: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsEnum(UserStatus)
   status: UserStatus;
 }
