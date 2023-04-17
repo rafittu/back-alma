@@ -65,7 +65,7 @@ model User {
   contact  UserContactInfo  @relation(fields: [userContactInfoId], references: [id])
   security UserSecurityInfo @relation(fields: [userSecurityInfoId], references: [id])
 
-  updated_at         DateTime @updatedAt
+  created_at         DateTime @default(now())
   userPersonalInfoId String   @db.Uuid
   userContactInfoId  String   @db.Uuid
   userSecurityInfoId String   @db.Uuid

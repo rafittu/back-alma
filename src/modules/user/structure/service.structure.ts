@@ -20,12 +20,14 @@ export interface IUserPersonalInfo {
   socialName: string;
   bornDate: string;
   motherName: string;
+  updatedAt: Date;
 }
 
 export interface IUserContactInfo {
   username: string;
   email: string;
   phone: string;
+  updatedAt: Date;
 }
 
 export interface PartialUser {
@@ -37,7 +39,6 @@ export interface PartialUser {
   contact: IUserContactInfo;
   status: string;
   createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface IUpdateUser {

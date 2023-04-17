@@ -102,27 +102,37 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const { updated_at: updatedAt } = user;
+      const { created_at: createdAt } = user;
       const {
         first_name: firstName,
         last_name: lastName,
         social_name: socialName,
         born_date: bornDate,
         mother_name: motherName,
-        created_at: createdAt,
         status,
       } = user.personal;
       const { username, email, phone } = user.contact;
 
-      delete user.updated_at;
+      delete user.created_at;
 
       const userResponse = {
         ...user,
-        personal: { firstName, lastName, socialName, bornDate, motherName },
-        contact: { username, email, phone },
+        personal: {
+          firstName,
+          lastName,
+          socialName,
+          bornDate,
+          motherName,
+          updatedAt: user.personal.updated_at,
+        },
+        contact: {
+          username,
+          email,
+          phone,
+          updatedAt: user.contact.updated_at,
+        },
         status,
         createdAt,
-        updatedAt,
       };
 
       return userResponse;
