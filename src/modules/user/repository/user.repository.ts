@@ -4,11 +4,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../../prisma.service';
 import { IUserRepository } from '../structure/repository.structure';
-import {
-  ICreateUser,
-  IUpdateUser,
-  PartialUser,
-} from '../structure/service.structure';
+import { ICreateUser, IUpdateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { ipAddressToInteger } from '../../../modules/utils/helpers/user-module';
@@ -26,7 +22,6 @@ export class UserRepository implements IUserRepository<User> {
       social_name: data.socialName,
       born_date: data.bornDate,
       mother_name: data.motherName,
-      status,
     };
 
     const contactInfo = {
@@ -44,6 +39,7 @@ export class UserRepository implements IUserRepository<User> {
     };
 
     const userData = {
+      status,
       personal: {
         create: personalInfo,
       },
@@ -79,16 +75,30 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const { created_at: createdAt } = user;
+      const {
+        user_personal_info_id: userPersonalInfoId,
+        user_contact_info_id: userContactInfoId,
+        user_security_info_id: userSecurityInfoId,
+        created_at: createdAt,
+        updated_at: updatedAt,
+      } = user;
+
       const { first_name: firstName, social_name: socialName } = user.personal;
       const { confirmation_token: confirmationToken } = user.security;
+
+      delete user.user_personal_info_id;
+      delete user.user_contact_info_id;
+      delete user.user_security_info_id;
       delete user.created_at;
+      delete user.updated_at;
 
       const userResponse = {
         ...user,
-        personal: { firstName, socialName },
-        security: { confirmationToken },
+        personal: { id: userPersonalInfoId, firstName, socialName },
+        security: { id: userSecurityInfoId, confirmationToken },
+        contact: { id: userContactInfoId, ...user.contact },
         createdAt,
+        updatedAt,
       };
 
       return userResponse;
@@ -104,7 +114,7 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async getUserById(data: string): Promise<PartialUser> {
+  async getUserById(data: string) {
     try {
       const user = await this.prisma.user.findFirst({
         where: { id: data },
@@ -119,22 +129,36 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const { created_at: createdAt } = user;
+      const {
+        user_personal_info_id: userPersonalInfoId,
+        user_contact_info_id: userContactInfoId,
+        user_security_info_id: userSecurityInfoId,
+        status,
+        created_at: createdAt,
+        updated_at: updatedAt,
+      } = user;
+
       const {
         first_name: firstName,
         last_name: lastName,
         social_name: socialName,
         born_date: bornDate,
         mother_name: motherName,
-        status,
       } = user.personal;
+
       const { username, email, phone } = user.contact;
 
+      delete user.user_personal_info_id;
+      delete user.user_contact_info_id;
+      delete user.user_security_info_id;
       delete user.created_at;
+      delete user.updated_at;
 
       const userResponse = {
         ...user,
+        status,
         personal: {
+          id: userPersonalInfoId,
           firstName,
           lastName,
           socialName,
@@ -143,14 +167,18 @@ export class UserRepository implements IUserRepository<User> {
           updatedAt: user.personal.updated_at,
         },
         contact: {
+          id: userContactInfoId,
           username,
           email,
           phone,
           updatedAt: user.contact.updated_at,
         },
-        security: { updatedAt: user.security.updated_at },
-        status,
+        security: {
+          id: userSecurityInfoId,
+          updatedAt: user.security.updated_at,
+        },
         createdAt,
+        updatedAt,
       };
 
       return userResponse;
@@ -166,7 +194,6 @@ export class UserRepository implements IUserRepository<User> {
       social_name: data.socialName,
       born_date: data.bornDate,
       mother_name: data.motherName,
-      status: data.status,
     };
 
     const contactInfo = {
@@ -189,6 +216,7 @@ export class UserRepository implements IUserRepository<User> {
     }
 
     const userData = {
+      status: data.status,
       personal: {
         update: personalInfo,
       },
@@ -230,22 +258,43 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const { created_at: createdAt } = user;
+      const {
+        user_personal_info_id: userPersonalInfoId,
+        user_contact_info_id: userContactInfoId,
+        user_security_info_id: userSecurityInfoId,
+        created_at: createdAt,
+        updated_at: updatedAt,
+      } = user;
+
       const { first_name: firstName, social_name: socialName } = user.personal;
       const { username, email } = user.contact;
-      const { confirmation_token: confirmationToken } = user.security;
+
+      delete user.user_personal_info_id;
+      delete user.user_contact_info_id;
+      delete user.user_security_info_id;
       delete user.created_at;
+      delete user.updated_at;
 
       const userResponse = {
         ...user,
         personal: {
+          id: userPersonalInfoId,
           firstName,
           socialName,
           updatedAt: user.personal.updated_at,
         },
-        contact: { username, email, updatedAt: user.contact.updated_at },
-        security: { confirmationToken, updatedAt: user.security.updated_at },
+        contact: {
+          id: userContactInfoId,
+          username,
+          email,
+          updatedAt: user.contact.updated_at,
+        },
+        security: {
+          id: userSecurityInfoId,
+          updatedAt: user.security.updated_at,
+        },
         createdAt,
+        updatedAt,
       };
 
       return userResponse;
