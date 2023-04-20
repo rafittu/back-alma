@@ -1,10 +1,9 @@
-import { User } from '.prisma/client';
 import { Inject, Injectable } from '@nestjs/common';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository } from '../structure/repository.structure';
-import { IUpdateUser } from '../structure/service.structure';
+import { IUserRepository, User } from '../structure/repository.structure';
 import { UserStatus } from '../structure/user-status.enum';
+import { IUpdateUser } from '../structure/service.structure';
 
 @Injectable()
 export class UpdateUserService {
@@ -13,7 +12,7 @@ export class UpdateUserService {
     private userRepository: IUserRepository<User>,
   ) {}
 
-  async execute(data: IUpdateUser, userId: string) {
+  async execute(data: IUpdateUser, userId: string): Promise<User> {
     /* if updating email or phone, remember to send an
     email/code confirmation */
     if (data.email || data.phone) {

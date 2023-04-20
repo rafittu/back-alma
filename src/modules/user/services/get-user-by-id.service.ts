@@ -1,8 +1,6 @@
-import { User } from '.prisma/client';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository } from '../structure/repository.structure';
-import { PartialUser } from '../structure/service.structure';
+import { IUserRepository, User } from '../structure/repository.structure';
 
 @Injectable()
 export class GetUserByIdService {
@@ -11,7 +9,7 @@ export class GetUserByIdService {
     private userRepository: IUserRepository<User>,
   ) {}
 
-  async execute(data: string): Promise<PartialUser> {
-    return await this.userRepository.getUserById(data);
+  async execute(userId: string): Promise<User> {
+    return await this.userRepository.getUserById(userId);
   }
 }

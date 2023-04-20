@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../../prisma.service';
-import { IUserRepository } from '../structure/repository.structure';
+import {
+  IUserRepository,
+  UserContactInfo,
+  UserPersonalInfo,
+  UserSecurityInfo,
+  UnformattedUser,
+  User,
+} from '../structure/repository.structure';
 import { ICreateUser, IUpdateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
@@ -13,37 +19,39 @@ import { ipAddressToInteger } from '../../../modules/utils/helpers/user-module';
 export class UserRepository implements IUserRepository<User> {
   constructor(private prisma: PrismaService) {}
 
-  private formatPersonalInfo(data) {
+  private formatPersonalInfo(user: UnformattedUser): UserPersonalInfo {
     return {
-      first_name: data.firstName,
-      last_name: data.lastName,
-      social_name: data.socialName,
-      born_date: data.bornDate,
-      mother_name: data.motherName,
+      first_name: user.firstName,
+      last_name: user.lastName,
+      social_name: user.socialName,
+      born_date: user.bornDate,
+      mother_name: user.motherName,
     };
   }
 
-  private formatContactInfo(data) {
+  private formatContactInfo(user: UnformattedUser): UserContactInfo {
     return {
-      username: data.username,
-      email: data.email,
-      phone: data.phone,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
     };
   }
 
-  private async formatSecurityInfo(data) {
+  private async formatSecurityInfo(
+    user: UnformattedUser,
+  ): Promise<UserSecurityInfo> {
     const salt = await bcrypt.genSalt();
 
     return {
-      password: await bcrypt.hash(data.password, salt),
+      password: await bcrypt.hash(user.password, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
-      ip_address: ipAddressToInteger(data.ipAddress),
+      ip_address: ipAddressToInteger(user.ipAddress),
     };
   }
 
-  private formatUserResponse(user) {
+  private formatUserResponse(user): User {
     return {
       id: user.id,
       status: user.status,
@@ -73,7 +81,7 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
-  async createUser(data: ICreateUser, status: UserStatus) {
+  async createUser(data: ICreateUser, status: UserStatus): Promise<User> {
     const userData = {
       status,
       personal: {
@@ -125,10 +133,10 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async getUserById(data: string) {
+  async getUserById(userId: string): Promise<User> {
     try {
       const user = await this.prisma.user.findFirst({
-        where: { id: data },
+        where: { id: userId },
         include: {
           personal: true,
           contact: true,
@@ -147,7 +155,7 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async updateUser(data: IUpdateUser, userId: string) {
+  async updateUser(data: IUpdateUser, userId: string): Promise<User> {
     let securityInfo = {};
     if (data.password) {
       /*needs to verify if old password match before actually update it*/

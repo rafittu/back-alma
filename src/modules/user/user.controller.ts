@@ -8,7 +8,6 @@ import {
   Req,
   UseFilters,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
 import { Request } from 'express';
 import { AppError } from '../../common/errors/Error';
 import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
@@ -17,7 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserService } from './services/create-user.service';
 import { GetUserByIdService } from './services/get-user-by-id.service';
 import { UpdateUserService } from './services/update-user.service';
-import { PartialUser } from './structure/service.structure';
+import { User } from './structure/repository.structure';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -37,12 +36,15 @@ export class UserController {
   }
 
   @Get('/:id')
-  getById(@Param('id') userId: string): Promise<PartialUser> {
+  getById(@Param('id') userId: string): Promise<User> {
     return this.getUserByIdService.execute(userId);
   }
 
   @Patch('/:id')
-  async updateUser(@Param('id') userId: string, @Body() body: UpdateUserDto) {
+  async updateUser(
+    @Param('id') userId: string,
+    @Body() body: UpdateUserDto,
+  ): Promise<User> {
     return await this.updateUserService.execute(body, userId);
   }
 }
