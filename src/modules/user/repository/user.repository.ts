@@ -13,41 +13,77 @@ import { ipAddressToInteger } from '../../../modules/utils/helpers/user-module';
 export class UserRepository implements IUserRepository<User> {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(data: ICreateUser, status: UserStatus): Promise<User> {
-    const salt = await bcrypt.genSalt();
-
-    const personalInfo = {
+  private formatPersonalInfo(data) {
+    return {
       first_name: data.firstName,
       last_name: data.lastName,
       social_name: data.socialName,
       born_date: data.bornDate,
       mother_name: data.motherName,
     };
+  }
 
-    const contactInfo = {
+  private formatContactInfo(data) {
+    return {
       username: data.username,
       email: data.email,
       phone: data.phone,
     };
+  }
 
-    const securityInfo = {
+  private async formatSecurityInfo(data) {
+    const salt = await bcrypt.genSalt();
+
+    return {
       password: await bcrypt.hash(data.password, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
       ip_address: ipAddressToInteger(data.ipAddress),
     };
+  }
 
+  private formatUserResponse(user) {
+    return {
+      id: user.id,
+      status: user.status,
+      personal: {
+        id: user.user_personal_info_id,
+        firstName: user.personal.first_name,
+        lastName: user.personal.last_name,
+        socialName: user.personal.social_name,
+        bornDate: user.personal.born_date,
+        motherName: user.personal.mother_name,
+        updatedAt: user.personal.updated_at,
+      },
+      contact: {
+        id: user.user_contact_info_id,
+        username: user.contact.username,
+        email: user.contact.email,
+        phone: user.contact.phone,
+        updatedAt: user.contact.updated_at,
+      },
+      security: {
+        id: user.user_security_info_id,
+        confirmationToken: user.security.confirmation_token,
+        updatedAt: user.security.updated_at,
+      },
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
+    };
+  }
+
+  async createUser(data: ICreateUser, status: UserStatus) {
     const userData = {
       status,
       personal: {
-        create: personalInfo,
+        create: this.formatPersonalInfo(data),
       },
       contact: {
-        create: contactInfo,
+        create: this.formatContactInfo(data),
       },
       security: {
-        create: securityInfo,
+        create: await this.formatSecurityInfo(data),
       },
     };
 
@@ -75,32 +111,7 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const {
-        user_personal_info_id: userPersonalInfoId,
-        user_contact_info_id: userContactInfoId,
-        user_security_info_id: userSecurityInfoId,
-        created_at: createdAt,
-        updated_at: updatedAt,
-      } = user;
-
-      const { first_name: firstName, social_name: socialName } = user.personal;
-      const { confirmation_token: confirmationToken } = user.security;
-
-      delete user.user_personal_info_id;
-      delete user.user_contact_info_id;
-      delete user.user_security_info_id;
-      delete user.created_at;
-      delete user.updated_at;
-
-      const userResponse = {
-        ...user,
-        personal: { id: userPersonalInfoId, firstName, socialName },
-        security: { id: userSecurityInfoId, confirmationToken },
-        contact: { id: userContactInfoId, ...user.contact },
-        createdAt,
-        updatedAt,
-      };
-
+      const userResponse = this.formatUserResponse(user);
       return userResponse;
     } catch (error) {
       if (error.code === 'P2002') {
@@ -129,58 +140,7 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const {
-        user_personal_info_id: userPersonalInfoId,
-        user_contact_info_id: userContactInfoId,
-        user_security_info_id: userSecurityInfoId,
-        status,
-        created_at: createdAt,
-        updated_at: updatedAt,
-      } = user;
-
-      const {
-        first_name: firstName,
-        last_name: lastName,
-        social_name: socialName,
-        born_date: bornDate,
-        mother_name: motherName,
-      } = user.personal;
-
-      const { username, email, phone } = user.contact;
-
-      delete user.user_personal_info_id;
-      delete user.user_contact_info_id;
-      delete user.user_security_info_id;
-      delete user.created_at;
-      delete user.updated_at;
-
-      const userResponse = {
-        ...user,
-        status,
-        personal: {
-          id: userPersonalInfoId,
-          firstName,
-          lastName,
-          socialName,
-          bornDate,
-          motherName,
-          updatedAt: user.personal.updated_at,
-        },
-        contact: {
-          id: userContactInfoId,
-          username,
-          email,
-          phone,
-          updatedAt: user.contact.updated_at,
-        },
-        security: {
-          id: userSecurityInfoId,
-          updatedAt: user.security.updated_at,
-        },
-        createdAt,
-        updatedAt,
-      };
-
+      const userResponse = this.formatUserResponse(user);
       return userResponse;
     } catch (error) {
       throw new AppError('user-repository.getUserById', 404, 'user not found');
@@ -188,40 +148,19 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   async updateUser(data: IUpdateUser, userId: string) {
-    const personalInfo = {
-      first_name: data.firstName,
-      last_name: data.lastName,
-      social_name: data.socialName,
-      born_date: data.bornDate,
-      mother_name: data.motherName,
-    };
-
-    const contactInfo = {
-      username: data.username,
-      email: data.email,
-      phone: data.phone,
-    };
-
     let securityInfo = {};
     if (data.password) {
       /*needs to verify if old password match before actually update it*/
-      const salt = await bcrypt.genSalt();
-
-      securityInfo = {
-        password: await bcrypt.hash(data.password, salt),
-        salt,
-        confirmation_token: crypto.randomBytes(32).toString('hex'),
-        recover_token: null,
-      };
+      securityInfo = await this.formatSecurityInfo(data);
     }
 
     const userData = {
       status: data.status,
       personal: {
-        update: personalInfo,
+        update: this.formatPersonalInfo(data),
       },
       contact: {
-        update: contactInfo,
+        update: this.formatContactInfo(data),
       },
       security: {
         update: securityInfo,
@@ -258,49 +197,17 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const {
-        user_personal_info_id: userPersonalInfoId,
-        user_contact_info_id: userContactInfoId,
-        user_security_info_id: userSecurityInfoId,
-        created_at: createdAt,
-        updated_at: updatedAt,
-      } = user;
-
-      const { first_name: firstName, social_name: socialName } = user.personal;
-      const { username, email } = user.contact;
-
-      delete user.user_personal_info_id;
-      delete user.user_contact_info_id;
-      delete user.user_security_info_id;
-      delete user.created_at;
-      delete user.updated_at;
-
-      const userResponse = {
-        ...user,
-        personal: {
-          id: userPersonalInfoId,
-          firstName,
-          socialName,
-          updatedAt: user.personal.updated_at,
-        },
-        contact: {
-          id: userContactInfoId,
-          username,
-          email,
-          updatedAt: user.contact.updated_at,
-        },
-        security: {
-          id: userSecurityInfoId,
-          updatedAt: user.security.updated_at,
-        },
-        createdAt,
-        updatedAt,
-      };
-
+      const userResponse = this.formatUserResponse(user);
       return userResponse;
     } catch (error) {
-      console.log(error);
-      throw new AppError('user-repository.updateUser', 500, 'user not updated');
+      if (error.code) {
+        throw new AppError(
+          'user-repository.updateUser',
+          500,
+          `${error.code} - user not updated`,
+        );
+      }
+      throw new AppError('user-repository.updateUser', 304, 'user not updated');
     }
   }
 }
