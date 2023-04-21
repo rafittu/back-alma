@@ -43,7 +43,7 @@ export class UserRepository implements IUserRepository<User> {
     const salt = await bcrypt.genSalt();
 
     return {
-      password: await bcrypt.hash(user.newPassword, salt),
+      password: await bcrypt.hash(user.password, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
@@ -158,7 +158,7 @@ export class UserRepository implements IUserRepository<User> {
   async updateUser(data: IUpdateUser, userId: string): Promise<User> {
     let securityInfo = {};
 
-    if (data.newPassword) {
+    if (data.password) {
       const { security } = await this.prisma.user.findFirst({
         where: { id: userId },
         include: {
