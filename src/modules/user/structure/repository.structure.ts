@@ -1,19 +1,6 @@
 import { ICreateUser, IUpdateUser } from './service.structure';
 import { UserStatus } from './user-status.enum';
 
-export interface UnformattedUser {
-  firstName?: string;
-  lastName?: string;
-  socialName?: string;
-  bornDate?: string;
-  motherName?: string;
-  username?: string;
-  email?: string;
-  phone?: string;
-  password?: string;
-  ipAddress?: string;
-}
-
 export interface UserPersonalInfo {
   first_name: string;
   last_name: string;
@@ -39,6 +26,37 @@ export interface UserSecurityInfo {
   updated_at?: string;
 }
 
+export interface UnformattedUser {
+  id: string;
+  user_personal_info_id?: string;
+  user_contact_info_id?: string;
+  user_security_info_id?: string;
+  status?: string;
+  personal?: {
+    id?: string;
+    first_name?: string;
+    last_name?: string;
+    social_name?: string;
+    born_date?: string;
+    mother_name?: string;
+    updated_at?: Date;
+  };
+  contact?: {
+    id?: string;
+    username?: string;
+    email?: string;
+    phone?: string;
+    updated_at?: Date;
+  };
+  security?: {
+    id?: string;
+    confirmation_token?: string;
+    updated_at?: Date;
+  };
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface User {
   id: string;
   status: string;
@@ -49,22 +67,22 @@ export interface User {
     socialName: string;
     bornDate?: string;
     motherName?: string;
-    updatedAt?: string;
+    updatedAt?: Date;
   };
   contact: {
     id: string;
     username: string;
     email: string;
     phone?: string;
-    updatedAt?: string;
+    updatedAt?: Date;
   };
   security: {
     id: string;
     confirmationToken?: string;
-    updatedAt?: string;
+    updatedAt?: Date;
   };
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IUserRepository<User> {

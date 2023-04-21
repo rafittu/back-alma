@@ -79,9 +79,9 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message:
-      'password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
+      'new password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
   })
-  password: string;
+  newPassword: string;
 
   @IsOptional()
   @IsNotEmpty()
@@ -89,7 +89,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message:
-      'password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
+      'new password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
   })
   passwordConfirmation: string;
 

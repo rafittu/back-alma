@@ -24,7 +24,8 @@ export interface IUpdateUser {
   email?: string;
   phone?: string;
   oldPassword?: string;
-  password?: string;
+  newPassword?: string;
   passwordConfirmation?: string;
+  ipAddress?: string;
   status?: UserStatus;
 }

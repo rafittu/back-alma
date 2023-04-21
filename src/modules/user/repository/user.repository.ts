@@ -13,13 +13,13 @@ import {
 import { ICreateUser, IUpdateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
-import { ipAddressToInteger } from '../../../modules/utils/helpers/user-module';
+import { ipAddressToInteger } from '../../utils/helpers/helpers-user-module';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
   constructor(private prisma: PrismaService) {}
 
-  private formatPersonalInfo(user: UnformattedUser): UserPersonalInfo {
+  private formatPersonalInfo(user: IUpdateUser): UserPersonalInfo {
     return {
       first_name: user.firstName,
       last_name: user.lastName,
@@ -29,7 +29,7 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
-  private formatContactInfo(user: UnformattedUser): UserContactInfo {
+  private formatContactInfo(user: IUpdateUser): UserContactInfo {
     return {
       username: user.username,
       email: user.email,
@@ -38,12 +38,12 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   private async formatSecurityInfo(
-    user: UnformattedUser,
+    user: IUpdateUser,
   ): Promise<UserSecurityInfo> {
     const salt = await bcrypt.genSalt();
 
     return {
-      password: await bcrypt.hash(user.password, salt),
+      password: await bcrypt.hash(user.newPassword, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
@@ -51,7 +51,7 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
-  private formatUserResponse(user): User {
+  private formatUserResponse(user: UnformattedUser): User {
     return {
       id: user.id,
       status: user.status,
@@ -157,9 +157,33 @@ export class UserRepository implements IUserRepository<User> {
 
   async updateUser(data: IUpdateUser, userId: string): Promise<User> {
     let securityInfo = {};
-    if (data.password) {
-      /*needs to verify if old password match before actually update it*/
-      securityInfo = await this.formatSecurityInfo(data);
+
+    if (data.newPassword) {
+      const { security } = await this.prisma.user.findFirst({
+        where: { id: userId },
+        include: {
+          security: {
+            select: {
+              password: true,
+            },
+          },
+        },
+      });
+
+      const isPasswordMatch = await bcrypt.compare(
+        data.oldPassword,
+        security.password,
+      );
+
+      if (isPasswordMatch) {
+        securityInfo = await this.formatSecurityInfo(data);
+      } else {
+        throw new AppError(
+          'user-repository.updateUser',
+          422,
+          'old passwords do not match',
+        );
+      }
     }
 
     const userData = {
