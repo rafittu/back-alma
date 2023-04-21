@@ -242,4 +242,32 @@ export class UserRepository implements IUserRepository<User> {
       throw new AppError('user-repository.updateUser', 304, 'user not updated');
     }
   }
+
+  async deleteUser(userId: string, status: UserStatus): Promise<User> {
+    try {
+      const user = await this.prisma.user.update({
+        data: { status },
+        where: { id: userId },
+        include: {
+          personal: {
+            select: {
+              first_name: true,
+              social_name: true,
+            },
+          },
+          contact: {
+            select: {
+              username: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      const userResponse = this.formatUserResponse(user);
+      return userResponse;
+    } catch (error) {
+      throw new AppError('user-repository.deleteUser', 500, 'user not updated');
+    }
+  }
 }
