@@ -1,12 +1,8 @@
-import { User } from '.prisma/client';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  ipv4Regex,
-  ipv6Regex,
-} from '../../../modules/utils/helpers/user-module';
+import { ipv4Regex, ipv6Regex } from '../../utils/helpers/helpers-user-module';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository } from '../structure/repository.structure';
+import { IUserRepository, User } from '../structure/repository.structure';
 import { ICreateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 
