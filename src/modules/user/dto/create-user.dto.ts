@@ -69,8 +69,7 @@ export class CreateUserDto {
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message:
-      'password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
+    message: 'passwords doesnt match',
   })
   passwordConfirmation: string;
 }
