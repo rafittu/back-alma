@@ -43,7 +43,7 @@ export class UserRepository implements IUserRepository<User> {
     const salt = await bcrypt.genSalt();
 
     return {
-      password: await bcrypt.hash(user.newPassword, salt),
+      password: await bcrypt.hash(user.password, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
