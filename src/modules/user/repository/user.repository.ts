@@ -43,7 +43,7 @@ export class UserRepository implements IUserRepository<User> {
     const salt = await bcrypt.genSalt();
 
     return {
-      password: await bcrypt.hash(user.newPassword, salt),
+      password: await bcrypt.hash(user.password, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
@@ -176,6 +176,7 @@ export class UserRepository implements IUserRepository<User> {
       );
 
       if (isPasswordMatch) {
+        data.password = data.newPassword;
         securityInfo = await this.formatSecurityInfo(data);
       } else {
         throw new AppError(
@@ -232,6 +233,14 @@ export class UserRepository implements IUserRepository<User> {
       const userResponse = this.formatUserResponse(user);
       return userResponse;
     } catch (error) {
+      if (error.code === 'P2002') {
+        throw new AppError(
+          'user-repository.updateUser',
+          409,
+          `${error.meta.target} already in use`,
+        );
+      }
+
       if (error.code) {
         throw new AppError(
           'user-repository.updateUser',

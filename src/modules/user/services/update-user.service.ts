@@ -15,7 +15,7 @@ export class UpdateUserService {
   async execute(data: IUpdateUser, userId: string): Promise<User> {
     /* if updating email or phone, remember to send an
     email/code confirmation */
-    if (data.email || data.phone) {
+    if (data.email) {
       data.status = UserStatus.PENDING_CONFIRMATION;
     }
 

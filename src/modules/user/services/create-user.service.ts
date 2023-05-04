@@ -14,19 +14,23 @@ export class CreateUserService {
   ) {}
 
   async execute(data: ICreateUser): Promise<User> {
-    const validateIp = (ip: string): boolean => {
-      return ipv4Regex.test(ip) || ipv6Regex.test(ip);
-    };
-
-    if (!validateIp(data.ipAddress)) {
-      throw new AppError('user-service.createUser', 403, 'invalid IP address');
-    }
-
     if (data.password != data.passwordConfirmation) {
       throw new AppError(
         'user-service.createUser',
         422,
         'passwords do not match',
+      );
+    }
+
+    const validateIp = (ip: string): boolean => {
+      return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+    };
+
+    if (!validateIp(data.ipAddress)) {
+      throw new AppError(
+        'user-service.createUser',
+        403,
+        'cannot create user from a local server',
       );
     }
 
