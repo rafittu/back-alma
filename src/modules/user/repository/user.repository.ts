@@ -176,6 +176,7 @@ export class UserRepository implements IUserRepository<User> {
       );
 
       if (isPasswordMatch) {
+        data.password = data.newPassword;
         securityInfo = await this.formatSecurityInfo(data);
       } else {
         throw new AppError(
@@ -232,6 +233,14 @@ export class UserRepository implements IUserRepository<User> {
       const userResponse = this.formatUserResponse(user);
       return userResponse;
     } catch (error) {
+      if (error.code === 'P2002') {
+        throw new AppError(
+          'user-repository.updateUser',
+          409,
+          `${error.meta.target} already in use`,
+        );
+      }
+
       if (error.code) {
         throw new AppError(
           'user-repository.updateUser',

@@ -23,6 +23,7 @@ export interface IUpdateUser {
   username?: string;
   email?: string;
   phone?: string;
+  password?: string;
   oldPassword?: string;
   password?: string;
   passwordConfirmation?: string;
