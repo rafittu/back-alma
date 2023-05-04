@@ -23,7 +23,7 @@ export class UserRepository implements IUserRepository<User> {
     return {
       first_name: user.firstName,
       last_name: user.lastName,
-      social_name: user.socialName,
+      social_name: user.socialName ? user.socialName : null,
       born_date: user.bornDate,
       mother_name: user.motherName,
     };
@@ -31,9 +31,9 @@ export class UserRepository implements IUserRepository<User> {
 
   private formatContactInfo(user: IUpdateUser): UserContactInfo {
     return {
-      username: user.username,
+      username: user.username ? user.username : null,
       email: user.email,
-      phone: user.phone,
+      phone: user.phone ? user.phone : null,
     };
   }
 
