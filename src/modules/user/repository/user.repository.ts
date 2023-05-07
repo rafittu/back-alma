@@ -281,7 +281,11 @@ export class UserRepository implements IUserRepository<User> {
       const userResponse = this.formatUserResponse(user);
       return userResponse;
     } catch (error) {
-      throw new AppError('user-repository.deleteUser', 500, 'user not updated');
+      throw new AppError(
+        'user-repository.deleteUser',
+        500,
+        'user not cancelled',
+      );
     }
   }
 }
