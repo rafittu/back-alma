@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -17,6 +18,7 @@ import { CreateUserService } from './services/create-user.service';
 import { GetUserByIdService } from './services/get-user-by-id.service';
 import { UpdateUserService } from './services/update-user.service';
 import { User } from './structure/repository.structure';
+import { DeleteUserService } from './services/delete-user.service';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -25,6 +27,7 @@ export class UserController {
     private readonly createUserService: CreateUserService,
     private readonly getUserByIdService: GetUserByIdService,
     private readonly updateUserService: UpdateUserService,
+    private readonly deleteUserService: DeleteUserService,
   ) {}
 
   @Post('/signup')
@@ -46,5 +49,10 @@ export class UserController {
     @Body() body: UpdateUserDto,
   ): Promise<User> {
     return await this.updateUserService.execute(body, userId);
+  }
+
+  @Delete('/:id')
+  async deleteUser(@Param('id') userId: string): Promise<User> {
+    return await this.deleteUserService.execute(userId);
   }
 }
