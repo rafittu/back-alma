@@ -270,6 +270,11 @@ export class UserRepository implements IUserRepository<User> {
               email: true,
             },
           },
+          security: {
+            select: {
+              confirmation_token: true,
+            },
+          },
         },
       });
 
