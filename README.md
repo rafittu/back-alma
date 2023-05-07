@@ -18,6 +18,8 @@ Este projeto utiliza:
 - ORM Prisma para comunicação com o banco de dados;
 - Docker como uma ferramenta de containerização;
 
+- Bcrypt e Crypto como ferramenta de criptografia;
+
 <br>
 
 ## Instalação
