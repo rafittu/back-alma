@@ -5,12 +5,13 @@ import * as bcrypt from 'bcrypt';
 import { AppError } from 'src/common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
 import { IauthRepository } from '../structure/auth-repository.structure';
+import { UserPayload } from '../structure/service.structure';
 
 @Injectable()
 export class AuthRepository implements IauthRepository<User> {
   constructor(private prisma: PrismaService) {}
 
-  async validateUser(credentials: CredentialsDto): Promise<object> {
+  async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
     const { email, password } = credentials;
 
     const userData = await this.prisma.userContactInfo.findUnique({
@@ -18,6 +19,7 @@ export class AuthRepository implements IauthRepository<User> {
         email,
       },
       select: {
+        username: true,
         User: {
           select: {
             id: true,
@@ -39,7 +41,12 @@ export class AuthRepository implements IauthRepository<User> {
 
       if (isPasswordValid) {
         delete userData.User[0].security;
-        return userData;
+
+        return {
+          id: userData.User[0].id,
+          username: userData.username,
+          email,
+        };
       }
     }
 

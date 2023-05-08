@@ -9,6 +9,7 @@ import { SignInService } from './services/signin.service';
 import { LocalAuthGuard } from './infra/guards/local-auth.guard';
 import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 import { AppError } from 'src/common/errors/Error';
+import { AuthRequest, UserToken } from './structure/service.structure';
 
 @Controller('auth')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -17,7 +18,7 @@ export class AuthController {
 
   @Post('/signin')
   @UseGuards(LocalAuthGuard)
-  signIn(@Request() req) {
+  signIn(@Request() req: AuthRequest): UserToken {
     const { user } = req;
     return this.signInService.execute(user);
   }
