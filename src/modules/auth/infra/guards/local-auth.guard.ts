@@ -10,7 +10,11 @@ export class LocalAuthGuard extends AuthGuard('local') {
 
   handleRequest(err, user) {
     if (err || !user) {
-      throw new AppError(err?.internalCode, err?.code, err?.message);
+      throw new AppError(
+        'local-auth.guards',
+        401,
+        'email or password is invalid',
+      );
     }
 
     return user;
