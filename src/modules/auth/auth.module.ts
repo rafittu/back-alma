@@ -5,6 +5,7 @@ import { LocalStrategy } from './infra/strategies/local.strategy';
 import { SignInService } from './services/signin.service';
 import { AuthRepository } from './repository/auth.repository';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './infra/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -14,6 +15,12 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [PrismaService, LocalStrategy, AuthRepository, SignInService],
+  providers: [
+    PrismaService,
+    LocalStrategy,
+    JwtStrategy,
+    AuthRepository,
+    SignInService,
+  ],
 })
 export class AuthModule {}

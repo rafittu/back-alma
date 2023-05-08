@@ -10,6 +10,14 @@ export interface UserPayload {
   email: string;
 }
 
+export interface JtwPayload {
+  sub: string;
+  username: string;
+  email: string;
+  iat?: number;
+  exp?: number;
+}
+
 export interface UserToken {
   accessToken: string;
 }

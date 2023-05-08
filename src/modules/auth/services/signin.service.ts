@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UserPayload, UserToken } from '../structure/service.structure';
+import {
+  JtwPayload,
+  UserPayload,
+  UserToken,
+} from '../structure/service.structure';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -7,7 +11,7 @@ export class SignInService {
   constructor(private jwtService: JwtService) {}
 
   execute(user: UserPayload): UserToken {
-    const payload = {
+    const payload: JtwPayload = {
       sub: user.id,
       username: user.username,
       email: user.email,
