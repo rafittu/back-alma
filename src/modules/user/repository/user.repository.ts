@@ -158,7 +158,7 @@ export class UserRepository implements IUserRepository<User> {
   async updateUser(data: IUpdateUser, userId: string): Promise<User> {
     let securityInfo;
 
-    if (data.password) {
+    if (data.newPassword) {
       const { security } = await this.prisma.user.findFirst({
         where: { id: userId },
         include: {
@@ -176,6 +176,7 @@ export class UserRepository implements IUserRepository<User> {
       );
 
       if (isPasswordMatch) {
+        data.password = data.newPassword;
         securityInfo = await this.formatSecurityInfo(data);
         securityInfo.confirmation_token = null;
       } else {

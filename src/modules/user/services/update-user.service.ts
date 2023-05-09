@@ -19,7 +19,7 @@ export class UpdateUserService {
       data.status = UserStatus.PENDING_CONFIRMATION;
     }
 
-    if (data.password && data.password != data.passwordConfirmation) {
+    if (data.newPassword && data.newPassword != data.passwordConfirmation) {
       throw new AppError(
         'user-service.updateUser',
         422,
