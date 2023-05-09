@@ -19,6 +19,7 @@ import { GetUserByIdService } from './services/get-user-by-id.service';
 import { UpdateUserService } from './services/update-user.service';
 import { User } from './structure/repository.structure';
 import { DeleteUserService } from './services/delete-user.service';
+import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -30,6 +31,7 @@ export class UserController {
     private readonly deleteUserService: DeleteUserService,
   ) {}
 
+  @isPublic()
   @Post('/signup')
   create(@Req() req: Request, @Body() body: CreateUserDto): Promise<User> {
     const createUserDto = body;

@@ -4,7 +4,7 @@
 
 <br>
 
-A API desenvolvida tem como objetivo o gerenciamento de usuários. Por meio dessa API, é possível realizar operações de cadastro, consulta, atualização e exclusão de usuários.
+A API desenvolvida tem como objetivo o gerenciamento de usuários. Por meio dessa API, é possível realizar operações de cadastro, consulta, autenticação, atualização e exclusão de usuários.
 
 A identidade de cada usuário é considerada uma "ALMA" dentro do sistema, representando a importância e singularidade de cada indivíduo. Por isso, a API oferece recursos para gerenciar e manter essas informações com segurança e eficiência.
 
@@ -14,11 +14,12 @@ A identidade de cada usuário é considerada uma "ALMA" dentro do sistema, repre
 
 Este projeto utiliza:
 
-- Framework NestJS com TypeScript;
+- Node.js com framework NestJS e TypeScript;
 - ORM Prisma para comunicação com o banco de dados;
 - Docker como uma ferramenta de containerização;
 
 - Bcrypt e Crypto como ferramenta de criptografia;
+- Passport.js para autenticação de usuários;
 
 <br>
 
