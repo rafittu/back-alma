@@ -156,7 +156,7 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   async updateUser(data: IUpdateUser, userId: string): Promise<User> {
-    let securityInfo = {};
+    let securityInfo;
 
     if (data.password) {
       const { security } = await this.prisma.user.findFirst({
@@ -176,8 +176,8 @@ export class UserRepository implements IUserRepository<User> {
       );
 
       if (isPasswordMatch) {
-        data.password = data.newPassword;
         securityInfo = await this.formatSecurityInfo(data);
+        securityInfo.confirmation_token = null;
       } else {
         throw new AppError(
           'user-repository.updateUser',
@@ -185,6 +185,13 @@ export class UserRepository implements IUserRepository<User> {
           'old passwords do not match',
         );
       }
+    }
+
+    if (data.email) {
+      securityInfo = {
+        ...securityInfo,
+        confirmation_token: crypto.randomBytes(32).toString('hex'),
+      };
     }
 
     const userData = {
