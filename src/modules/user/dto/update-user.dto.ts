@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString,
   Matches,
   MaxLength,
@@ -61,7 +62,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @IsOptional()
   @IsString()
-  @MaxLength(15)
+  @IsPhoneNumber()
   phone: string;
 
   @IsOptional()
