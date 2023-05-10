@@ -52,6 +52,7 @@ export class CreateUserService {
     };
 
     await this.mailerService.sendMail(email);
+    delete user.security.confirmationToken;
 
     return user;
   }
