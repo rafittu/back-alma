@@ -41,9 +41,12 @@ export class UpdateUserService {
       };
 
       await this.mailerService.sendMail(email);
+      delete user.security.confirmationToken;
 
       return user;
     }
+
+    delete user.security.confirmationToken;
     return user;
   }
 }
