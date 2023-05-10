@@ -20,6 +20,7 @@ import { UpdateUserService } from './services/update-user.service';
 import { User } from './structure/repository.structure';
 import { DeleteUserService } from './services/delete-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
+import { ConfirmAccountService } from './services/confirm-email.service';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -29,6 +30,7 @@ export class UserController {
     private readonly getUserByIdService: GetUserByIdService,
     private readonly updateUserService: UpdateUserService,
     private readonly deleteUserService: DeleteUserService,
+    private readonly confirmAccountService: ConfirmAccountService,
   ) {}
 
   @isPublic()
@@ -56,5 +58,13 @@ export class UserController {
   @Delete('/:id')
   async deleteUser(@Param('id') userId: string): Promise<User> {
     return await this.deleteUserService.execute(userId);
+  }
+
+  @isPublic()
+  @Patch('/account/:token')
+  async confirmAccount(
+    @Param('token') confirmationToken: string,
+  ): Promise<object> {
+    return await this.confirmAccountService.execute(confirmationToken);
   }
 }

@@ -6,6 +6,7 @@ import { GetUserByIdService } from './services/get-user-by-id.service';
 import { UpdateUserService } from './services/update-user.service';
 import { UserController } from './user.controller';
 import { DeleteUserService } from './services/delete-user.service';
+import { ConfirmAccountService } from './services/confirm-email.service';
 
 @Module({
   controllers: [UserController],
@@ -16,6 +17,7 @@ import { DeleteUserService } from './services/delete-user.service';
     GetUserByIdService,
     UpdateUserService,
     DeleteUserService,
+    ConfirmAccountService,
   ],
 })
 export class UserModule {}

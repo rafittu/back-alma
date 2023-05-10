@@ -5,6 +5,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import * as Joi from 'joi';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/infra/guards/jwt-auth.guard';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { mailerConfig } from './modules/utils/configs/mailer.config';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { JwtAuthGuard } from './modules/auth/infra/guards/jwt-auth.guard';
         JWT_EXPIRATION: Joi.string().required(),
       }),
     }),
+    MailerModule.forRoot(mailerConfig),
     UserModule,
     AuthModule,
   ],

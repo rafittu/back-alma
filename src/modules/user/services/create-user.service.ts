@@ -5,12 +5,14 @@ import { UserRepository } from '../repository/user.repository';
 import { IUserRepository, User } from '../structure/repository.structure';
 import { ICreateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class CreateUserService {
   constructor(
     @Inject(UserRepository)
     private userRepository: IUserRepository<User>,
+    private mailerService: MailerService,
   ) {}
 
   async execute(data: ICreateUser): Promise<User> {
@@ -34,9 +36,24 @@ export class CreateUserService {
       );
     }
 
-    return await this.userRepository.createUser(
+    const user = await this.userRepository.createUser(
       data,
       UserStatus.PENDING_CONFIRMATION,
     );
+
+    const email = {
+      to: user.contact.email,
+      from: 'noreply@application.com',
+      subject: 'ALMA - Email de confirmação',
+      template: 'email-confirmation',
+      context: {
+        token: user.security.confirmationToken,
+      },
+    };
+
+    await this.mailerService.sendMail(email);
+    delete user.security.confirmationToken;
+
+    return user;
   }
 }

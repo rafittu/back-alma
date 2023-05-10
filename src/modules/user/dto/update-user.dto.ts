@@ -81,7 +81,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
     message:
       'new password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
   })
-  password: string;
+  newPassword: string;
 
   @IsOptional()
   @IsNotEmpty()

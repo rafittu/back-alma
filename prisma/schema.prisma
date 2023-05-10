@@ -44,12 +44,13 @@ model UserContactInfo {
 }
 
 model UserSecurityInfo {
-  id                 String  @id @default(uuid()) @db.Uuid
+  id                 String     @id @default(uuid()) @db.Uuid
   password           String
   salt               String
-  confirmation_token String? @unique @db.VarChar(64)
-  recover_token      String? @db.VarChar(64)
-  ip_address         BigInt  @db.BigInt()
+  confirmation_token String?    @unique @db.VarChar(64)
+  recover_token      String?    @db.VarChar(64)
+  ip_address         BigInt     @db.BigInt()
+  status             UserStatus
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
@@ -59,11 +60,10 @@ model UserSecurityInfo {
 }
 
 model User {
-  id                    String     @id @unique @default(uuid()) @db.Uuid
-  user_personal_info_id String     @db.Uuid
-  user_contact_info_id  String     @db.Uuid
-  user_security_info_id String     @db.Uuid
-  status                UserStatus
+  id                    String @id @unique @default(uuid()) @db.Uuid
+  user_personal_info_id String @db.Uuid
+  user_contact_info_id  String @db.Uuid
+  user_security_info_id String @db.Uuid
 
   created_at DateTime         @default(now())
   updated_at DateTime         @updatedAt()
