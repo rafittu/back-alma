@@ -90,4 +90,8 @@ export interface IUserRepository<User> {
   getUserById(userId: string): Promise<User>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
+  confirmAccount(
+    confirmationToken: string,
+    status: UserStatus,
+  ): Promise<object>;
 }

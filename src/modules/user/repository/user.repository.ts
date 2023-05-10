@@ -296,4 +296,31 @@ export class UserRepository implements IUserRepository<User> {
       );
     }
   }
+
+  async confirmAccount(
+    confirmationToken: string,
+    status: UserStatus,
+  ): Promise<object> {
+    try {
+      await this.prisma.userSecurityInfo.update({
+        data: {
+          confirmation_token: null,
+          status,
+        },
+        where: {
+          confirmation_token: confirmationToken,
+        },
+      });
+
+      return {
+        message: 'account successfully confirmed',
+      };
+    } catch (error) {
+      throw new AppError(
+        'user-repository.confirmAccount',
+        500,
+        'Account not confirmed',
+      );
+    }
+  }
 }
