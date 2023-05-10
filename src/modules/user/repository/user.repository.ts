@@ -39,6 +39,7 @@ export class UserRepository implements IUserRepository<User> {
 
   private async formatSecurityInfo(
     user: IUpdateUser,
+    status: UserStatus,
   ): Promise<UserSecurityInfo> {
     const salt = await bcrypt.genSalt();
 
@@ -48,13 +49,13 @@ export class UserRepository implements IUserRepository<User> {
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
       ip_address: ipAddressToInteger(user.ipAddress),
+      status: status,
     };
   }
 
   private formatUserResponse(user: UnformattedUser): User {
     return {
       id: user.id,
-      status: user.status,
       personal: {
         id: user.user_personal_info_id,
         firstName: user.personal.first_name,
@@ -74,6 +75,7 @@ export class UserRepository implements IUserRepository<User> {
       security: {
         id: user.user_security_info_id,
         confirmationToken: user.security.confirmation_token,
+        status: user.security.status,
         updatedAt: user.security.updated_at,
       },
       createdAt: user.created_at,
@@ -83,7 +85,6 @@ export class UserRepository implements IUserRepository<User> {
 
   async createUser(data: ICreateUser, status: UserStatus): Promise<User> {
     const userData = {
-      status,
       personal: {
         create: this.formatPersonalInfo(data),
       },
@@ -91,7 +92,7 @@ export class UserRepository implements IUserRepository<User> {
         create: this.formatContactInfo(data),
       },
       security: {
-        create: await this.formatSecurityInfo(data),
+        create: await this.formatSecurityInfo(data, status),
       },
     };
 
@@ -114,6 +115,7 @@ export class UserRepository implements IUserRepository<User> {
           security: {
             select: {
               confirmation_token: true,
+              status: true,
             },
           },
         },
@@ -142,6 +144,7 @@ export class UserRepository implements IUserRepository<User> {
           contact: true,
           security: {
             select: {
+              status: true,
               updated_at: true,
             },
           },
@@ -177,7 +180,7 @@ export class UserRepository implements IUserRepository<User> {
 
       if (isPasswordMatch) {
         data.password = data.newPassword;
-        securityInfo = await this.formatSecurityInfo(data);
+        securityInfo = await this.formatSecurityInfo(data, null);
         securityInfo.confirmation_token = null;
       } else {
         throw new AppError(
@@ -192,11 +195,11 @@ export class UserRepository implements IUserRepository<User> {
       securityInfo = {
         ...securityInfo,
         confirmation_token: crypto.randomBytes(32).toString('hex'),
+        status: UserStatus.PENDING_CONFIRMATION,
       };
     }
 
     const userData = {
-      status: data.status,
       personal: {
         update: this.formatPersonalInfo(data),
       },
@@ -232,6 +235,7 @@ export class UserRepository implements IUserRepository<User> {
           security: {
             select: {
               confirmation_token: true,
+              status: true,
               updated_at: true,
             },
           },
@@ -263,7 +267,13 @@ export class UserRepository implements IUserRepository<User> {
   async deleteUser(userId: string, status: UserStatus): Promise<User> {
     try {
       const user = await this.prisma.user.update({
-        data: { status },
+        data: {
+          security: {
+            update: {
+              status,
+            },
+          },
+        },
         where: { id: userId },
         include: {
           personal: {

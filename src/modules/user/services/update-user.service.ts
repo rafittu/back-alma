@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
 import { IUserRepository, User } from '../structure/repository.structure';
-import { UserStatus } from '../structure/user-status.enum';
 import { IUpdateUser } from '../structure/service.structure';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -15,10 +14,6 @@ export class UpdateUserService {
   ) {}
 
   async execute(data: IUpdateUser, userId: string): Promise<User> {
-    if (data.email) {
-      data.status = UserStatus.PENDING_CONFIRMATION;
-    }
-
     if (data.newPassword && data.newPassword != data.passwordConfirmation) {
       throw new AppError(
         'user-service.updateUser',

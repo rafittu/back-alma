@@ -23,6 +23,7 @@ export interface UserSecurityInfo {
   confirmation_token: string;
   recover_token: string;
   ip_address: number;
+  status: UserStatus;
   updated_at?: string;
 }
 
@@ -31,7 +32,6 @@ export interface UnformattedUser {
   user_personal_info_id?: string;
   user_contact_info_id?: string;
   user_security_info_id?: string;
-  status?: string;
   personal?: {
     id?: string;
     first_name?: string;
@@ -51,6 +51,7 @@ export interface UnformattedUser {
   security?: {
     id?: string;
     confirmation_token?: string;
+    status?: string;
     updated_at?: Date;
   };
   created_at: Date;
@@ -59,7 +60,6 @@ export interface UnformattedUser {
 
 export interface User {
   id: string;
-  status: string;
   personal: {
     id: string;
     firstName: string;
@@ -79,6 +79,7 @@ export interface User {
   security: {
     id: string;
     confirmationToken?: string;
+    status: string;
     updatedAt?: Date;
   };
   createdAt: Date;
