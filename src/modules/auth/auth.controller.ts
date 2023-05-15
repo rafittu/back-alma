@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Request,
   UseFilters,
@@ -17,11 +19,15 @@ import {
 } from './structure/service.structure';
 import { isPublic } from './infra/decorators/is-public.decorator';
 import { CurrentUser } from './infra/decorators/current-user.decorator';
+import { ConfirmAccountEmailService } from './services/confirm-email.service';
 
 @Controller('auth')
 @UseFilters(new HttpExceptionFilter(new AppError()))
 export class AuthController {
-  constructor(private readonly signInService: SignInService) {}
+  constructor(
+    private readonly signInService: SignInService,
+    private readonly confirmAccountEmailService: ConfirmAccountEmailService,
+  ) {}
 
   @isPublic()
   @Post('/signin')
@@ -29,6 +35,14 @@ export class AuthController {
   signIn(@Request() req: AuthRequest): UserToken {
     const { user } = req;
     return this.signInService.execute(user);
+  }
+
+  @isPublic()
+  @Patch('/account/:token')
+  async confirmAccountEmail(
+    @Param('token') confirmationToken: string,
+  ): Promise<object> {
+    return await this.confirmAccountEmailService.execute(confirmationToken);
   }
 
   @Get('/me')

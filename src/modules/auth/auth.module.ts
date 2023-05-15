@@ -7,6 +7,7 @@ import { AuthRepository } from './repository/auth.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './infra/strategies/jwt.strategy';
 import { LoginValidationMiddleware } from './infra/middlewares/login-validation.middleware';
+import { ConfirmAccountEmailService } from './services/confirm-email.service';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LoginValidationMiddleware } from './infra/middlewares/login-validation.
     JwtStrategy,
     AuthRepository,
     SignInService,
+    ConfirmAccountEmailService,
   ],
 })
 export class AuthModule implements NestModule {

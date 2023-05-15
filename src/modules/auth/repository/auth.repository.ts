@@ -4,11 +4,12 @@ import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { AppError } from 'src/common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
-import { IauthRepository } from '../structure/auth-repository.structure';
+import { IAuthRepository } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
+import { UserStatus } from 'src/modules/user/structure/user-status.enum';
 
 @Injectable()
-export class AuthRepository implements IauthRepository<User> {
+export class AuthRepository implements IAuthRepository<User> {
   constructor(private prisma: PrismaService) {}
 
   async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
@@ -55,5 +56,32 @@ export class AuthRepository implements IauthRepository<User> {
       401,
       'email or password is invalid',
     );
+  }
+
+  async confirmAccountEmail(
+    confirmationToken: string,
+    status: UserStatus,
+  ): Promise<object> {
+    try {
+      await this.prisma.userSecurityInfo.update({
+        data: {
+          confirmation_token: null,
+          status,
+        },
+        where: {
+          confirmation_token: confirmationToken,
+        },
+      });
+
+      return {
+        message: 'account email successfully confirmed',
+      };
+    } catch (error) {
+      throw new AppError(
+        'user-repository.confirmAccount',
+        500,
+        'Account not confirmed',
+      );
+    }
   }
 }
