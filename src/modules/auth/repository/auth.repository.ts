@@ -118,4 +118,43 @@ export class AuthRepository implements IAuthRepository<User> {
 
     return userRecoverToken;
   }
+
+  async resetPassword(recoverToken: string, password: string): Promise<object> {
+    const user = await this.prisma.userSecurityInfo.findFirst({
+      where: { recover_token: recoverToken },
+    });
+
+    if (!user) {
+      throw new AppError(
+        'auth-repository.resetPassword',
+        404,
+        'invalid recover token',
+      );
+    }
+
+    try {
+      const salt = await bcrypt.genSalt();
+
+      await this.prisma.userSecurityInfo.update({
+        data: {
+          password,
+          salt,
+          recover_token: null,
+        },
+        where: {
+          id: user.id,
+        },
+      });
+
+      return {
+        message: 'password reseted',
+      };
+    } catch (error) {
+      throw new AppError(
+        'auth-repository.resetPassword',
+        500,
+        'password not reseted',
+      );
+    }
+  }
 }

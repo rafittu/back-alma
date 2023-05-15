@@ -8,4 +8,5 @@ export interface IAuthRepository<User> {
     status: UserStatus,
   ): Promise<object>;
   sendRecoverPasswordEmail(email: string): Promise<string>;
+  resetPassword(recoverToken: string, password: string): Promise<object>;
 }
