@@ -7,4 +7,5 @@ export interface IAuthRepository<User> {
     confirmationToken: string,
     status: UserStatus,
   ): Promise<object>;
+  sendRecoverPasswordEmail(email: string): Promise<string>;
 }

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -20,6 +21,7 @@ import {
 import { isPublic } from './infra/decorators/is-public.decorator';
 import { CurrentUser } from './infra/decorators/current-user.decorator';
 import { ConfirmAccountEmailService } from './services/confirm-email.service';
+import { RecoverPasswordService } from './services/recover-password.service';
 
 @Controller('auth')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -27,6 +29,7 @@ export class AuthController {
   constructor(
     private readonly signInService: SignInService,
     private readonly confirmAccountEmailService: ConfirmAccountEmailService,
+    private readonly recoverPasswordService: RecoverPasswordService,
   ) {}
 
   @isPublic()
@@ -43,6 +46,14 @@ export class AuthController {
     @Param('token') confirmationToken: string,
   ): Promise<object> {
     return await this.confirmAccountEmailService.execute(confirmationToken);
+  }
+
+  @isPublic()
+  @Post('/send-recover-password-email')
+  async sendRecoverPasswordEmail(
+    @Body('email') email: string,
+  ): Promise<object> {
+    return await this.recoverPasswordService.sendRecoverPasswordEmail(email);
   }
 
   @Get('/me')

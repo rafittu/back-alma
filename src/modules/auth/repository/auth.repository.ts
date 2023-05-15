@@ -7,6 +7,7 @@ import { CredentialsDto } from '../dto/credentials.dto';
 import { IAuthRepository } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
 import { UserStatus } from 'src/modules/user/structure/user-status.enum';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository<User> {
@@ -78,10 +79,43 @@ export class AuthRepository implements IAuthRepository<User> {
       };
     } catch (error) {
       throw new AppError(
-        'user-repository.confirmAccount',
+        'auth-repository.confirmAccountEmail',
         500,
         'Account not confirmed',
       );
     }
+  }
+
+  async sendRecoverPasswordEmail(email: string): Promise<string> {
+    const userContactInfo = await this.prisma.userContactInfo.findFirst({
+      where: { email },
+      include: {
+        User: {
+          select: {
+            user_security_info_id: true,
+          },
+        },
+      },
+    });
+
+    if (!userContactInfo) {
+      throw new AppError(
+        'auth-repository.sendRecoverPasswordEmail',
+        404,
+        'user with this email not found',
+      );
+    }
+
+    const userRecoverToken = randomBytes(32).toString('hex');
+    await this.prisma.userSecurityInfo.update({
+      data: {
+        recover_token: userRecoverToken,
+      },
+      where: {
+        id: userContactInfo.User[0].user_security_info_id,
+      },
+    });
+
+    return userRecoverToken;
   }
 }
