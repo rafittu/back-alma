@@ -75,7 +75,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   oldPassword: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
@@ -85,7 +84,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   newPassword: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
@@ -94,7 +92,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   passwordConfirmation: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsEnum(UserStatus)
   status: UserStatus;
 }
