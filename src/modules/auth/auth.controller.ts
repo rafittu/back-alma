@@ -22,6 +22,7 @@ import { isPublic } from './infra/decorators/is-public.decorator';
 import { CurrentUser } from './infra/decorators/current-user.decorator';
 import { ConfirmAccountEmailService } from './services/confirm-email.service';
 import { RecoverPasswordService } from './services/recover-password.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -54,6 +55,15 @@ export class AuthController {
     @Body('email') email: string,
   ): Promise<object> {
     return await this.recoverPasswordService.sendRecoverPasswordEmail(email);
+  }
+
+  @isPublic()
+  @Patch('/reset-password/:token')
+  async resetPassword(
+    @Param('token') recoverToken: string,
+    @Body() body: ChangePasswordDto,
+  ): Promise<object> {
+    return await this.recoverPasswordService.resetPassword(recoverToken, body);
   }
 
   @Get('/me')

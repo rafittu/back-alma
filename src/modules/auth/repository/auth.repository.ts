@@ -137,7 +137,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
       await this.prisma.userSecurityInfo.update({
         data: {
-          password,
+          password: await bcrypt.hash(password, salt),
           salt,
           recover_token: null,
         },
