@@ -63,5 +63,15 @@ describe('UserController', () => {
       expect(createUserService.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockNewUser);
     });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(createUserService, 'execute')
+        .mockRejectedValueOnce(new Error());
+
+      expect(
+        controller.create(mockFakeRequest, mockCreateUserBody),
+      ).rejects.toThrowError();
+    });
   });
 });
