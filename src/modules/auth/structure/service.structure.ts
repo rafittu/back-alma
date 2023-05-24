@@ -21,3 +21,8 @@ export interface JtwPayload {
 export interface UserToken {
   accessToken: string;
 }
+
+export interface ResetPassword {
+  password: string;
+  passwordConfirmation: string;
+}
