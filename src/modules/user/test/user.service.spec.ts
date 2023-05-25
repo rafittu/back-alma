@@ -29,7 +29,7 @@ describe('User Services', () => {
           provide: UserRepository,
           useValue: {
             createUser: jest.fn().mockResolvedValue(mockNewUser),
-            getUserById: jest.fn(),
+            getUserById: jest.fn().mockResolvedValue(mockNewUser),
             updateUser: jest.fn(),
             deleteUser: jest.fn(),
           },
@@ -101,6 +101,23 @@ describe('User Services', () => {
         expect(error.code).toBe(403);
         expect(error.message).toBe('cannot create user from a local server');
       }
+    });
+  });
+
+  describe('get user by id', () => {
+    it('should get an user successfully', async () => {
+      const result = await getUserByIdService.execute(mockNewUser.id);
+
+      expect(userRepository.getUserById).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockNewUser);
+    });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(userRepository, 'getUserById')
+        .mockRejectedValueOnce(new Error());
+
+      expect(getUserByIdService.execute(mockNewUser.id)).rejects.toThrowError();
     });
   });
 });
