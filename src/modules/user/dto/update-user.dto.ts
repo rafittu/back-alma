@@ -3,7 +3,6 @@ import { CreateUserDto } from './create-user.dto';
 import {
   IsEmail,
   IsEnum,
-  IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -15,24 +14,21 @@ import { UserStatus } from '../structure/user-status.enum';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(125)
-  firstName: string;
+  firstName?: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(125)
-  lastName: string;
+  lastName?: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(250)
-  socialName: string;
+  socialName?: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(10, { message: 'must be a valid born date: yyyy-mm-dd' })
   @Matches(
@@ -41,38 +37,36 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
       message: 'must be a valid born date and formatted as yyyy-mm-dd',
     },
   )
-  bornDate: string;
+  bornDate?: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(250)
-  motherName: string;
+  motherName?: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(45)
-  username: string;
+  username?: string;
 
   @IsOptional()
   @IsString()
   @IsEmail()
   @MaxLength(250)
-  email: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
   @IsPhoneNumber()
-  phone: string;
+  phone?: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MinLength(7)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'invalid old password',
   })
-  oldPassword: string;
+  oldPassword?: string;
 
   @IsOptional()
   @IsString()
@@ -81,7 +75,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
     message:
       'new password must contain at least one uppercase letter, one lowercase letter and one number or symbol',
   })
-  newPassword: string;
+  newPassword?: string;
 
   @IsOptional()
   @IsString()
@@ -89,9 +83,9 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'passwords doesnt match',
   })
-  passwordConfirmation: string;
+  passwordConfirmation?: string;
 
   @IsOptional()
   @IsEnum(UserStatus)
-  status: UserStatus;
+  status?: UserStatus;
 }
