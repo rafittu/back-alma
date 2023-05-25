@@ -1,19 +1,15 @@
-import { faker } from '@faker-js/faker';
 import { Request } from 'express';
+import { faker } from '@faker-js/faker';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { User } from '../../structure/repository.structure';
 import { UserStatus } from '../../structure/user-status.enum';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
-function createMockRequest(remoteAddress: string): Request {
-  return {
-    socket: {
-      remoteAddress,
-    },
-  } as Request;
-}
-
-export const mockFakeRequest: Request = createMockRequest(faker.internet.ip());
+export const mockFakeRequest: Request = {
+  socket: {
+    remoteAddress: faker.internet.ip(),
+  },
+} as Request;
 
 export const mockCreateUserBody: CreateUserDto = {
   firstName: faker.person.firstName(),
