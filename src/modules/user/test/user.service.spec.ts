@@ -11,7 +11,11 @@ import {
   mockUpdateUserEmail,
   updatePasswordInvalidBody,
 } from './mocks/services.mock';
-import { mockNewUser, mockUpdateUserResponse } from './mocks/controller.mock';
+import {
+  mockDeleteUserResponse,
+  mockNewUser,
+  mockUpdateUserResponse,
+} from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
 
 describe('User Services', () => {
@@ -36,7 +40,7 @@ describe('User Services', () => {
             createUser: jest.fn().mockResolvedValue(mockNewUser),
             getUserById: jest.fn().mockResolvedValue(mockNewUser),
             updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
-            deleteUser: jest.fn(),
+            deleteUser: jest.fn().mockResolvedValue(mockDeleteUserResponse),
           },
         },
         {
@@ -167,6 +171,23 @@ describe('User Services', () => {
         expect(error.code).toBe(422);
         expect(error.message).toBe('new passwords do not match');
       }
+    });
+  });
+
+  describe('delete user', () => {
+    it('should delete an user successfully', async () => {
+      const result = await deleteUserService.execute(mockNewUser.id);
+
+      expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockDeleteUserResponse);
+    });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(userRepository, 'deleteUser')
+        .mockRejectedValueOnce(new Error());
+
+      expect(deleteUserService.execute(mockNewUser.id)).rejects.toThrowError();
     });
   });
 });
