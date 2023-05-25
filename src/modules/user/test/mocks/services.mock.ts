@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { ICreateUser } from '../../structure/service.structure';
+import { UpdateUserDto } from '../../dto/update-user.dto';
 
 export const mockCreateUser: ICreateUser = {
   firstName: faker.person.firstName(),
@@ -13,4 +14,19 @@ export const mockCreateUser: ICreateUser = {
   password: '@Password123',
   passwordConfirmation: '@Password123',
   ipAddress: faker.internet.ip(),
+};
+
+export const mockUpdateUserEmail: UpdateUserDto = {
+  email: faker.internet.email(),
+};
+
+export const mockUpdateAccountPassword: UpdateUserDto = {
+  oldPassword: mockCreateUser.password,
+  newPassword: faker.internet.password(),
+  passwordConfirmation: faker.internet.password(),
+};
+
+export const updatePasswordInvalidBody: UpdateUserDto = {
+  newPassword: faker.internet.password(),
+  passwordConfirmation: faker.internet.password(),
 };

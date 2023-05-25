@@ -5,8 +5,13 @@ import { UpdateUserService } from '../services/update-user.service';
 import { DeleteUserService } from '../services/delete-user.service';
 import { UserRepository } from '../repository/user.repository';
 import { MailerService } from '@nestjs-modules/mailer';
-import { mockCreateUser } from './mocks/services.mock';
-import { mockNewUser } from './mocks/controller.mock';
+import {
+  mockCreateUser,
+  mockUpdateAccountPassword,
+  mockUpdateUserEmail,
+  updatePasswordInvalidBody,
+} from './mocks/services.mock';
+import { mockNewUser, mockUpdateUserResponse } from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
 
 describe('User Services', () => {
@@ -30,7 +35,7 @@ describe('User Services', () => {
           useValue: {
             createUser: jest.fn().mockResolvedValue(mockNewUser),
             getUserById: jest.fn().mockResolvedValue(mockNewUser),
-            updateUser: jest.fn(),
+            updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
             deleteUser: jest.fn(),
           },
         },
@@ -118,6 +123,50 @@ describe('User Services', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(getUserByIdService.execute(mockNewUser.id)).rejects.toThrowError();
+    });
+  });
+
+  describe('update user', () => {
+    it('should update an user successfully', async () => {
+      const result = await updateUserService.execute(
+        mockUpdateUserEmail,
+        mockNewUser.id,
+      );
+
+      expect(userRepository.updateUser).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockUpdateUserResponse);
+    });
+
+    it('should send an email confirmation if updating user email', async () => {
+      await updateUserService.execute(mockUpdateUserEmail, mockNewUser.id);
+
+      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
+    });
+
+    it(`should throw an error if doesn't contain 'oldPassword' field when updating password`, async () => {
+      try {
+        await updateUserService.execute(
+          updatePasswordInvalidBody,
+          mockNewUser.id,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(422);
+        expect(error.message).toBe(`missing 'oldPassword' field`);
+      }
+    });
+
+    it(`should throw an error if 'newPassword' and 'passwordConfirmation' doesn't match`, async () => {
+      try {
+        await updateUserService.execute(
+          mockUpdateAccountPassword,
+          mockNewUser.id,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(422);
+        expect(error.message).toBe('new passwords do not match');
+      }
     });
   });
 });
