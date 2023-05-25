@@ -13,6 +13,7 @@ import {
 describe('UserController', () => {
   let controller: UserController;
   let createUserService: CreateUserService;
+  let getUserByIdService: GetUserByIdService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,7 +28,7 @@ describe('UserController', () => {
         {
           provide: GetUserByIdService,
           useValue: {
-            execute: jest.fn(),
+            execute: jest.fn().mockResolvedValue(mockNewUser),
           },
         },
         {
@@ -47,6 +48,7 @@ describe('UserController', () => {
 
     controller = module.get<UserController>(UserController);
     createUserService = module.get<CreateUserService>(CreateUserService);
+    getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
   });
 
   it('should be defined', () => {
@@ -72,6 +74,23 @@ describe('UserController', () => {
       expect(
         controller.create(mockFakeRequest, mockCreateUserBody),
       ).rejects.toThrowError();
+    });
+  });
+
+  describe('get user by id', () => {
+    it('should find user by id sucessfully', async () => {
+      const result = await controller.getById(mockNewUser.id);
+
+      expect(getUserByIdService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockNewUser);
+    });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(getUserByIdService, 'execute')
+        .mockRejectedValueOnce(new Error());
+
+      expect(controller.getById(mockNewUser.id)).rejects.toThrowError();
     });
   });
 });
