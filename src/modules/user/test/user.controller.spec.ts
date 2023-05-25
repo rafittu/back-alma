@@ -11,7 +11,7 @@ import {
   mockUpdateUser,
   mockUpdateUserResponse,
   mockDeleteUserResponse,
-} from './mocks/create-user.mock';
+} from './mocks/controller.mock';
 
 describe('UserController', () => {
   let controller: UserController;

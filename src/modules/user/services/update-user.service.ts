@@ -14,11 +14,16 @@ export class UpdateUserService {
   ) {}
 
   async execute(data: IUpdateUser, userId: string): Promise<User> {
-    if (data.newPassword && data.newPassword != data.passwordConfirmation) {
+    if (
+      data.newPassword &&
+      (!data.oldPassword || data.newPassword != data.passwordConfirmation)
+    ) {
       throw new AppError(
         'user-service.updateUser',
         422,
-        'new passwords do not match',
+        !data.oldPassword
+          ? `missing 'oldPassword' field`
+          : 'new passwords do not match',
       );
     }
 
