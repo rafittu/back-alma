@@ -10,6 +10,7 @@ import {
   mockNewUser,
   mockUpdateUser,
   mockUpdateUserResponse,
+  mockDeleteUserResponse,
 } from './mocks/create-user.mock';
 
 describe('UserController', () => {
@@ -17,6 +18,7 @@ describe('UserController', () => {
   let createUserService: CreateUserService;
   let getUserByIdService: GetUserByIdService;
   let updateUserService: UpdateUserService;
+  let deleteUserService: DeleteUserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,7 +45,7 @@ describe('UserController', () => {
         {
           provide: DeleteUserService,
           useValue: {
-            execute: jest.fn(),
+            execute: jest.fn().mockResolvedValue(mockDeleteUserResponse),
           },
         },
       ],
@@ -53,6 +55,7 @@ describe('UserController', () => {
     createUserService = module.get<CreateUserService>(CreateUserService);
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
     updateUserService = module.get<UpdateUserService>(UpdateUserService);
+    deleteUserService = module.get<DeleteUserService>(DeleteUserService);
   });
 
   it('should be defined', () => {
@@ -117,6 +120,23 @@ describe('UserController', () => {
       expect(
         controller.updateUser(mockNewUser.id, mockUpdateUser),
       ).rejects.toThrowError();
+    });
+  });
+
+  describe('delete user', () => {
+    it('should delete an user successfully', async () => {
+      const result = await controller.deleteUser(mockNewUser.id);
+
+      expect(deleteUserService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockDeleteUserResponse);
+    });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(deleteUserService, 'execute')
+        .mockRejectedValueOnce(new Error());
+
+      expect(controller.deleteUser(mockNewUser.id)).rejects.toThrowError();
     });
   });
 });

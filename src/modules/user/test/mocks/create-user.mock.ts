@@ -82,3 +82,23 @@ export const mockUpdateUserResponse: User = {
   createdAt: mockNewUser.createdAt,
   updatedAt: faker.date.recent(),
 };
+
+export const mockDeleteUserResponse: User = {
+  id: mockNewUser.id,
+  personal: {
+    id: mockNewUser.personal.id,
+    firstName: mockNewUser.personal.firstName,
+    socialName: mockNewUser.personal.socialName,
+  },
+  contact: {
+    id: mockNewUser.contact.id,
+    username: mockUpdateUser.username,
+    email: mockNewUser.contact.email,
+  },
+  security: {
+    id: mockNewUser.security.id,
+    status: UserStatus.CANCELLED,
+  },
+  createdAt: mockNewUser.createdAt,
+  updatedAt: faker.date.recent(),
+};
