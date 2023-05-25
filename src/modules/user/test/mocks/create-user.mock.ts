@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { User } from '../../structure/repository.structure';
 import { UserStatus } from '../../structure/user-status.enum';
+import { UpdateUserDto } from '../../dto/update-user.dto';
 
 function createMockRequest(remoteAddress: string): Request {
   return {
@@ -35,7 +36,7 @@ export const mockNewUser: User = {
     lastName: mockCreateUserBody.lastName,
     socialName: mockCreateUserBody.socialName,
     bornDate: mockCreateUserBody.bornDate,
-    motherName: mockCreateUserBody.bornDate,
+    motherName: mockCreateUserBody.motherName,
     updatedAt: faker.date.recent(),
   },
   contact: {
@@ -52,5 +53,32 @@ export const mockNewUser: User = {
     updatedAt: faker.date.recent(),
   },
   createdAt: faker.date.recent(),
+  updatedAt: faker.date.recent(),
+};
+
+export const mockUpdateUser: UpdateUserDto = {
+  username: faker.internet.userName(),
+};
+
+export const mockUpdateUserResponse: User = {
+  id: mockNewUser.id,
+  personal: {
+    id: mockNewUser.personal.id,
+    firstName: mockNewUser.personal.firstName,
+    socialName: mockNewUser.personal.socialName,
+    updatedAt: mockNewUser.personal.updatedAt,
+  },
+  contact: {
+    id: mockNewUser.contact.id,
+    username: mockUpdateUser.username,
+    email: mockNewUser.contact.email,
+    updatedAt: faker.date.recent(),
+  },
+  security: {
+    id: mockNewUser.security.id,
+    status: UserStatus.ACTIVE,
+    updatedAt: mockNewUser.security.updatedAt,
+  },
+  createdAt: mockNewUser.createdAt,
   updatedAt: faker.date.recent(),
 };

@@ -8,12 +8,15 @@ import {
   mockFakeRequest,
   mockCreateUserBody,
   mockNewUser,
+  mockUpdateUser,
+  mockUpdateUserResponse,
 } from './mocks/create-user.mock';
 
 describe('UserController', () => {
   let controller: UserController;
   let createUserService: CreateUserService;
   let getUserByIdService: GetUserByIdService;
+  let updateUserService: UpdateUserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,7 +37,7 @@ describe('UserController', () => {
         {
           provide: UpdateUserService,
           useValue: {
-            execute: jest.fn(),
+            execute: jest.fn().mockResolvedValue(mockUpdateUserResponse),
           },
         },
         {
@@ -49,6 +52,7 @@ describe('UserController', () => {
     controller = module.get<UserController>(UserController);
     createUserService = module.get<CreateUserService>(CreateUserService);
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
+    updateUserService = module.get<UpdateUserService>(UpdateUserService);
   });
 
   it('should be defined', () => {
@@ -56,7 +60,7 @@ describe('UserController', () => {
   });
 
   describe('create user', () => {
-    it('should create a new user sucessfully', async () => {
+    it('should create a new user successfully', async () => {
       const result = await controller.create(
         mockFakeRequest,
         mockCreateUserBody,
@@ -78,7 +82,7 @@ describe('UserController', () => {
   });
 
   describe('get user by id', () => {
-    it('should find user by id sucessfully', async () => {
+    it('should get an user by id successfully', async () => {
       const result = await controller.getById(mockNewUser.id);
 
       expect(getUserByIdService.execute).toHaveBeenCalledTimes(1);
@@ -91,6 +95,28 @@ describe('UserController', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(controller.getById(mockNewUser.id)).rejects.toThrowError();
+    });
+  });
+
+  describe('update user', () => {
+    it('should update an user successfully', async () => {
+      const result = await controller.updateUser(
+        mockNewUser.id,
+        mockUpdateUser,
+      );
+
+      expect(updateUserService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockUpdateUserResponse);
+    });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(updateUserService, 'execute')
+        .mockRejectedValueOnce(new Error());
+
+      expect(
+        controller.updateUser(mockNewUser.id, mockUpdateUser),
+      ).rejects.toThrowError();
     });
   });
 });
