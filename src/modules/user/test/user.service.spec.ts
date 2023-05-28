@@ -14,6 +14,7 @@ import {
 import {
   mockDeleteUserResponse,
   mockNewUser,
+  mockUpdateUser,
   mockUpdateUserResponse,
 } from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
@@ -100,7 +101,7 @@ describe('User Services', () => {
     it(`should throw an error if 'ipAddress' is invalid`, async () => {
       const invalidIpAddress = {
         ...mockCreateUser,
-        ipAddres: 'invalid ip address',
+        ipAddress: 'invalid ip address',
       };
 
       try {
@@ -133,7 +134,7 @@ describe('User Services', () => {
   describe('update user', () => {
     it('should update an user successfully', async () => {
       const result = await updateUserService.execute(
-        mockUpdateUserEmail,
+        mockUpdateUser,
         mockNewUser.id,
       );
 

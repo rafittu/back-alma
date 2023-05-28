@@ -16,6 +16,10 @@ export const mockCreateUser: ICreateUser = {
   ipAddress: faker.internet.ip(),
 };
 
+export const mockUpdateUser: UpdateUserDto = {
+  username: faker.internet.userName(),
+};
+
 export const mockUpdateUserEmail: UpdateUserDto = {
   email: faker.internet.email(),
 };
