@@ -8,6 +8,7 @@ import {
   UnformattedUserPrismaResponse,
   FormattedUserResponse,
 } from './mocks/repository.mock';
+import { mockNewUser } from './mocks/controller.mock';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
@@ -63,6 +64,33 @@ describe('User Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not created');
+      }
+    });
+  });
+
+  describe('get user by id', () => {
+    it('should get a user by id successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(UnformattedUserPrismaResponse);
+
+      const result = await userRepository.getUserById(mockNewUser.id);
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(FormattedUserResponse);
+    });
+
+    it('should throw an error if user is not found', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockRejectedValueOnce(new Error());
+
+      try {
+        await userRepository.getUserById(mockNewUser.id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user not found');
       }
     });
   });
