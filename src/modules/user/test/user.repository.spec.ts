@@ -3,12 +3,16 @@ import { PrismaService } from '../../../prisma.service';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { mockCreateUser } from './mocks/services.mock';
+import {
+  mockCreateUser,
+  mockUpdateAccountPassword,
+} from './mocks/services.mock';
 import {
   UnformattedUserPrismaResponse,
   FormattedUserResponse,
 } from './mocks/repository.mock';
-import { mockNewUser } from './mocks/controller.mock';
+import { mockNewUser, mockUpdateUserResponse } from './mocks/controller.mock';
+import bcrypt from 'bcrypt';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
@@ -91,6 +95,41 @@ describe('User Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(404);
         expect(error.message).toBe('user not found');
+      }
+    });
+  });
+
+  describe('delete user', () => {
+    it('should delete a user successfully', async () => {
+      UnformattedUserPrismaResponse.security.status = UserStatus.CANCELLED;
+
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockResolvedValueOnce(UnformattedUserPrismaResponse);
+
+      const result = await userRepository.deleteUser(
+        mockNewUser.id,
+        UserStatus.CANCELLED,
+      );
+
+      FormattedUserResponse.security.status = UserStatus.CANCELLED;
+
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(FormattedUserResponse);
+      expect(result.security.status).toContain('CANCELLED');
+    });
+
+    it('should throw an error if user deletion fails', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockRejectedValueOnce(new Error());
+
+      try {
+        await userRepository.deleteUser(mockNewUser.id, UserStatus.CANCELLED);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('user not cancelled');
       }
     });
   });
