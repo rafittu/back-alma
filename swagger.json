@@ -1,0 +1,13 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ALMA Backend API Documentation",
+    "description": "Back-end API to manage users",
+    "contact": {
+      "name": "Rafael Ribeiro",
+      "url": "https://www.wophi.be/alma/support",
+      "email": "alma@wophi.be"
+    },
+    "version": "1.0.0"
+  }
+}
