@@ -2,7 +2,49 @@ import { faker } from '@faker-js/faker';
 import { UserStatus } from '../../structure/user-status.enum';
 import { User } from '../../structure/repository.structure';
 
-export const UnformattedUserPrismaResponse = {
+export const UnformattedCreatedUser = {
+  id: faker.string.uuid(),
+  user_personal_info_id: faker.string.uuid(),
+  user_contact_info_id: faker.string.uuid(),
+  user_security_info_id: faker.string.uuid(),
+  personal: {
+    first_name: faker.person.firstName(),
+    social_name: faker.person.fullName(),
+  },
+  contact: {
+    username: faker.internet.userName(),
+    email: faker.internet.email(),
+  },
+  security: {
+    confirmation_token: faker.string.alphanumeric(),
+    status: UserStatus.PENDING_CONFIRMATION,
+  },
+  created_at: new Date(),
+  updated_at: new Date(),
+};
+
+export const FormattedCreatedUser: User = {
+  id: UnformattedCreatedUser.id,
+  personal: {
+    id: UnformattedCreatedUser.user_personal_info_id,
+    firstName: UnformattedCreatedUser.personal.first_name,
+    socialName: UnformattedCreatedUser.personal.social_name,
+  },
+  contact: {
+    id: UnformattedCreatedUser.user_contact_info_id,
+    username: UnformattedCreatedUser.contact.username,
+    email: UnformattedCreatedUser.contact.email,
+  },
+  security: {
+    id: UnformattedCreatedUser.user_security_info_id,
+    confirmationToken: UnformattedCreatedUser.security.confirmation_token,
+    status: UnformattedCreatedUser.security.status,
+  },
+  createdAt: UnformattedCreatedUser.created_at,
+  updatedAt: UnformattedCreatedUser.updated_at,
+};
+
+export const UnformattedUserResponse = {
   id: faker.string.uuid(),
   user_personal_info_id: faker.string.uuid(),
   user_contact_info_id: faker.string.uuid(),
@@ -22,7 +64,6 @@ export const UnformattedUserPrismaResponse = {
     updated_at: new Date(),
   },
   security: {
-    confirmation_token: faker.string.alphanumeric(),
     status: UserStatus.ACTIVE,
     updated_at: new Date(),
   },
@@ -31,30 +72,28 @@ export const UnformattedUserPrismaResponse = {
 };
 
 export const FormattedUserResponse: User = {
-  id: UnformattedUserPrismaResponse.id,
+  id: UnformattedUserResponse.id,
   personal: {
-    id: UnformattedUserPrismaResponse.user_personal_info_id,
-    firstName: UnformattedUserPrismaResponse.personal.first_name,
-    lastName: UnformattedUserPrismaResponse.personal.last_name,
-    socialName: UnformattedUserPrismaResponse.personal.social_name,
-    bornDate: UnformattedUserPrismaResponse.personal.born_date,
-    motherName: UnformattedUserPrismaResponse.personal.mother_name,
-    updatedAt: UnformattedUserPrismaResponse.personal.updated_at,
+    id: UnformattedUserResponse.user_personal_info_id,
+    firstName: UnformattedUserResponse.personal.first_name,
+    lastName: UnformattedUserResponse.personal.last_name,
+    socialName: UnformattedUserResponse.personal.social_name,
+    bornDate: UnformattedUserResponse.personal.born_date,
+    motherName: UnformattedUserResponse.personal.mother_name,
+    updatedAt: UnformattedUserResponse.personal.updated_at,
   },
   contact: {
-    id: UnformattedUserPrismaResponse.user_contact_info_id,
-    username: UnformattedUserPrismaResponse.contact.username,
-    email: UnformattedUserPrismaResponse.contact.email,
-    phone: UnformattedUserPrismaResponse.contact.phone,
-    updatedAt: UnformattedUserPrismaResponse.contact.updated_at,
+    id: UnformattedUserResponse.user_contact_info_id,
+    username: UnformattedUserResponse.contact.username,
+    email: UnformattedUserResponse.contact.email,
+    phone: UnformattedUserResponse.contact.phone,
+    updatedAt: UnformattedUserResponse.contact.updated_at,
   },
   security: {
-    id: UnformattedUserPrismaResponse.user_security_info_id,
-    confirmationToken:
-      UnformattedUserPrismaResponse.security.confirmation_token,
-    status: UnformattedUserPrismaResponse.security.status,
-    updatedAt: UnformattedUserPrismaResponse.security.updated_at,
+    id: UnformattedUserResponse.user_security_info_id,
+    status: UnformattedUserResponse.security.status,
+    updatedAt: UnformattedUserResponse.security.updated_at,
   },
-  createdAt: UnformattedUserPrismaResponse.created_at,
-  updatedAt: UnformattedUserPrismaResponse.updated_at,
+  createdAt: UnformattedUserResponse.created_at,
+  updatedAt: UnformattedUserResponse.updated_at,
 };
