@@ -132,6 +132,75 @@
           }
         }
       }
+    },
+    "/auth/account/{token}": {
+      "patch": {
+        "summary": "Confirm user account email",
+        "description": "Route to confirm a user's account email",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Confirmation token for user registration",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account email confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "Account email successfully confirmed"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "400",
+                  "message": "Invalid request",
+                  "details": "Invalid confirmation token"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "500",
+                  "message": "Internal server error",
+                  "details": "An unexpected error occurred"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
