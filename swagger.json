@@ -9,5 +9,330 @@
       "email": "alma@wophi.be"
     },
     "version": "1.0.0"
+  },
+  "paths": {
+    "/user/signup": {
+      "post": {
+        "summary": "Create a new user",
+        "description": "Route to register new users",
+        "tags": ["User"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUp"
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Example of a valid user registration",
+                  "value": {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "username": "johndoe",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "email": "johndoe@example.com",
+                    "phone": "1234567890",
+                    "password": "password123",
+                    "passwordConfirmation": "password123"
+                  }
+                },
+                "example2": {
+                  "summary": "Example of required fields only",
+                  "value": {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "motherName": "Jane Doe",
+                    "email": "johndoe@example.com",
+                    "password": "password123",
+                    "passwordConfirmation": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "PENDING_CONFIRMATION"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-10T12:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "400",
+                  "message": "Invalid request data",
+                  "details": "One or more fields are missing or invalid"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "409",
+                  "message": "Username already in use",
+                  "details": "The provided username is already registered"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "500",
+                  "message": "Internal server error",
+                  "details": "An unexpected error occurred"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SignUp": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name of the user"
+          },
+          "socialName": {
+            "type": "string",
+            "description": "Social name of the user"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user"
+          },
+          "bornDate": {
+            "type": "string",
+            "description": "Date of birth of the user"
+          },
+          "motherName": {
+            "type": "string",
+            "description": "Mother's name of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the user"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password of the user"
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "description": "Password confirmation"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "motherName",
+          "email",
+          "password",
+          "passwordConfirmation"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "personal": {
+            "$ref": "#/components/schemas/Personal"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "security": {
+            "$ref": "#/components/schemas/Security"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Date and time of user creation"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Date and time of last user update"
+          }
+        }
+      },
+      "Personal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Personal information ID"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name of the user"
+          },
+          "socialName": {
+            "type": "string",
+            "description": "Social name of the user"
+          },
+          "bornDate": {
+            "type": "string",
+            "description": "Date of birth of the user"
+          }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Contact information ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the user"
+          }
+        }
+      },
+      "Security": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Security information ID"
+          },
+          "confirmationToken": {
+            "type": "string",
+            "description": "Confirmation token for user registration"
+          },
+          "status": {
+            "type": "string",
+            "description": "User status"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "details": {
+            "type": "string",
+            "description": "Additional error details"
+          }
+        }
+      }
+    },
+    "examples": {
+      "UserExample": {
+        "id": "123456",
+        "personal": {
+          "id": "789012",
+          "firstName": "John",
+          "lastName": "Doe",
+          "socialName": "JD",
+          "bornDate": "1990-01-01"
+        },
+        "contact": {
+          "id": "345678",
+          "username": "johndoe",
+          "email": "johndoe@example.com"
+        },
+        "security": {
+          "id": "901234",
+          "status": "PENDING_CONFIRMATION"
+        },
+        "createdAt": "2023-05-10T12:00:00Z",
+        "updatedAt": "2023-05-10T12:00:00Z"
+      },
+      "BadRequestExample": {
+        "code": "400",
+        "message": "Invalid request data",
+        "details": "One or more fields are missing or invalid"
+      },
+      "ConflictExample": {
+        "code": "409",
+        "message": "Username already in use",
+        "details": "The provided username is already registered"
+      },
+      "InternalServerErrorExample": {
+        "code": "500",
+        "message": "Internal server error",
+        "details": "An unexpected error occurred"
+      }
+    }
   }
 }
