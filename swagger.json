@@ -288,6 +288,83 @@
           }
         }
       }
+    },
+    "/auth/send-recover-password-email": {
+      "post": {
+        "summary": "Send recover password email",
+        "description": "Send an email to the user with instructions to recover their password",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordRecover"
+              },
+              "example": {
+                "email": "johndoe@example.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "recover password email sent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user with this email not found",
+                    "code": "auth-repository.sendRecoverPasswordEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Failed to send recover password email",
+                    "code": "internal.server.error",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -465,6 +542,15 @@
           }
         }
       },
+      "PasswordRecover": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -490,29 +576,6 @@
             "properties": {}
           }
         }
-      }
-    },
-    "examples": {
-      "UserExample": {
-        "id": "123456",
-        "personal": {
-          "id": "789012",
-          "firstName": "John",
-          "lastName": "Doe",
-          "socialName": "JD",
-          "bornDate": "1990-01-01"
-        },
-        "contact": {
-          "id": "345678",
-          "username": "johndoe",
-          "email": "johndoe@example.com"
-        },
-        "security": {
-          "id": "901234",
-          "status": "PENDING_CONFIRMATION"
-        },
-        "createdAt": "2023-05-10T12:00:00Z",
-        "updatedAt": "2023-05-10T12:00:00Z"
       }
     }
   }
