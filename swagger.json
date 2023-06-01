@@ -93,9 +93,12 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "code": "400",
-                  "message": "Invalid request data",
-                  "details": "One or more fields are missing or invalid"
+                  "error": {
+                    "message": ["One or more fields are missing or invalid"],
+                    "code": "bad.request",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -108,9 +111,30 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "code": "409",
-                  "message": "Email already taken",
-                  "details": "Email is already being used"
+                  "error": {
+                    "message": "email/phone already taken",
+                    "code": "user-repository.createUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "cannot create user from a local server",
+                    "code": "user-service.createUser",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -123,9 +147,12 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "code": "500",
-                  "message": "User not created",
-                  "details": "An unexpected error occurred"
+                  "error": {
+                    "message": "user not created",
+                    "code": "user-repository.createUser",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -164,22 +191,7 @@
                   }
                 },
                 "example": {
-                  "message": "Account email successfully confirmed"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "code": "400",
-                  "message": "Invalid request",
-                  "details": "Invalid confirmation token"
+                  "message": "account email successfully confirmed"
                 }
               }
             }
@@ -192,9 +204,12 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "code": "500",
-                  "message": "Internal server error",
-                  "details": "An unexpected error occurred"
+                  "error": {
+                    "message": "Account not confirmed",
+                    "code": "auth-repository.confirmAccountEmail",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -243,24 +258,30 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "code": "401",
-                  "message": "Unauthorized",
-                  "details": "email or password is invalid"
+                  "error": {
+                    "message": "email or password is invalid",
+                    "code": "local-auth.guards",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
           },
           "500": {
-            "description": "Internal Server Error",
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "code": "500",
-                  "message": "Internal Server Error",
-                  "details": "An unexpected error occurred"
+                  "error": {
+                    "message": "Internal Server Error",
+                    "code": "internal.server.error",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -276,30 +297,37 @@
         "properties": {
           "firstName": {
             "type": "string",
+            "maxLength": 125,
             "description": "First name of the user"
           },
           "lastName": {
             "type": "string",
+            "maxLength": 125,
             "description": "Last name of the user"
           },
           "socialName": {
             "type": "string",
+            "maxLength": 250,
             "description": "Social name of the user"
           },
           "username": {
             "type": "string",
+            "maxLength": 45,
             "description": "Username of the user"
           },
           "bornDate": {
             "type": "string",
+            "formate": "date",
             "description": "Date of birth of the user"
           },
           "motherName": {
             "type": "string",
+            "maxLength": 250,
             "description": "Mother's name of the user"
           },
           "email": {
             "type": "string",
+            "maxLength": 250,
             "description": "Email address of the user"
           },
           "phone": {
@@ -308,6 +336,8 @@
           },
           "password": {
             "type": "string",
+            "minLength": "7",
+            "pattern": "at least one uppercase letter, one lowercase letter and one number or symbol",
             "description": "Password of the user"
           },
           "passwordConfirmation": {
@@ -438,17 +468,26 @@
       "Error": {
         "type": "object",
         "properties": {
-          "code": {
-            "type": "string",
-            "description": "Error code"
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "Error message"
+              },
+              "code": {
+                "type": "string",
+                "description": "Error code"
+              },
+              "status": {
+                "type": "boolean",
+                "description": "Error status"
+              }
+            }
           },
-          "message": {
-            "type": "string",
-            "description": "Error message"
-          },
-          "details": {
-            "type": "string",
-            "description": "Additional error details"
+          "data": {
+            "type": "object",
+            "properties": {}
           }
         }
       }
@@ -474,21 +513,6 @@
         },
         "createdAt": "2023-05-10T12:00:00Z",
         "updatedAt": "2023-05-10T12:00:00Z"
-      },
-      "BadRequestExample": {
-        "code": "400",
-        "message": "Invalid request data",
-        "details": "One or more fields are missing or invalid"
-      },
-      "ConflictExample": {
-        "code": "409",
-        "message": "Username already in use",
-        "details": "The provided username is already registered"
-      },
-      "InternalServerErrorExample": {
-        "code": "500",
-        "message": "Internal server error",
-        "details": "An unexpected error occurred"
       }
     }
   }
