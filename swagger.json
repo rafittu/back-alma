@@ -365,6 +365,107 @@
           }
         }
       }
+    },
+    "/auth/reset-password/{token}": {
+      "patch": {
+        "summary": "Reset user password",
+        "description": "Route to reset user password using the recovery token sent by email",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Recovery token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              },
+              "example": {
+                "password": "newpassword",
+                "passwordConfirmation": "newpassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPassword"
+                },
+                "example": {
+                  "message": "password reseted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "passwords do not match",
+                    "code": "recover-password-service.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid recover token",
+                    "code": "auth-repository.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "password not reseted",
+                    "code": "auth-repository.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -548,6 +649,21 @@
           "email": {
             "type": "string",
             "description": "Email address of the user"
+          }
+        }
+      },
+      "ResetPassword": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": "7",
+            "pattern": "at least one uppercase letter, one lowercase letter and one number or symbol",
+            "description": "Password of the user"
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "description": "Password confirmation"
           }
         }
       },
