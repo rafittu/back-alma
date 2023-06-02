@@ -542,6 +542,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -577,6 +586,215 @@
                   },
                   "createdAt": "2023-05-10T12:00:00Z",
                   "updatedAt": "2023-05-11T12:00:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/update/{id}": {
+      "patch": {
+        "summary": "Update user info",
+        "description": "Route to update user data",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUser"
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Example of updating password",
+                  "value": {
+                    "oldPassword": "password123",
+                    "newPassword": "newpassword",
+                    "passwordConfirmation": "newpassword"
+                  }
+                },
+                "example2": {
+                  "summary": "Example of updating username",
+                  "value": {
+                    "username": "Jd"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "socialName": "JD",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "updatedAt": "2023-05-13T12:00:00Z"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "ACTIVE",
+                    "updatedAt": "2023-05-11T12:00:00Z"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-13T12:00:00Z"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not updated",
+                    "code": "user-repository.updateUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": ["One or more fields are missing or invalid"],
+                    "code": "bad.request",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "email/phone already taken",
+                    "code": "user-repository.createUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "missing old password propertie",
+                    "value": {
+                      "error": {
+                        "message": "missing 'oldPassword' field",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "new passwords do not match",
+                    "value": {
+                      "error": {
+                        "message": "new passwords do not match",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "summary": "new passwords do not match",
+                    "value": {
+                      "error": {
+                        "message": "old passwords do not match",
+                        "code": "user-repository.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not updated",
+                    "code": "user-repository.updateUser",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -697,6 +915,10 @@
           "bornDate": {
             "type": "string",
             "description": "Date of birth of the user"
+          },
+          "motherName": {
+            "type": "string",
+            "description": "Mother's name of the user"
           }
         }
       },
@@ -794,6 +1016,66 @@
           "email": {
             "type": "string",
             "description": "Email address of the user"
+          }
+        }
+      },
+      "UpdateUser": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name of the user"
+          },
+          "socialName": {
+            "type": "string",
+            "description": "Social name of the user"
+          },
+          "bornDate": {
+            "type": "string",
+            "description": "Date of birth of the user"
+          },
+          "motherName": {
+            "type": "string",
+            "description": "Mother's name of the user"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the user"
+          },
+          "oldPassword": {
+            "type": "string",
+            "description": "Account old password"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Account new password"
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "description": "Password confirmation"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_CONFIRMATION",
+              "ACTIVE",
+              "BLOCKED",
+              "CANCELLED",
+              "BANNED"
+            ],
+            "description": "Status of the user"
           }
         }
       },
