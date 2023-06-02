@@ -45,7 +45,7 @@ export class UserController {
     return this.getUserByIdService.execute(userId);
   }
 
-  @Patch('/:id')
+  @Patch('/update/:id')
   async updateUser(
     @Param('id') userId: string,
     @Body() body: UpdateUserDto,
@@ -53,7 +53,7 @@ export class UserController {
     return await this.updateUserService.execute(body, userId);
   }
 
-  @Delete('/:id')
+  @Delete('/delete/:id')
   async deleteUser(@Param('id') userId: string): Promise<User> {
     return await this.deleteUserService.execute(userId);
   }
