@@ -66,9 +66,7 @@
                   "personal": {
                     "id": "789012",
                     "firstName": "John",
-                    "lastName": "Doe",
-                    "socialName": "JD",
-                    "bornDate": "1990-01-01"
+                    "socialName": "JD"
                   },
                   "contact": {
                     "id": "345678",
@@ -524,6 +522,67 @@
           }
         }
       }
+    },
+    "/user/{id}": {
+      "get": {
+        "summary": "Get user by id",
+        "description": "Route to get an user by id",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "phone": "1234567890",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "ACTIVE",
+                    "updatedAt": "2023-05-11T12:00:00Z"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-11T12:00:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -668,10 +727,6 @@
           "id": {
             "type": "string",
             "description": "Security information ID"
-          },
-          "confirmationToken": {
-            "type": "string",
-            "description": "Confirmation token for user registration"
           },
           "status": {
             "type": "string",
