@@ -466,6 +466,64 @@
           }
         }
       }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Get me",
+        "description": "Route to get user by access token",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User informations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPayload"
+                },
+                "example": {
+                  "id": "123456",
+                  "username": "johndoe",
+                  "email": "johndoe@example.com"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -667,6 +725,23 @@
           }
         }
       },
+      "UserPayload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Contact information ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -692,6 +767,13 @@
             "properties": {}
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
