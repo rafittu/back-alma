@@ -21,6 +21,8 @@ Este projeto utiliza:
 - Bcrypt e Crypto como ferramenta de criptografia;
 - Passport.js para autenticação de usuários;
 
+- Swagger para documentação da API;
+
 <br>
 
 ## Instalação
