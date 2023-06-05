@@ -3,7 +3,7 @@ import { PrismaService } from '../../../prisma.service';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { mockCreateUser } from './mocks/services.mock';
+import { mockCreateUser, mockUpdateUserEmail } from './mocks/services.mock';
 import {
   FormattedUserResponse,
   UnformattedUserResponse,
@@ -11,7 +11,12 @@ import {
   FormattedCreatedUser,
   UnformattedDeletedUser,
   FormattedDeletedUserResponse,
+  mockUpdateUserPassword,
+  oldPasswordPrismaResponse,
 } from './mocks/repository.mock';
+
+import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
@@ -104,6 +109,99 @@ describe('User Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(404);
         expect(error.message).toBe('user not found');
+      }
+    });
+  });
+
+  describe('update user', () => {
+    it('should update user data successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockResolvedValueOnce(UnformattedUserResponse);
+
+      const result = await userRepository.updateUser(
+        mockUpdateUserEmail,
+        FormattedCreatedUser.id,
+      );
+
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(FormattedUserResponse);
+    });
+
+    it('should update user password successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(oldPasswordPrismaResponse as unknown as User);
+
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockResolvedValueOnce(UnformattedUserResponse);
+
+      const result = await userRepository.updateUser(
+        mockUpdateUserPassword,
+        FormattedCreatedUser.id,
+      );
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(FormattedUserResponse);
+    });
+
+    it('should throw an error if old password is incorrect when updating it', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(oldPasswordPrismaResponse as unknown as User);
+
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
+
+      try {
+        await userRepository.updateUser(
+          mockUpdateUserPassword,
+          FormattedCreatedUser.id,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(422);
+        expect(error.message).toBe('old passwords do not match');
+      }
+    });
+
+    it('should throw an error if new email is already taken', async () => {
+      jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce({
+        code: 'P2002',
+        meta: { target: ['email'] },
+      });
+
+      try {
+        await userRepository.updateUser(
+          mockUpdateUserEmail,
+          FormattedCreatedUser.id,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(409);
+        expect(error.message).toBe('email already in use');
+      }
+    });
+
+    it('should throw an error if user is not updated', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockRejectedValueOnce(
+          new AppError('user-repository.updateUser', 304, 'user not updated'),
+        );
+
+      try {
+        await userRepository.updateUser(
+          mockUpdateUserEmail,
+          FormattedCreatedUser.id,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(304);
+        expect(error.message).toBe('user not updated');
       }
     });
   });

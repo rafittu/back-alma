@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { UserStatus } from '../../structure/user-status.enum';
 import { User } from '../../structure/repository.structure';
+import { UpdateUserDto } from '../../dto/update-user.dto';
 
 export const UnformattedCreatedUser = {
   id: faker.string.uuid(),
@@ -136,4 +137,20 @@ export const FormattedDeletedUserResponse: User = {
   },
   createdAt: UnformattedDeletedUser.created_at,
   updatedAt: UnformattedDeletedUser.updated_at,
+};
+
+export const mockUpdateUserEmail: UpdateUserDto = {
+  email: faker.internet.email(),
+};
+
+export const mockUpdateUserPassword: UpdateUserDto = {
+  oldPassword: 'oldPassword',
+  newPassword: 'newPassword',
+  passwordConfirmation: 'newPassword',
+};
+
+export const oldPasswordPrismaResponse = {
+  security: {
+    password: 'oldPassword',
+  },
 };
