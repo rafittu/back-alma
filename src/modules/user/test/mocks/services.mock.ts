@@ -34,3 +34,5 @@ export const updatePasswordInvalidBody: UpdateUserDto = {
   newPassword: faker.internet.password(),
   passwordConfirmation: faker.internet.password(),
 };
+
+export const invalidUserId = faker.database.mongodbObjectId();
