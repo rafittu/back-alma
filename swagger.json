@@ -1,0 +1,1198 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ALMA Backend API Documentation",
+    "description": "Back-end API to manage users",
+    "contact": {
+      "name": "Rafael Ribeiro",
+      "url": "https://www.wophi.be/alma/support",
+      "email": "alma@wophi.be"
+    },
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/user/signup": {
+      "post": {
+        "summary": "Create a new user",
+        "description": "Route to register new users",
+        "tags": ["User"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUp"
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Example of a valid user registration",
+                  "value": {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "username": "johndoe",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "email": "johndoe@example.com",
+                    "phone": "1234567890",
+                    "password": "password123",
+                    "passwordConfirmation": "password123"
+                  }
+                },
+                "example2": {
+                  "summary": "Example of required fields only",
+                  "value": {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "motherName": "Jane Doe",
+                    "email": "johndoe@example.com",
+                    "password": "password123",
+                    "passwordConfirmation": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "socialName": "JD"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "PENDING_CONFIRMATION"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-10T12:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": ["One or more fields are missing or invalid"],
+                    "code": "bad.request",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "email/phone already taken",
+                    "code": "user-repository.createUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "cannot create user from a local server",
+                    "code": "user-service.createUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not created",
+                    "code": "user-repository.createUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/account/{token}": {
+      "patch": {
+        "summary": "Confirm user account email",
+        "description": "Route to confirm a user's account email",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Confirmation token for user registration",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account email confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "account email successfully confirmed"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Account not confirmed",
+                    "code": "auth-repository.confirmAccountEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/signin": {
+      "post": {
+        "summary": "User login",
+        "description": "Authenticate a user with the provided credentials",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCredentials"
+              },
+              "example": {
+                "email": "johndoe@example.com",
+                "password": "password123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User authenticated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                },
+                "example": {
+                  "accessToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "email or password is invalid",
+                    "code": "local-auth.guards",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Internal Server Error",
+                    "code": "internal.server.error",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/send-recover-password-email": {
+      "post": {
+        "summary": "Send recover password email",
+        "description": "Send an email to the user with instructions to recover their password",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordRecover"
+              },
+              "example": {
+                "email": "johndoe@example.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "recover password email sent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user with this email not found",
+                    "code": "auth-repository.sendRecoverPasswordEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Failed to send recover password email",
+                    "code": "internal.server.error",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset-password/{token}": {
+      "patch": {
+        "summary": "Reset user password",
+        "description": "Route to reset user password using the recovery token sent by email",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Recovery token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              },
+              "example": {
+                "password": "newpassword",
+                "passwordConfirmation": "newpassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPassword"
+                },
+                "example": {
+                  "message": "password reseted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "passwords do not match",
+                    "code": "recover-password-service.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid recover token",
+                    "code": "auth-repository.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "password not reseted",
+                    "code": "auth-repository.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Get me",
+        "description": "Route to get user by access token",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User informations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPayload"
+                },
+                "example": {
+                  "id": "123456",
+                  "username": "johndoe",
+                  "email": "johndoe@example.com"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "summary": "Get user by id",
+        "description": "Route to get an user by id",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "phone": "1234567890",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "ACTIVE",
+                    "updatedAt": "2023-05-11T12:00:00Z"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-11T12:00:00Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/update/{id}": {
+      "patch": {
+        "summary": "Update user info",
+        "description": "Route to update user data",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUser"
+              },
+              "examples": {
+                "example1": {
+                  "summary": "Example of updating password",
+                  "value": {
+                    "oldPassword": "password123",
+                    "newPassword": "newpassword",
+                    "passwordConfirmation": "newpassword"
+                  }
+                },
+                "example2": {
+                  "summary": "Example of updating username",
+                  "value": {
+                    "username": "Jd"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "socialName": "JD",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "updatedAt": "2023-05-13T12:00:00Z"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "ACTIVE",
+                    "updatedAt": "2023-05-11T12:00:00Z"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-13T12:00:00Z"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not updated",
+                    "code": "user-repository.updateUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": ["One or more fields are missing or invalid"],
+                    "code": "bad.request",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "email/phone already taken",
+                    "code": "user-repository.createUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "missing old password propertie",
+                    "value": {
+                      "error": {
+                        "message": "missing 'oldPassword' field",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "new passwords do not match",
+                    "value": {
+                      "error": {
+                        "message": "new passwords do not match",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "summary": "new passwords do not match",
+                    "value": {
+                      "error": {
+                        "message": "old passwords do not match",
+                        "code": "user-repository.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not updated",
+                    "code": "user-repository.updateUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/delete/{id}": {
+      "delete": {
+        "summary": "Delete user account",
+        "description": "Route to delete user account",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "socialName": "JD"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "CANCELLED"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-15T12:00:00Z"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not cancelled",
+                    "code": "user-repository.deleteUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SignUp": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "maxLength": 125,
+            "description": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 125,
+            "description": "Last name of the user"
+          },
+          "socialName": {
+            "type": "string",
+            "maxLength": 250,
+            "description": "Social name of the user"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 45,
+            "description": "Username of the user"
+          },
+          "bornDate": {
+            "type": "string",
+            "formate": "date",
+            "description": "Date of birth of the user"
+          },
+          "motherName": {
+            "type": "string",
+            "maxLength": 250,
+            "description": "Mother's name of the user"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 250,
+            "description": "Email address of the user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the user"
+          },
+          "password": {
+            "type": "string",
+            "minLength": "7",
+            "pattern": "at least one uppercase letter, one lowercase letter and one number or symbol",
+            "description": "Password of the user"
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "description": "Password confirmation"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "motherName",
+          "email",
+          "password",
+          "passwordConfirmation"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "personal": {
+            "$ref": "#/components/schemas/Personal"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "security": {
+            "$ref": "#/components/schemas/Security"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Date and time of user creation"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Date and time of last user update"
+          }
+        }
+      },
+      "Personal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Personal information ID"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name of the user"
+          },
+          "socialName": {
+            "type": "string",
+            "description": "Social name of the user"
+          },
+          "bornDate": {
+            "type": "string",
+            "description": "Date of birth of the user"
+          },
+          "motherName": {
+            "type": "string",
+            "description": "Mother's name of the user"
+          }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Contact information ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the user"
+          }
+        }
+      },
+      "Security": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Security information ID"
+          },
+          "status": {
+            "type": "string",
+            "description": "User status"
+          }
+        }
+      },
+      "UserCredentials": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password of the user"
+          }
+        }
+      },
+      "AccessToken": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access token used for authentication in subsequent API calls. This token should be included in the 'Authorization' header as a Bearer Token"
+          }
+        }
+      },
+      "PasswordRecover": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          }
+        }
+      },
+      "ResetPassword": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": "7",
+            "pattern": "at least one uppercase letter, one lowercase letter and one number or symbol",
+            "description": "Password of the user"
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "description": "Password confirmation"
+          }
+        }
+      },
+      "UserPayload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Contact information ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          }
+        }
+      },
+      "UpdateUser": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name of the user"
+          },
+          "socialName": {
+            "type": "string",
+            "description": "Social name of the user"
+          },
+          "bornDate": {
+            "type": "string",
+            "description": "Date of birth of the user"
+          },
+          "motherName": {
+            "type": "string",
+            "description": "Mother's name of the user"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the user"
+          },
+          "oldPassword": {
+            "type": "string",
+            "description": "Account old password"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Account new password"
+          },
+          "passwordConfirmation": {
+            "type": "string",
+            "description": "Password confirmation"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_CONFIRMATION",
+              "ACTIVE",
+              "BLOCKED",
+              "CANCELLED",
+              "BANNED"
+            ],
+            "description": "Status of the user"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "Error message"
+              },
+              "code": {
+                "type": "string",
+                "description": "Error code"
+              },
+              "status": {
+                "type": "boolean",
+                "description": "Error status"
+              }
+            }
+          },
+          "data": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
