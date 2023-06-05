@@ -9,6 +9,8 @@ import {
   UnformattedUserResponse,
   UnformattedCreatedUser,
   FormattedCreatedUser,
+  UnformattedDeletedUser,
+  FormattedDeletedUserResponse,
 } from './mocks/repository.mock';
 
 describe('User Repository', () => {
@@ -16,34 +18,20 @@ describe('User Repository', () => {
   let prismaService: PrismaService;
 
   beforeEach(async () => {
-    const prismaServiceMock = {
-      user: {
-        create: jest.fn().mockResolvedValueOnce(UnformattedCreatedUser),
-        findFirst: jest.fn().mockResolvedValueOnce(UnformattedUserResponse),
-        update: jest.fn().mockResolvedValueOnce(UnformattedUserResponse),
-      },
-    };
-
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserRepository,
-        {
-          provide: PrismaService,
-          useValue: prismaServiceMock,
-        },
-      ],
+      providers: [UserRepository, PrismaService],
     }).compile();
 
     userRepository = module.get<UserRepository>(UserRepository);
     prismaService = module.get<PrismaService>(PrismaService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('create user', () => {
     it('should create a new user successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'create')
+        .mockResolvedValueOnce(UnformattedCreatedUser);
+
       const result = await userRepository.createUser(
         mockCreateUser,
         UserStatus.PENDING_CONFIRMATION,
@@ -60,21 +48,11 @@ describe('User Repository', () => {
       });
 
       try {
-        const result = await userRepository.createUser(
+        await userRepository.createUser(
           mockCreateUser,
           UserStatus.PENDING_CONFIRMATION,
         );
-
-        expect(prismaService.user.create).toHaveBeenCalledTimes(1);
-
-        console.log(
-          'should throw an error if username or email is already in use',
-          prismaService.user.create,
-        );
-
-        console.log('L78: não caiu no erro', result);
       } catch (error) {
-        console.log('L80:', error);
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(409);
         expect(error.message).toBe('username already in use');
@@ -84,7 +62,9 @@ describe('User Repository', () => {
     it('should throw an error if user is not created', async () => {
       jest
         .spyOn(prismaService.user, 'create')
-        .mockRejectedValueOnce(new Error());
+        .mockRejectedValueOnce(
+          new AppError('user-repository.createUser', 500, 'user not created'),
+        );
 
       try {
         await userRepository.createUser(
@@ -101,6 +81,10 @@ describe('User Repository', () => {
 
   describe('get user by id', () => {
     it('should get a user by id successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(UnformattedUserResponse);
+
       const result = await userRepository.getUserById(FormattedCreatedUser.id);
 
       expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
@@ -110,22 +94,13 @@ describe('User Repository', () => {
     it('should throw an error if user is not found', async () => {
       jest
         .spyOn(prismaService.user, 'findFirst')
-        .mockRejectedValueOnce(new Error());
+        .mockRejectedValueOnce(
+          new AppError('user-repository.getUserById', 404, 'user not found'),
+        );
 
       try {
-        const result = await userRepository.getUserById(
-          FormattedCreatedUser.id,
-        );
-        expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-
-        console.log(
-          'L125: should throw an error if user is not found',
-          prismaService.user.create,
-        );
-
-        console.log('não caiu no erro', result);
+        await userRepository.getUserById(FormattedCreatedUser.id);
       } catch (error) {
-        console.log('L131:', error);
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(404);
         expect(error.message).toBe('user not found');
@@ -135,27 +110,31 @@ describe('User Repository', () => {
 
   describe('delete user', () => {
     it('should delete a user successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockResolvedValueOnce(UnformattedDeletedUser);
+
       const result = await userRepository.deleteUser(
         FormattedCreatedUser.id,
         UserStatus.CANCELLED,
       );
 
       expect(prismaService.user.update).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(FormattedUserResponse);
+      expect(result).toEqual(FormattedDeletedUserResponse);
     });
 
     it('should throw an error if user deletion fails', async () => {
       jest
         .spyOn(prismaService.user, 'update')
-        .mockRejectedValueOnce(new Error());
+        .mockRejectedValueOnce(
+          new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
+        );
 
       try {
         await userRepository.deleteUser(
           FormattedCreatedUser.id,
           UserStatus.CANCELLED,
         );
-
-        console.log('user not cancelled - Tcoverage');
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);

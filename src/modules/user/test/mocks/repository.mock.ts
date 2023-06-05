@@ -97,3 +97,43 @@ export const FormattedUserResponse: User = {
   createdAt: UnformattedUserResponse.created_at,
   updatedAt: UnformattedUserResponse.updated_at,
 };
+
+export const UnformattedDeletedUser = {
+  id: faker.string.uuid(),
+  user_personal_info_id: faker.string.uuid(),
+  user_contact_info_id: faker.string.uuid(),
+  user_security_info_id: faker.string.uuid(),
+  personal: {
+    first_name: faker.person.firstName(),
+    social_name: faker.person.fullName(),
+  },
+  contact: {
+    username: faker.internet.userName(),
+    email: faker.internet.email(),
+  },
+  security: {
+    status: UserStatus.CANCELLED,
+  },
+  created_at: new Date(),
+  updated_at: new Date(),
+};
+
+export const FormattedDeletedUserResponse: User = {
+  id: UnformattedDeletedUser.id,
+  personal: {
+    id: UnformattedDeletedUser.user_personal_info_id,
+    firstName: UnformattedDeletedUser.personal.first_name,
+    socialName: UnformattedDeletedUser.personal.social_name,
+  },
+  contact: {
+    id: UnformattedDeletedUser.user_contact_info_id,
+    username: UnformattedDeletedUser.contact.username,
+    email: UnformattedDeletedUser.contact.email,
+  },
+  security: {
+    id: UnformattedDeletedUser.user_security_info_id,
+    status: UnformattedDeletedUser.security.status,
+  },
+  createdAt: UnformattedDeletedUser.created_at,
+  updatedAt: UnformattedDeletedUser.updated_at,
+};
