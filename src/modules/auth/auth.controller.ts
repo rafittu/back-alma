@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { SignInService } from './services/signin.service';
 import { LocalAuthGuard } from './infra/guards/local-auth.guard';
-import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
-import { AppError } from 'src/common/errors/Error';
+import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
+import { AppError } from '../../common/errors/Error';
 import {
   AuthRequest,
   UserPayload,

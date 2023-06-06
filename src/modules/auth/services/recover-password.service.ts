@@ -4,7 +4,7 @@ import { IAuthRepository } from '../structure/auth-repository.structure';
 import { User } from '@prisma/client';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPassword } from '../structure/service.structure';
-import { AppError } from 'src/common/errors/Error';
+import { AppError } from '../../../common/errors/Error';
 
 @Injectable()
 export class RecoverPasswordService {
