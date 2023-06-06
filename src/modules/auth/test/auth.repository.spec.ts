@@ -7,6 +7,7 @@ import {
   userCredentialsMock,
   validatedUserMockResponse,
 } from './mocks/repository.mock';
+import { AppError } from '../../../common/errors/Error';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
@@ -38,6 +39,20 @@ describe('Auth Repository', () => {
 
       expect(prismaService.userContactInfo.findUnique).toHaveBeenCalledTimes(1);
       expect(result).toEqual(validatedUserMockResponse);
+    });
+
+    it('should throw an error if email or password is invalid', async () => {
+      jest
+        .spyOn(prismaService.userContactInfo, 'findUnique')
+        .mockReturnValueOnce(null);
+
+      try {
+        await authRepository.validateUser(userCredentialsMock);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(401);
+        expect(error.message).toBe('email or password is invalid');
+      }
     });
   });
 });
