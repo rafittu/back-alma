@@ -8,6 +8,11 @@ import {
   validatedUserMockResponse,
 } from './mocks/repository.mock';
 import { AppError } from '../../../common/errors/Error';
+import { UserStatus } from '../../user/structure/user-status.enum';
+import {
+  accountConfirmResponse,
+  confirmationTokenMock,
+} from './mocks/controller.mock';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
@@ -53,6 +58,22 @@ describe('Auth Repository', () => {
         expect(error.code).toBe(401);
         expect(error.message).toBe('email or password is invalid');
       }
+    });
+  });
+
+  describe('confirm Account Email', () => {
+    it('should validate user email account successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
+
+      const result = await authRepository.confirmAccountEmail(
+        confirmationTokenMock,
+        UserStatus.ACTIVE,
+      );
+
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(accountConfirmResponse);
     });
   });
 });
