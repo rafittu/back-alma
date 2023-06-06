@@ -156,5 +156,43 @@ describe('Auth Repository', () => {
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(resetPasswordResponse);
     });
+
+    it('should throw an error if recover token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(null);
+
+      try {
+        await authRepository.resetPassword(
+          recoverTokenMock,
+          userCredentialsMock.password,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('invalid recover token');
+      }
+    });
+
+    it('should throw an error if password not reseted', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(getUserSecurityInfoResponse);
+
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockRejectedValueOnce('user not updated');
+
+      try {
+        await authRepository.resetPassword(
+          recoverTokenMock,
+          userCredentialsMock.password,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('password not reseted');
+      }
+    });
   });
 });
