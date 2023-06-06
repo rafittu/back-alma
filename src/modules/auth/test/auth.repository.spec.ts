@@ -75,5 +75,22 @@ describe('Auth Repository', () => {
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(accountConfirmResponse);
     });
+
+    it('should throw an error if account not confirmed', async () => {
+      jest
+        .spyOn(prismaService.userContactInfo, 'findUnique')
+        .mockRejectedValueOnce('invalid confirmation token');
+
+      try {
+        await authRepository.confirmAccountEmail(
+          confirmationTokenMock,
+          UserStatus.ACTIVE,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('Account not confirmed');
+      }
+    });
   });
 });
