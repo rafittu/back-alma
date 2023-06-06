@@ -119,5 +119,19 @@ describe('Auth Repository', () => {
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(recoverTokenMock);
     });
+
+    it('should throw an error if password recover email is not sent', async () => {
+      jest
+        .spyOn(prismaService.userContactInfo, 'findUnique')
+        .mockResolvedValueOnce(null);
+
+      try {
+        await authRepository.sendRecoverPasswordEmail(userEmailMock);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user with this email not found');
+      }
+    });
   });
 });
