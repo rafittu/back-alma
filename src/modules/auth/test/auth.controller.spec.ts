@@ -3,7 +3,12 @@ import { AuthController } from '../auth.controller';
 import { SignInService } from '../services/signin.service';
 import { ConfirmAccountEmailService } from '../services/confirm-email.service';
 import { RecoverPasswordService } from '../services/recover-password.service';
-import { accessTokenMock, authRequestMock } from './mocks/controller.mock';
+import {
+  accessTokenMock,
+  accountConfirmResponse,
+  authRequestMock,
+  confirmationTokenMock,
+} from './mocks/controller.mock';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -24,7 +29,7 @@ describe('AuthController', () => {
         {
           provide: ConfirmAccountEmailService,
           useValue: {
-            execute: jest.fn(),
+            execute: jest.fn().mockResolvedValueOnce(accountConfirmResponse),
           },
         },
         {
@@ -57,6 +62,17 @@ describe('AuthController', () => {
 
       expect(signInService.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(accessTokenMock);
+    });
+  });
+
+  describe('confirm account email', () => {
+    it('should confirm user account email', async () => {
+      const result = await controller.confirmAccountEmail(
+        confirmationTokenMock,
+      );
+
+      expect(confirmAccountEmailService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(accountConfirmResponse);
     });
   });
 });

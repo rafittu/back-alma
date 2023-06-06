@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { AuthRequest } from '../../structure/service.structure';
+import { AuthRequest, UserToken } from '../../structure/service.structure';
 
-export const accessTokenMock = {
+export const accessTokenMock: UserToken = {
   accessToken: faker.string.alphanumeric(),
 };
 
@@ -12,4 +12,10 @@ authRequestMock.user = {
   id: faker.string.uuid(),
   username: faker.internet.userName(),
   email: faker.internet.email(),
+};
+
+export const confirmationTokenMock = faker.string.alphanumeric();
+
+export const accountConfirmResponse = {
+  message: 'account email successfully confirmed',
 };
