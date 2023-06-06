@@ -12,7 +12,10 @@ import { UserStatus } from '../../user/structure/user-status.enum';
 import {
   accountConfirmResponse,
   confirmationTokenMock,
+  userEmailMock,
 } from './mocks/controller.mock';
+import { recoverTokenMock } from './mocks/services.mock';
+import * as Crypto from 'crypto';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
@@ -61,7 +64,7 @@ describe('Auth Repository', () => {
     });
   });
 
-  describe('confirm Account Email', () => {
+  describe('confirm account email', () => {
     it('should validate user email account successfully', async () => {
       jest
         .spyOn(prismaService.userSecurityInfo, 'update')
@@ -91,6 +94,30 @@ describe('Auth Repository', () => {
         expect(error.code).toBe(500);
         expect(error.message).toBe('Account not confirmed');
       }
+    });
+  });
+
+  describe('send recover password email', () => {
+    it('should return an user recover token successfully', async () => {
+      jest
+        .spyOn(prismaService.userContactInfo, 'findFirst')
+        .mockResolvedValueOnce(getUserCredentialsResponse);
+
+      jest
+        .spyOn(Crypto, 'randomBytes')
+        .mockReturnValueOnce(recoverTokenMock as never);
+
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
+
+      const result = await authRepository.sendRecoverPasswordEmail(
+        userEmailMock,
+      );
+
+      expect(prismaService.userContactInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(recoverTokenMock);
     });
   });
 });
