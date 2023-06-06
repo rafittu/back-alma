@@ -19,3 +19,9 @@ export const confirmationTokenMock = faker.string.alphanumeric();
 export const accountConfirmResponse = {
   message: 'account email successfully confirmed',
 };
+
+export const userEmailMock = faker.internet.email();
+
+export const recoverPasswordEmailResponse = {
+  message: 'recover password email sent',
+};

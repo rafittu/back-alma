@@ -8,6 +8,8 @@ import {
   accountConfirmResponse,
   authRequestMock,
   confirmationTokenMock,
+  recoverPasswordEmailResponse,
+  userEmailMock,
 } from './mocks/controller.mock';
 
 describe('AuthController', () => {
@@ -35,7 +37,9 @@ describe('AuthController', () => {
         {
           provide: RecoverPasswordService,
           useValue: {
-            sendRecoverPasswordEmail: jest.fn(),
+            sendRecoverPasswordEmail: jest
+              .fn()
+              .mockResolvedValueOnce(recoverPasswordEmailResponse),
             resetPassword: jest.fn(),
           },
         },
@@ -73,6 +77,17 @@ describe('AuthController', () => {
 
       expect(confirmAccountEmailService.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(accountConfirmResponse);
+    });
+  });
+
+  describe('send recover password email', () => {
+    it('should send an email to recover password', async () => {
+      const result = await controller.sendRecoverPasswordEmail(userEmailMock);
+
+      expect(
+        recoverPasswordService.sendRecoverPasswordEmail,
+      ).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(recoverPasswordEmailResponse);
     });
   });
 });
