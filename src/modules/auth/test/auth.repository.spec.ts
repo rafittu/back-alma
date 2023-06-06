@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthRepository } from '../repository/auth.repository';
 import {
   getUserCredentialsResponse,
+  getUserSecurityInfoResponse,
   userCredentialsMock,
   validatedUserMockResponse,
 } from './mocks/repository.mock';
@@ -12,6 +13,7 @@ import { UserStatus } from '../../user/structure/user-status.enum';
 import {
   accountConfirmResponse,
   confirmationTokenMock,
+  resetPasswordResponse,
   userEmailMock,
 } from './mocks/controller.mock';
 import { recoverTokenMock } from './mocks/services.mock';
@@ -132,6 +134,27 @@ describe('Auth Repository', () => {
         expect(error.code).toBe(404);
         expect(error.message).toBe('user with this email not found');
       }
+    });
+  });
+
+  describe('reset password', () => {
+    it('should reset user account password', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(getUserSecurityInfoResponse);
+
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
+
+      const result = await authRepository.resetPassword(
+        recoverTokenMock,
+        userCredentialsMock.password,
+      );
+
+      expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(resetPasswordResponse);
     });
   });
 });
