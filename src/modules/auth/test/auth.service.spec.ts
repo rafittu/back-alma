@@ -4,6 +4,11 @@ import { RecoverPasswordService } from '../services/recover-password.service';
 import { SignInService } from '../services/signin.service';
 import { AuthRepository } from '../repository/auth.repository';
 import { JwtService } from '@nestjs/jwt';
+import {
+  jwtPayloadMock,
+  jwtTokenMock,
+  signinPayloadMock,
+} from './mocks/services.mock';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -55,5 +60,16 @@ describe('AuthService', () => {
     expect(jwtService).toBeDefined();
     expect(confirmAccountEmailService).toBeDefined();
     expect(recoverPasswordService).toBeDefined();
+  });
+
+  describe('signin service', () => {
+    it('should return a user token', () => {
+      jest.spyOn(jwtService, 'sign').mockReturnValue(jwtTokenMock);
+
+      const result = signInService.execute(signinPayloadMock);
+
+      expect(jwtService.sign).toHaveBeenCalledWith(jwtPayloadMock);
+      expect(result).toEqual({ accessToken: jwtTokenMock });
+    });
   });
 });
