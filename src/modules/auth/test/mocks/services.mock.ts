@@ -14,3 +14,5 @@ export const jwtPayloadMock: JtwPayload = {
 };
 
 export const jwtTokenMock = faker.string.alphanumeric();
+
+export const recoverTokenMock = faker.string.alphanumeric();

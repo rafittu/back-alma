@@ -7,10 +7,16 @@ import { JwtService } from '@nestjs/jwt';
 import {
   jwtPayloadMock,
   jwtTokenMock,
+  recoverTokenMock,
   signinPayloadMock,
 } from './mocks/services.mock';
-import { accountConfirmResponse } from './mocks/controller.mock';
+import {
+  accountConfirmResponse,
+  recoverPasswordEmailResponse,
+  userEmailMock,
+} from './mocks/controller.mock';
 import { confirmationTokenMock } from './mocks/controller.mock';
+import { MailerService } from '@nestjs-modules/mailer';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -19,6 +25,7 @@ describe('AuthService', () => {
   let recoverPasswordService: RecoverPasswordService;
 
   let authRepository: AuthRepository;
+  let mailerService: MailerService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,21 +33,24 @@ describe('AuthService', () => {
         SignInService,
         JwtService,
         ConfirmAccountEmailService,
-        {
-          provide: RecoverPasswordService,
-          useValue: {
-            sendRecoverPasswordEmail: jest.fn(),
-
-            resetPassword: jest.fn(),
-          },
-        },
+        RecoverPasswordService,
         {
           provide: AuthRepository,
           useValue: {
             validateUser: jest.fn(),
-            confirmAccountEmail: jest.fn(),
-            sendRecoverPasswordEmail: jest.fn(),
+            confirmAccountEmail: jest
+              .fn()
+              .mockResolvedValueOnce(accountConfirmResponse),
+            sendRecoverPasswordEmail: jest
+              .fn()
+              .mockResolvedValueOnce(recoverPasswordEmailResponse),
             resetPassword: jest.fn(),
+          },
+        },
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn(),
           },
         },
       ],
@@ -55,6 +65,7 @@ describe('AuthService', () => {
     recoverPasswordService = module.get<RecoverPasswordService>(
       RecoverPasswordService,
     );
+    mailerService = module.get<MailerService>(MailerService);
   });
 
   it('should be defined', () => {
@@ -87,6 +98,24 @@ describe('AuthService', () => {
 
       expect(authRepository.confirmAccountEmail).toHaveBeenCalledTimes(1);
       expect(result).toEqual(accountConfirmResponse);
+    });
+  });
+
+  describe('send recover password email', () => {
+    it('should send an email with recover password instructions', async () => {
+      jest
+        .spyOn(authRepository, 'sendRecoverPasswordEmail')
+        .mockResolvedValueOnce(recoverTokenMock);
+
+      jest.spyOn(mailerService, 'sendMail').mockResolvedValueOnce('email sent');
+
+      const result = await recoverPasswordService.sendRecoverPasswordEmail(
+        userEmailMock,
+      );
+
+      expect(authRepository.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
+      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(recoverPasswordEmailResponse);
     });
   });
 });
