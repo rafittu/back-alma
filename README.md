@@ -12,16 +12,17 @@ A identidade de cada usuário é considerada uma "ALMA" dentro do sistema, repre
 
 ## Tecnologias
 
-Este projeto utiliza:
+Este projeto utiliza as seguintes tecnologias:
 
-- Node.js com framework NestJS e TypeScript;
-- ORM Prisma para comunicação com o banco de dados;
-- Docker como uma ferramenta de containerização;
+- **Node.js** com framework **NestJS** e **TypeScript**;
+- **Prisma ORM** para comunicação e manipulação do banco de dados;
+- **Docker** como uma ferramenta de containerização;
 
-- Bcrypt e Crypto como ferramenta de criptografia;
-- Passport.js para autenticação de usuários;
+- **Bcrypt** e **Crypto** como ferramenta de criptografia;
+- **Passport.js** para implementação de estratégias de autenticação;
 
-- Swagger para documentação da API;
+- **Jest** para execução dos testes unitários;
+- **Swagger** para documentação da API;
 
 <br>
 
