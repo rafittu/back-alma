@@ -1,5 +1,9 @@
 import { faker } from '@faker-js/faker';
-import { AuthRequest, UserToken } from '../../structure/service.structure';
+import {
+  AuthRequest,
+  UserPayload,
+  UserToken,
+} from '../../structure/service.structure';
 import { ChangePasswordDto } from '../../dto/change-password.dto';
 
 export const accessTokenMock: UserToken = {
@@ -34,4 +38,10 @@ export const resetPasswordMock: ChangePasswordDto = {
 
 export const resetPasswordResponse = {
   message: 'password reseted',
+};
+
+export const userPayloadMock: UserPayload = {
+  id: faker.string.uuid(),
+  username: faker.internet.userName(),
+  email: faker.internet.email(),
 };

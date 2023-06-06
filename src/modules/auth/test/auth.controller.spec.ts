@@ -12,6 +12,7 @@ import {
   resetPasswordMock,
   resetPasswordResponse,
   userEmailMock,
+  userPayloadMock,
 } from './mocks/controller.mock';
 
 describe('AuthController', () => {
@@ -104,6 +105,14 @@ describe('AuthController', () => {
 
       expect(recoverPasswordService.resetPassword).toHaveBeenCalledTimes(1);
       expect(result).toEqual(resetPasswordResponse);
+    });
+  });
+
+  describe('getMe', () => {
+    it('should return the current user', () => {
+      const result = controller.getMe(userPayloadMock);
+
+      expect(result).toBe(userPayloadMock);
     });
   });
 });
