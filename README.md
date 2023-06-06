@@ -59,19 +59,15 @@ $ npm run start:dev
 
 ## Testes
 
-Executando os testes unitários:
+A API possui uma cobertura de testes unitários abrangente, com 100% de cobertura em cada parte essencial do código, garantindo a qualidade e o correto funcionamento do sistema.
+
+Para executar os testes unitários, utilize o seguinte comando:
 
 ```bash
 $ npm run test
 ```
 
-Executando testes de ponta a ponta (end-to-end):
-
-```bash
-$ npm run test:e2e
-```
-
-Gerando relatório de cobertura dos testes:
+Você também pode gerar um relatório de cobertura dos testes para verificar quais partes do código foram testadas. Para gerar esse relatório, utilize o seguinte comando:
 
 ```bash
 $ npm run test:cov
