@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { AppError } from 'src/common/errors/Error';
+import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
 import { IAuthRepository } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
