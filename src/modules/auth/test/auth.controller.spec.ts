@@ -3,6 +3,7 @@ import { AuthController } from '../auth.controller';
 import { SignInService } from '../services/signin.service';
 import { ConfirmAccountEmailService } from '../services/confirm-email.service';
 import { RecoverPasswordService } from '../services/recover-password.service';
+import { accessTokenMock, authRequestMock } from './mocks/controller.mock';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -17,7 +18,7 @@ describe('AuthController', () => {
         {
           provide: SignInService,
           useValue: {
-            execute: jest.fn(),
+            execute: jest.fn().mockResolvedValueOnce(accessTokenMock),
           },
         },
         {
@@ -48,5 +49,14 @@ describe('AuthController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('user signin', () => {
+    it('should return an user access token', async () => {
+      const result = await controller.signIn(authRequestMock);
+
+      expect(signInService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(accessTokenMock);
+    });
   });
 });
