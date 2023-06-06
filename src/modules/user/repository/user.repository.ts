@@ -253,13 +253,6 @@ export class UserRepository implements IUserRepository<User> {
         );
       }
 
-      if (error.code) {
-        throw new AppError(
-          'user-repository.updateUser',
-          500,
-          `${error.code} - user not updated`,
-        );
-      }
       throw new AppError('user-repository.updateUser', 304, 'user not updated');
     }
   }

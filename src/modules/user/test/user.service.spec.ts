@@ -6,6 +6,7 @@ import { DeleteUserService } from '../services/delete-user.service';
 import { UserRepository } from '../repository/user.repository';
 import { MailerService } from '@nestjs-modules/mailer';
 import {
+  invalidUserId,
   mockCreateUser,
   mockUpdateAccountPassword,
   mockUpdateUserEmail,
@@ -14,6 +15,7 @@ import {
 import {
   mockDeleteUserResponse,
   mockNewUser,
+  mockUpdateUser,
   mockUpdateUserResponse,
 } from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
@@ -100,7 +102,7 @@ describe('User Services', () => {
     it(`should throw an error if 'ipAddress' is invalid`, async () => {
       const invalidIpAddress = {
         ...mockCreateUser,
-        ipAddres: 'invalid ip address',
+        ipAddress: 'invalid ip address',
       };
 
       try {
@@ -121,19 +123,21 @@ describe('User Services', () => {
       expect(result).toEqual(mockNewUser);
     });
 
-    it('should throw an error', () => {
-      jest
-        .spyOn(userRepository, 'getUserById')
-        .mockRejectedValueOnce(new Error());
-
-      expect(getUserByIdService.execute(mockNewUser.id)).rejects.toThrowError();
+    it('should throw an error if user not found', async () => {
+      try {
+        await getUserByIdService.execute(invalidUserId);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user not found');
+      }
     });
   });
 
   describe('update user', () => {
     it('should update an user successfully', async () => {
       const result = await updateUserService.execute(
-        mockUpdateUserEmail,
+        mockUpdateUser,
         mockNewUser.id,
       );
 
@@ -182,12 +186,20 @@ describe('User Services', () => {
       expect(result).toEqual(mockDeleteUserResponse);
     });
 
-    it('should throw an error', () => {
+    it('should throw an error if user not cancelled', async () => {
       jest
         .spyOn(userRepository, 'deleteUser')
-        .mockRejectedValueOnce(new Error());
+        .mockRejectedValueOnce(
+          new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
+        );
 
-      expect(deleteUserService.execute(mockNewUser.id)).rejects.toThrowError();
+      try {
+        await deleteUserService.execute(invalidUserId);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('user not cancelled');
+      }
     });
   });
 });
