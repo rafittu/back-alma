@@ -9,6 +9,8 @@ import {
   authRequestMock,
   confirmationTokenMock,
   recoverPasswordEmailResponse,
+  resetPasswordMock,
+  resetPasswordResponse,
   userEmailMock,
 } from './mocks/controller.mock';
 
@@ -40,7 +42,9 @@ describe('AuthController', () => {
             sendRecoverPasswordEmail: jest
               .fn()
               .mockResolvedValueOnce(recoverPasswordEmailResponse),
-            resetPassword: jest.fn(),
+            resetPassword: jest
+              .fn()
+              .mockResolvedValueOnce(resetPasswordResponse),
           },
         },
       ],
@@ -88,6 +92,18 @@ describe('AuthController', () => {
         recoverPasswordService.sendRecoverPasswordEmail,
       ).toHaveBeenCalledTimes(1);
       expect(result).toEqual(recoverPasswordEmailResponse);
+    });
+  });
+
+  describe('reset account password', () => {
+    it('should reset user account password', async () => {
+      const result = await controller.resetPassword(
+        confirmationTokenMock,
+        resetPasswordMock,
+      );
+
+      expect(recoverPasswordService.resetPassword).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(resetPasswordResponse);
     });
   });
 });
