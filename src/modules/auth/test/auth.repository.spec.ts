@@ -1,9 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../prisma.service';
-import { AppError } from '../../../common/errors/Error';
-
-import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { AuthRepository } from '../repository/auth.repository';
+import {
+  getUserCredentialsResponse,
+  userCredentialsMock,
+  validatedUserMockResponse,
+} from './mocks/repository.mock';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
@@ -21,5 +24,20 @@ describe('Auth Repository', () => {
   it('should be defined', () => {
     expect(authRepository).toBeDefined();
     expect(prismaService).toBeDefined();
+  });
+
+  describe('validate user', () => {
+    it('should validate user credentials successfully', async () => {
+      jest
+        .spyOn(prismaService.userContactInfo, 'findUnique')
+        .mockResolvedValueOnce(getUserCredentialsResponse);
+
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+
+      const result = await authRepository.validateUser(userCredentialsMock);
+
+      expect(prismaService.userContactInfo.findUnique).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(validatedUserMockResponse);
+    });
   });
 });
