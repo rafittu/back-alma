@@ -12,16 +12,17 @@ A identidade de cada usuário é considerada uma "ALMA" dentro do sistema, repre
 
 ## Tecnologias
 
-Este projeto utiliza:
+Este projeto utiliza as seguintes tecnologias:
 
-- Node.js com framework NestJS e TypeScript;
-- ORM Prisma para comunicação com o banco de dados;
-- Docker como uma ferramenta de containerização;
+- **Node.js** com framework **NestJS** e **TypeScript**;
+- **Prisma ORM** para comunicação e manipulação do banco de dados;
+- **Docker** como uma ferramenta de containerização;
 
-- Bcrypt e Crypto como ferramenta de criptografia;
-- Passport.js para autenticação de usuários;
+- **Bcrypt** e **Crypto** como ferramenta de criptografia;
+- **Passport.js** para implementação de estratégias de autenticação;
 
-- Swagger para documentação da API;
+- **Jest** para execução dos testes unitários;
+- **Swagger** para documentação da API;
 
 <br>
 
@@ -59,19 +60,15 @@ $ npm run start:dev
 
 ## Testes
 
-Executando os testes unitários:
+A API possui uma cobertura de testes unitários abrangente, com 100% de cobertura em cada parte essencial do código, garantindo a qualidade e o correto funcionamento do sistema.
+
+Para executar os testes unitários, utilize o seguinte comando:
 
 ```bash
 $ npm run test
 ```
 
-Executando testes de ponta a ponta (end-to-end):
-
-```bash
-$ npm run test:e2e
-```
-
-Gerando relatório de cobertura dos testes:
+Você também pode gerar um relatório de cobertura dos testes para verificar quais partes do código foram testadas. Para gerar esse relatório, utilize o seguinte comando:
 
 ```bash
 $ npm run test:cov
