@@ -13,10 +13,13 @@ import {
 import {
   accountConfirmResponse,
   recoverPasswordEmailResponse,
+  resetPasswordMock,
+  resetPasswordResponse,
   userEmailMock,
 } from './mocks/controller.mock';
 import { confirmationTokenMock } from './mocks/controller.mock';
 import { MailerService } from '@nestjs-modules/mailer';
+import { AppError } from '../../../common/errors/Error';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -37,20 +40,21 @@ describe('AuthService', () => {
         {
           provide: AuthRepository,
           useValue: {
-            validateUser: jest.fn(),
             confirmAccountEmail: jest
               .fn()
               .mockResolvedValueOnce(accountConfirmResponse),
             sendRecoverPasswordEmail: jest
               .fn()
-              .mockResolvedValueOnce(recoverPasswordEmailResponse),
-            resetPassword: jest.fn(),
+              .mockResolvedValueOnce(recoverTokenMock),
+            resetPassword: jest
+              .fn()
+              .mockResolvedValueOnce(resetPasswordResponse),
           },
         },
         {
           provide: MailerService,
           useValue: {
-            sendMail: jest.fn(),
+            sendMail: jest.fn().mockResolvedValueOnce('email sent'),
           },
         },
       ],
@@ -88,10 +92,6 @@ describe('AuthService', () => {
 
   describe('confirm email account', () => {
     it('should confirm user account email', async () => {
-      jest
-        .spyOn(authRepository, 'confirmAccountEmail')
-        .mockResolvedValueOnce(accountConfirmResponse);
-
       const result = await confirmAccountEmailService.execute(
         confirmationTokenMock,
       );
@@ -103,12 +103,6 @@ describe('AuthService', () => {
 
   describe('send recover password email', () => {
     it('should send an email with recover password instructions', async () => {
-      jest
-        .spyOn(authRepository, 'sendRecoverPasswordEmail')
-        .mockResolvedValueOnce(recoverTokenMock);
-
-      jest.spyOn(mailerService, 'sendMail').mockResolvedValueOnce('email sent');
-
       const result = await recoverPasswordService.sendRecoverPasswordEmail(
         userEmailMock,
       );
@@ -116,6 +110,33 @@ describe('AuthService', () => {
       expect(authRepository.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
       expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
       expect(result).toEqual(recoverPasswordEmailResponse);
+    });
+  });
+
+  describe('reset account password', () => {
+    it('should reset account password to a new one', async () => {
+      const result = await recoverPasswordService.resetPassword(
+        recoverTokenMock,
+        resetPasswordMock,
+      );
+
+      expect(authRepository.resetPassword).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(resetPasswordResponse);
+    });
+
+    it('should throw an error if passwordConfirmation is incorrect', async () => {
+      resetPasswordMock.passwordConfirmation = 'invalidPasswordConfirmation';
+
+      try {
+        await recoverPasswordService.resetPassword(
+          recoverTokenMock,
+          resetPasswordMock,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('passwords do not match');
+      }
     });
   });
 });
