@@ -9,6 +9,8 @@ import {
   jwtTokenMock,
   signinPayloadMock,
 } from './mocks/services.mock';
+import { accountConfirmResponse } from './mocks/controller.mock';
+import { confirmationTokenMock } from './mocks/controller.mock';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -62,7 +64,7 @@ describe('AuthService', () => {
     expect(recoverPasswordService).toBeDefined();
   });
 
-  describe('signin service', () => {
+  describe('signin', () => {
     it('should return a user token', () => {
       jest.spyOn(jwtService, 'sign').mockReturnValue(jwtTokenMock);
 
@@ -70,6 +72,21 @@ describe('AuthService', () => {
 
       expect(jwtService.sign).toHaveBeenCalledWith(jwtPayloadMock);
       expect(result).toEqual({ accessToken: jwtTokenMock });
+    });
+  });
+
+  describe('confirm email account', () => {
+    it('should confirm user account email', async () => {
+      jest
+        .spyOn(authRepository, 'confirmAccountEmail')
+        .mockResolvedValueOnce(accountConfirmResponse);
+
+      const result = await confirmAccountEmailService.execute(
+        confirmationTokenMock,
+      );
+
+      expect(authRepository.confirmAccountEmail).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(accountConfirmResponse);
     });
   });
 });
