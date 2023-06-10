@@ -128,7 +128,7 @@
                 },
                 "example": {
                   "error": {
-                    "message": "cannot create user from a local server",
+                    "message": "invalid ip address",
                     "code": "user-service.createUser",
                     "status": true
                   },
