@@ -6,9 +6,20 @@ const EMAIL = process.env.MAILER_EMAIL;
 const PASSWORD = process.env.MAILER_PASSWORD;
 const DOMAIN = process.env.MAILER_DOMAIN;
 
+const templatesDir = path.join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  'modules',
+  'utils',
+  'templates',
+);
+
 export const mailerConfig: MailerOptions = {
   template: {
-    dir: path.resolve(__dirname, '..', 'templates'),
+    dir: templatesDir,
     adapter: new HandlebarsAdapter(),
     options: {
       extName: '.hbs',
