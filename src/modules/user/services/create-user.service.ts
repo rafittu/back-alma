@@ -29,11 +29,7 @@ export class CreateUserService {
     };
 
     if (!validateIp(data.ipAddress)) {
-      throw new AppError(
-        'user-service.createUser',
-        403,
-        'cannot create user from a local server',
-      );
+      throw new AppError('user-service.createUser', 403, 'invalid ip address');
     }
 
     const user = await this.userRepository.createUser(
