@@ -13,7 +13,6 @@ import {
 import { ICreateUser, IUpdateUser } from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
-import { ipAddressToInteger } from '../../utils/helpers/helpers-user-module';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
@@ -48,7 +47,7 @@ export class UserRepository implements IUserRepository<User> {
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
-      ip_address: ipAddressToInteger(user.ipAddress),
+      ip_address: user.ipAddress,
       status: status,
     };
   }

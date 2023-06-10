@@ -110,7 +110,7 @@ describe('User Services', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(403);
-        expect(error.message).toBe('cannot create user from a local server');
+        expect(error.message).toBe('invalid ip address');
       }
     });
   });

@@ -22,7 +22,7 @@ export interface UserSecurityInfo {
   salt: string;
   confirmation_token: string;
   recover_token: string;
-  ip_address: number;
+  ip_address: string;
   status: UserStatus;
   updated_at?: string;
 }
@@ -91,8 +91,4 @@ export interface IUserRepository<User> {
   getUserById(userId: string): Promise<User>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
-  // confirmAccount(
-  //   confirmationToken: string,
-  //   status: UserStatus,
-  // ): Promise<object>;
 }
