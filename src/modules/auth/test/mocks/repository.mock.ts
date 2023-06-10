@@ -37,7 +37,7 @@ export const getUserSecurityInfoResponse = {
   password: faker.internet.password(),
   salt: faker.string.numeric(),
   recover_token: faker.string.alphanumeric(),
-  ip_address: faker.number.bigInt(),
+  ip_address: faker.internet.ip(),
   status: UserStatus.ACTIVE,
   created_at: faker.date.past(),
   updated_at: faker.date.recent(),
