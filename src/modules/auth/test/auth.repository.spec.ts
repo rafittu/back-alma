@@ -124,7 +124,7 @@ describe('Auth Repository', () => {
 
     it('should throw an error if password recover email is not sent', async () => {
       jest
-        .spyOn(prismaService.userContactInfo, 'findUnique')
+        .spyOn(prismaService.userContactInfo, 'findFirst')
         .mockResolvedValueOnce(null);
 
       try {
