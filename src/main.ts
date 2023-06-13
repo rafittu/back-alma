@@ -26,6 +26,6 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT, () => console.log('WoPhi!'));
+  await app.listen(process.env.PORT);
 }
 bootstrap();

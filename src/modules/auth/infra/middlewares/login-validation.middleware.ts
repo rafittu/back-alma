@@ -10,7 +10,7 @@ import { CredentialsDto } from '../../dto/credentials.dto';
 @Injectable()
 export class LoginValidationMiddleware implements NestMiddleware {
   async use(req: Request, _res: Response, next: NextFunction) {
-    const body = req.body;
+    const { body } = req;
 
     const loginRequestBody = new CredentialsDto();
     loginRequestBody.email = body.email;
