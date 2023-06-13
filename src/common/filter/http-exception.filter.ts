@@ -16,6 +16,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     if (exception instanceof BadRequestException) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const hold = exception.getResponse() as any;
       const message = hold?.message || exception.message;
       this.error = new AppError('bad.request', HttpStatus.BAD_REQUEST, message);
