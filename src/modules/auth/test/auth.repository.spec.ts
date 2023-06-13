@@ -83,7 +83,7 @@ describe('Auth Repository', () => {
 
     it('should throw an error if account not confirmed', async () => {
       jest
-        .spyOn(prismaService.userContactInfo, 'findUnique')
+        .spyOn(prismaService.userSecurityInfo, 'update')
         .mockRejectedValueOnce('invalid confirmation token');
 
       try {
