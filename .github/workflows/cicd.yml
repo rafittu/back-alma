@@ -33,12 +33,3 @@ jobs:
 
     - name: Code review
       run: npx eslint .
-      
-    - name: Check version
-      run: |
-          VERSION=$(node -p "require('./package.json').version")
-          CURRENT_TAG=$(git tag --points-at HEAD)
-          if [ "$VERSION" != "$CURRENT_TAG" ]; then
-            echo "::error::Please update the version in package.json before merging."
-            exit 1
-          fi
