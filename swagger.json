@@ -662,6 +662,7 @@
                   "personal": {
                     "id": "789012",
                     "firstName": "John",
+                    "lastName": "Doe",
                     "socialName": "JD",
                     "updatedAt": "2023-05-10T12:00:00Z"
                   },
