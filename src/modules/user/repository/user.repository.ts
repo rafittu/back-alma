@@ -220,6 +220,7 @@ export class UserRepository implements IUserRepository<User> {
           personal: {
             select: {
               first_name: true,
+              last_name: true,
               social_name: true,
               updated_at: true,
             },
