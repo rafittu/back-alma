@@ -15,7 +15,7 @@ A identidade de cada usuário é considerada uma "ALMA" dentro do sistema, repre
 Este projeto utiliza as seguintes tecnologias:
 
 - **Node.js** com framework **NestJS** e **TypeScript**;
-- **Prisma ORM** para comunicação e manipulação do banco de dados;
+- **Prisma ORM** para comunicação e manipulação do banco de dados **PostgreSQL**;
 - **Docker** como uma ferramenta de containerização;
 
 - **Bcrypt** e **Crypto** como ferramenta de criptografia;
