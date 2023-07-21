@@ -2,7 +2,6 @@ import {
   IsEmail,
   IsNotEmpty,
   IsOptional,
-  IsPhoneNumber,
   IsString,
   Matches,
   MaxLength,
@@ -60,7 +59,6 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  @IsPhoneNumber()
   phone: string;
 
   @IsNotEmpty()
