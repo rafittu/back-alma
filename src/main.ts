@@ -9,6 +9,8 @@ import * as SwaggerDoc from '../swagger.json';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors();
+
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
   app.use(helmet.contentSecurityPolicy());
