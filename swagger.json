@@ -523,7 +523,7 @@
         }
       }
     },
-    "/auth/account/resend-toke": {
+    "/auth/account/resend-token": {
       "patch": {
         "summary": "Resend account confirmation token",
         "description": "Endpoint to resend new account confirmation token",
