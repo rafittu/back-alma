@@ -216,5 +216,19 @@ describe('Auth Repository', () => {
       expect(prismaService.user.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockResendAccountTokenResponse);
     });
+
+    it('should throw an error if confirmation token not generated', async () => {
+      jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce(null);
+
+      try {
+        await authRepository.resendAccountToken(
+          mockPrismaUpdateConfirmationToken.id,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('Account token not generated');
+      }
+    });
   });
 });
