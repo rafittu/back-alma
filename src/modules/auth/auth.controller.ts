@@ -44,7 +44,9 @@ export class AuthController {
   }
 
   @Patch('/account/resend-token')
-  async resendAccountTokenEmail(@CurrentUser() user: UserPayload) {
+  async resendAccountTokenEmail(
+    @CurrentUser() user: UserPayload,
+  ): Promise<object> {
     const { id } = user;
     return await this.resendAccountTokenEmailService.execute(id);
   }

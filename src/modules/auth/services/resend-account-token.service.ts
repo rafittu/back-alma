@@ -12,7 +12,7 @@ export class ResendAccountTokenEmailService {
     private mailerService: MailerService,
   ) {}
 
-  async execute(id: string) {
+  async execute(id: string): Promise<object> {
     const { email, confirmationToken } =
       await this.authRepository.resendAccountToken(id);
 
