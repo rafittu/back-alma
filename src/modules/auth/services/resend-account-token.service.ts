@@ -12,11 +12,9 @@ export class ResendAccountTokenEmailService {
     private mailerService: MailerService,
   ) {}
 
-  async execute(id: string, email: string) {
-    const { confirmationToken } = await this.authRepository.resendAccountToken(
-      id,
-      email,
-    );
+  async execute(id: string) {
+    const { email, confirmationToken } =
+      await this.authRepository.resendAccountToken(id);
 
     const confirmAccountEmail = {
       to: email,
@@ -31,7 +29,7 @@ export class ResendAccountTokenEmailService {
     await this.mailerService.sendMail(confirmAccountEmail);
 
     return {
-      message: 'account confirmation token resent',
+      message: `account confirmation token resent to ${email}`,
     };
   }
 }
