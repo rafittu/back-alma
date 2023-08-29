@@ -23,6 +23,7 @@ import { CurrentUser } from './infra/decorators/current-user.decorator';
 import { ConfirmAccountEmailService } from './services/confirm-email.service';
 import { RecoverPasswordService } from './services/recover-password.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ResendAccountTokenEmailService } from './services/resend-account-token.service';
 
 @Controller('auth')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -31,6 +32,7 @@ export class AuthController {
     private readonly signInService: SignInService,
     private readonly confirmAccountEmailService: ConfirmAccountEmailService,
     private readonly recoverPasswordService: RecoverPasswordService,
+    private readonly resendAccountTokenEmailService: ResendAccountTokenEmailService,
   ) {}
 
   @isPublic()
@@ -39,6 +41,15 @@ export class AuthController {
   signIn(@Request() req: AuthRequest): UserToken {
     const { user } = req;
     return this.signInService.execute(user);
+  }
+
+  @Patch('/account/resend-token')
+  async resendAccountTokenEmail(
+    @CurrentUser() user: UserPayload,
+    @Body('email') email: string,
+  ) {
+    const { id } = user;
+    return await this.resendAccountTokenEmailService.execute(id, email);
   }
 
   @isPublic()
