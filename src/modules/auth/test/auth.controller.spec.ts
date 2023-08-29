@@ -14,12 +14,14 @@ import {
   userEmailMock,
   userPayloadMock,
 } from './mocks/controller.mock';
+import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let signInService: SignInService;
   let confirmAccountEmailService: ConfirmAccountEmailService;
   let recoverPasswordService: RecoverPasswordService;
+  let resendAccountTokenEmailService: ResendAccountTokenEmailService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -48,6 +50,12 @@ describe('AuthController', () => {
               .mockResolvedValueOnce(resetPasswordResponse),
           },
         },
+        {
+          provide: ResendAccountTokenEmailService,
+          useValue: {
+            execute: jest.fn().mockResolvedValueOnce('email sent'),
+          },
+        },
       ],
     }).compile();
 
@@ -58,6 +66,9 @@ describe('AuthController', () => {
     );
     recoverPasswordService = module.get<RecoverPasswordService>(
       RecoverPasswordService,
+    );
+    resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
+      ResendAccountTokenEmailService,
     );
   });
 
@@ -113,6 +124,15 @@ describe('AuthController', () => {
       const result = controller.getMe(userPayloadMock);
 
       expect(result).toBe(userPayloadMock);
+    });
+  });
+
+  describe('resend confirm account token email', () => {
+    it('should send an email with confirmation token', async () => {
+      const result = await controller.resendAccountTokenEmail(userPayloadMock);
+
+      expect(resendAccountTokenEmailService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual('email sent');
     });
   });
 });
