@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import {
   jwtPayloadMock,
   jwtTokenMock,
+  mockResendAccountTokenResponse,
   recoverTokenMock,
   signinPayloadMock,
 } from './mocks/services.mock';
@@ -20,12 +21,14 @@ import {
 import { confirmationTokenMock } from './mocks/controller.mock';
 import { MailerService } from '@nestjs-modules/mailer';
 import { AppError } from '../../../common/errors/Error';
+import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
 
 describe('AuthService', () => {
   let signInService: SignInService;
   let jwtService: JwtService;
   let confirmAccountEmailService: ConfirmAccountEmailService;
   let recoverPasswordService: RecoverPasswordService;
+  let resendAccountTokenEmailService: ResendAccountTokenEmailService;
 
   let authRepository: AuthRepository;
   let mailerService: MailerService;
@@ -37,6 +40,7 @@ describe('AuthService', () => {
         JwtService,
         ConfirmAccountEmailService,
         RecoverPasswordService,
+        ResendAccountTokenEmailService,
         {
           provide: AuthRepository,
           useValue: {
@@ -49,6 +53,9 @@ describe('AuthService', () => {
             resetPassword: jest
               .fn()
               .mockResolvedValueOnce(resetPasswordResponse),
+            resendAccountToken: jest
+              .fn()
+              .mockResolvedValueOnce(mockResendAccountTokenResponse),
           },
         },
         {
@@ -69,6 +76,9 @@ describe('AuthService', () => {
     recoverPasswordService = module.get<RecoverPasswordService>(
       RecoverPasswordService,
     );
+    resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
+      ResendAccountTokenEmailService,
+    );
     mailerService = module.get<MailerService>(MailerService);
   });
 
@@ -77,6 +87,7 @@ describe('AuthService', () => {
     expect(jwtService).toBeDefined();
     expect(confirmAccountEmailService).toBeDefined();
     expect(recoverPasswordService).toBeDefined();
+    expect(resendAccountTokenEmailService).toBeDefined();
   });
 
   describe('signin', () => {
@@ -137,6 +148,22 @@ describe('AuthService', () => {
         expect(error.code).toBe(400);
         expect(error.message).toBe('passwords do not match');
       }
+    });
+  });
+
+  describe('resend confirm account token email', () => {
+    it('should send an email with confirmation token', async () => {
+      const result = await resendAccountTokenEmailService.execute(
+        signinPayloadMock.id,
+      );
+
+      const response = {
+        message: `account confirmation token resent to ${mockResendAccountTokenResponse.email}`,
+      };
+
+      expect(authRepository.resendAccountToken).toHaveBeenCalledTimes(1);
+      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(response);
     });
   });
 });
