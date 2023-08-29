@@ -523,6 +523,65 @@
         }
       }
     },
+    "/auth/account/resend-toke": {
+      "patch": {
+        "summary": "Resend account confirmation token",
+        "description": "Endpoint to resend new account confirmation token",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "account confirmation token resent to user@mail.com"
+                }
+              }
+            }
+          },
+
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Account token not generated",
+                    "code": "auth-repository.resendAccountToken",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "/user/{id}": {
       "get": {
         "summary": "Get user by id",
