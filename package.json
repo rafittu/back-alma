@@ -1,6 +1,6 @@
 {
   "name": "alma",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "back-end api to manage users",
   "author": "Rafael Ribeiro",
   "private": true,
