@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
 import { IAuthRepository } from '../structure/auth-repository.structure';
@@ -154,6 +155,40 @@ export class AuthRepository implements IAuthRepository<User> {
         'auth-repository.resetPassword',
         500,
         'password not reseted',
+      );
+    }
+  }
+
+  async resendAccountToken(id: string, email: string): Promise<object> {
+    try {
+      const newConfirmationToken = crypto.randomBytes(32).toString('hex');
+
+      await this.prisma.user.update({
+        data: {
+          contact: {
+            update: {
+              email,
+            },
+          },
+          security: {
+            update: {
+              confirmation_token: newConfirmationToken,
+            },
+          },
+        },
+        where: {
+          id,
+        },
+      });
+
+      return {
+        confirmationToken: newConfirmationToken,
+      };
+    } catch (error) {
+      throw new AppError(
+        'auth-repository.resendAccountToken',
+        500,
+        'Account token not generated',
       );
     }
   }
