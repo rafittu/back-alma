@@ -44,14 +44,14 @@ export class UserController {
     return this.createUserService.execute({ ...createUserDto, ipAddress });
   }
 
-  @Get('/:id')
-  getById(@Param('id') userId: string): Promise<User> {
-    return this.getUserByIdService.execute(userId);
-  }
-
   @Get('/filter')
   getByFilter(@Query() filter: IUserFilter): Promise<User> {
     return this.getUserByFilterService.execute(filter);
+  }
+
+  @Get('/:id')
+  getById(@Param('id') userId: string): Promise<User> {
+    return this.getUserByIdService.execute(userId);
   }
 
   @Patch('/update/:id')
