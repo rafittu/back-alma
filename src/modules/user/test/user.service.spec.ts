@@ -19,12 +19,14 @@ import {
   mockUpdateUserResponse,
 } from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
+import { GetUserByFilterService } from '../services/user-by-filter.service';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
   let getUserByIdService: GetUserByIdService;
   let updateUserService: UpdateUserService;
   let deleteUserService: DeleteUserService;
+  let getUserByFilterService: GetUserByFilterService;
 
   let userRepository: UserRepository;
   let mailerService: MailerService;
@@ -36,6 +38,7 @@ describe('User Services', () => {
         GetUserByIdService,
         UpdateUserService,
         DeleteUserService,
+        GetUserByFilterService,
         {
           provide: UserRepository,
           useValue: {
@@ -43,6 +46,7 @@ describe('User Services', () => {
             getUserById: jest.fn().mockResolvedValue(mockNewUser),
             updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
             deleteUser: jest.fn().mockResolvedValue(mockDeleteUserResponse),
+            userByFilter: jest.fn().mockResolvedValue(mockNewUser),
           },
         },
         {
@@ -58,6 +62,9 @@ describe('User Services', () => {
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
     updateUserService = module.get<UpdateUserService>(UpdateUserService);
     deleteUserService = module.get<DeleteUserService>(DeleteUserService);
+    getUserByFilterService = module.get<GetUserByFilterService>(
+      GetUserByFilterService,
+    );
 
     userRepository = module.get<UserRepository>(UserRepository);
     mailerService = module.get<MailerService>(MailerService);
@@ -68,6 +75,7 @@ describe('User Services', () => {
     expect(getUserByIdService).toBeDefined();
     expect(updateUserService).toBeDefined();
     expect(deleteUserService).toBeDefined();
+    expect(getUserByFilterService).toBeDefined();
   });
 
   describe('create user', () => {
@@ -199,6 +207,36 @@ describe('User Services', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not cancelled');
+      }
+    });
+  });
+
+  describe('get user by filter', () => {
+    it('should get an user by email successfully', async () => {
+      const result = await getUserByFilterService.execute({
+        email: mockNewUser.contact.email,
+      });
+
+      expect(userRepository.userByFilter).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockNewUser);
+    });
+
+    it('should get an user by phone successfully', async () => {
+      const result = await getUserByFilterService.execute({
+        phone: mockNewUser.contact.phone,
+      });
+
+      expect(userRepository.userByFilter).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockNewUser);
+    });
+
+    it('should throw an error if user not found', async () => {
+      try {
+        await getUserByFilterService.execute({ email: undefined });
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user not found');
       }
     });
   });

@@ -12,6 +12,7 @@ import {
   mockUpdateUserResponse,
   mockDeleteUserResponse,
 } from './mocks/controller.mock';
+import { GetUserByFilterService } from '../services/user-by-filter.service';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -19,6 +20,7 @@ describe('UserController', () => {
   let getUserByIdService: GetUserByIdService;
   let updateUserService: UpdateUserService;
   let deleteUserService: DeleteUserService;
+  let getUserByFilterService: GetUserByFilterService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -48,6 +50,12 @@ describe('UserController', () => {
             execute: jest.fn().mockResolvedValue(mockDeleteUserResponse),
           },
         },
+        {
+          provide: GetUserByFilterService,
+          useValue: {
+            execute: jest.fn().mockResolvedValue(mockNewUser),
+          },
+        },
       ],
     }).compile();
 
@@ -56,6 +64,9 @@ describe('UserController', () => {
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
     updateUserService = module.get<UpdateUserService>(UpdateUserService);
     deleteUserService = module.get<DeleteUserService>(DeleteUserService);
+    getUserByFilterService = module.get<GetUserByFilterService>(
+      GetUserByFilterService,
+    );
   });
 
   it('should be defined', () => {
@@ -137,6 +148,38 @@ describe('UserController', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(controller.deleteUser(mockNewUser.id)).rejects.toThrowError();
+    });
+  });
+
+  describe('get user by filter', () => {
+    it('should get an user by email filter', async () => {
+      const result = await controller.getByFilter({
+        email: mockNewUser.contact.email,
+      });
+
+      expect(getUserByFilterService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockNewUser);
+    });
+
+    it('should get an user by phone filter', async () => {
+      const result = await controller.getByFilter({
+        phone: mockNewUser.contact.phone,
+      });
+
+      expect(getUserByFilterService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockNewUser);
+    });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(getUserByFilterService, 'execute')
+        .mockRejectedValueOnce(new Error());
+
+      expect(
+        controller.getByFilter({
+          email: mockNewUser.contact.email,
+        }),
+      ).rejects.toThrowError();
     });
   });
 });
