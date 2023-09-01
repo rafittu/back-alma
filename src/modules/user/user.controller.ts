@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseFilters,
 } from '@nestjs/common';
@@ -20,6 +21,8 @@ import { UpdateUserService } from './services/update-user.service';
 import { User } from './structure/repository.structure';
 import { DeleteUserService } from './services/delete-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
+import { GetUserByFilterService } from './services/user-by-filter.service';
+import { IUserFilter } from './structure/service.structure';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -29,6 +32,7 @@ export class UserController {
     private readonly getUserByIdService: GetUserByIdService,
     private readonly updateUserService: UpdateUserService,
     private readonly deleteUserService: DeleteUserService,
+    private readonly getUserByFilterService: GetUserByFilterService,
   ) {}
 
   @isPublic()
@@ -43,6 +47,11 @@ export class UserController {
   @Get('/:id')
   getById(@Param('id') userId: string): Promise<User> {
     return this.getUserByIdService.execute(userId);
+  }
+
+  @Get('/filter')
+  getByFilter(@Query() filter: IUserFilter): Promise<User> {
+    return this.getUserByFilterService.execute(filter);
   }
 
   @Patch('/update/:id')
