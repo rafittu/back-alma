@@ -30,3 +30,9 @@ export interface IUpdateUser {
   ipAddress?: string;
   status?: UserStatus;
 }
+
+export interface IUserFilter {
+  id?: string;
+  email?: string;
+  phone?: string;
+}

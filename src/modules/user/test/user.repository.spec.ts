@@ -240,4 +240,67 @@ describe('User Repository', () => {
       }
     });
   });
+
+  describe('get user by filter', () => {
+    it('should get a user by id successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(UnformattedUserResponse);
+
+      const result = await userRepository.userByFilter({
+        id: FormattedCreatedUser.id,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(FormattedUserResponse);
+    });
+
+    it('should get a user by email successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(UnformattedUserResponse);
+
+      const result = await userRepository.userByFilter({
+        email: FormattedCreatedUser.contact.email,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(FormattedUserResponse);
+    });
+
+    it('should get a user by phone successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(UnformattedUserResponse);
+
+      const result = await userRepository.userByFilter({
+        phone: FormattedCreatedUser.contact.phone,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(FormattedUserResponse);
+    });
+
+    it('should throw an error if user is not found', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockRejectedValueOnce(
+          new AppError(
+            'user-repository.getUserByFilter',
+            404,
+            'user not found',
+          ),
+        );
+
+      try {
+        await userRepository.userByFilter({
+          email: FormattedCreatedUser.contact.email,
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user not found');
+      }
+    });
+  });
 });
