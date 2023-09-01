@@ -20,6 +20,14 @@ export class ResendAccountTokenEmailService {
 
   async execute(id: string, email: string): Promise<object> {
     try {
+      if (!email) {
+        throw new AppError(
+          'auth-services.resendAccountToken',
+          400,
+          'Missing email parameter',
+        );
+      }
+
       const existingUser = await this.userRepository.userByFilter({ email });
 
       if (id !== existingUser.id) {
