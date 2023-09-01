@@ -10,9 +10,14 @@ import {
   UnformattedUser,
   User,
 } from '../structure/repository.structure';
-import { ICreateUser, IUpdateUser } from '../structure/service.structure';
+import {
+  ICreateUser,
+  IUpdateUser,
+  IUserFilter,
+} from '../structure/service.structure';
 import { UserStatus } from '../structure/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
@@ -296,6 +301,45 @@ export class UserRepository implements IUserRepository<User> {
         'user-repository.deleteUser',
         500,
         'user not cancelled',
+      );
+    }
+  }
+
+  async userByFilter(filter: IUserFilter): Promise<User> {
+    const { id, email, phone } = filter;
+
+    try {
+      const userQuery: Prisma.UserWhereInput = {};
+
+      id ? (userQuery.id = id) : userQuery;
+      if (email || phone) {
+        userQuery.contact = {
+          ...(email && { email }),
+          ...(phone && { phone }),
+        };
+      }
+
+      const user = await this.prisma.user.findFirst({
+        where: userQuery,
+        include: {
+          personal: true,
+          contact: true,
+          security: {
+            select: {
+              status: true,
+              updated_at: true,
+            },
+          },
+        },
+      });
+
+      const userResponse = this.formatUserResponse(user);
+      return userResponse;
+    } catch (error) {
+      throw new AppError(
+        'user-repository.getUserByFilter',
+        404,
+        'user not found',
       );
     }
   }

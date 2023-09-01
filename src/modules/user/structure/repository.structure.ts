@@ -1,4 +1,4 @@
-import { ICreateUser, IUpdateUser } from './service.structure';
+import { ICreateUser, IUpdateUser, IUserFilter } from './service.structure';
 import { UserStatus } from './user-status.enum';
 
 export interface UserPersonalInfo {
@@ -91,4 +91,5 @@ export interface IUserRepository<User> {
   getUserById(userId: string): Promise<User>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
+  userByFilter(filter: IUserFilter): Promise<User>;
 }
