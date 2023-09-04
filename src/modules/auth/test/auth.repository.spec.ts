@@ -211,6 +211,7 @@ describe('Auth Repository', () => {
 
       const result = await authRepository.resendAccountToken(
         mockPrismaUpdateConfirmationToken.id,
+        mockPrismaUpdateConfirmationToken.contact.email,
       );
 
       expect(prismaService.user.update).toHaveBeenCalledTimes(1);
@@ -223,6 +224,7 @@ describe('Auth Repository', () => {
       try {
         await authRepository.resendAccountToken(
           mockPrismaUpdateConfirmationToken.id,
+          mockPrismaUpdateConfirmationToken.contact.email,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
