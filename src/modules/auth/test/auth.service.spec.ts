@@ -33,7 +33,6 @@ describe('AuthService', () => {
   let resendAccountTokenEmailService: ResendAccountTokenEmailService;
 
   let authRepository: AuthRepository;
-  let userRepository: UserRepository;
   let mailerService: MailerService;
 
   beforeEach(async () => {
@@ -70,14 +69,13 @@ describe('AuthService', () => {
         {
           provide: MailerService,
           useValue: {
-            sendMail: jest.fn().mockResolvedValueOnce('email sent'),
+            sendMail: jest.fn(),
           },
         },
       ],
     }).compile();
 
     authRepository = module.get<AuthRepository>(AuthRepository);
-    userRepository = module.get<UserRepository>(UserRepository);
     signInService = module.get<SignInService>(SignInService);
     jwtService = module.get<JwtService>(JwtService);
     confirmAccountEmailService = module.get<ConfirmAccountEmailService>(
@@ -200,6 +198,25 @@ describe('AuthService', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(400);
         expect(error.message).toBe('The new email provided is already in use');
+      }
+    });
+
+    it('should throw an error if account confirmation email is not resend', async () => {
+      jest
+        .spyOn(mailerService, 'sendMail')
+        .mockRejectedValueOnce(new Error('Email not sent'));
+
+      try {
+        await resendAccountTokenEmailService.execute(
+          mockUser.id,
+          mockUser.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe(
+          'Failed to resend account confirmation token',
+        );
       }
     });
   });
