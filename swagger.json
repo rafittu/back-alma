@@ -708,37 +708,46 @@
                 "schema": {
                   "$ref": "#/components/schemas/User"
                 },
-                "example": {
-                  "id": "123456",
-                  "personal": {
-                    "id": "789012",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "socialName": "JD",
-                    "bornDate": "1990-01-01",
-                    "motherName": "Jane Doe",
-                    "updatedAt": "2023-05-10T12:00:00Z"
+                "examples": {
+                  "example1": {
+                    "summary": "User found",
+                    "value": {
+                      "id": "123456",
+                      "personal": {
+                        "id": "789012",
+                        "firstName": "John",
+                        "lastName": "Doe",
+                        "socialName": "JD",
+                        "bornDate": "1990-01-01",
+                        "motherName": "Jane Doe",
+                        "updatedAt": "2023-05-10T12:00:00Z"
+                      },
+                      "contact": {
+                        "id": "345678",
+                        "username": "johndoe",
+                        "email": "johndoe@example.com",
+                        "phone": "1234567890",
+                        "updatedAt": "2023-05-10T12:00:00Z"
+                      },
+                      "security": {
+                        "id": "901234",
+                        "status": "ACTIVE",
+                        "updatedAt": "2023-05-11T12:00:00Z"
+                      },
+                      "createdAt": "2023-05-10T12:00:00Z",
+                      "updatedAt": "2023-05-11T12:00:00Z"
+                    }
                   },
-                  "contact": {
-                    "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com",
-                    "phone": "1234567890",
-                    "updatedAt": "2023-05-10T12:00:00Z"
-                  },
-                  "security": {
-                    "id": "901234",
-                    "status": "ACTIVE",
-                    "updatedAt": "2023-05-11T12:00:00Z"
-                  },
-                  "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-11T12:00:00Z"
+                  "example2": {
+                    "summary": "User not found",
+                    "value": {}
+                  }
                 }
               }
             }
           },
-          "404": {
-            "description": "Not found",
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -746,7 +755,7 @@
                 },
                 "example": {
                   "error": {
-                    "message": "user not found",
+                    "message": "could not get user",
                     "code": "user-repository.userByFilter",
                     "status": true
                   },
