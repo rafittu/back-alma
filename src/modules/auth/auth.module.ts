@@ -10,6 +10,7 @@ import { LoginValidationMiddleware } from './infra/middlewares/login-validation.
 import { ConfirmAccountEmailService } from './services/confirm-email.service';
 import { RecoverPasswordService } from './services/recover-password.service';
 import { ResendAccountTokenEmailService } from './services/resend-account-token.service';
+import { UserRepository } from '../user/repository/user.repository';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ResendAccountTokenEmailService } from './services/resend-account-token.
     LocalStrategy,
     JwtStrategy,
     AuthRepository,
+    UserRepository,
     SignInService,
     ConfirmAccountEmailService,
     RecoverPasswordService,

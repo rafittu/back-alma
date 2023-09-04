@@ -10,10 +10,9 @@ export interface IAuthRepository<User> {
   ): Promise<object>;
   sendRecoverPasswordEmail(email: string): Promise<string>;
   resetPassword(recoverToken: string, password: string): Promise<object>;
-  resendAccountToken(id: string): Promise<ResendAccToken>;
+  resendAccountToken(id: string, email: string): Promise<ResendAccToken>;
 }
 
 export interface ResendAccToken {
-  email: string;
   confirmationToken: string;
 }
