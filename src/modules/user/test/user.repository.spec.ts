@@ -281,14 +281,25 @@ describe('User Repository', () => {
       expect(result).toEqual(FormattedUserResponse);
     });
 
-    it('should throw an error if user is not found', async () => {
+    it('should return null if user not found', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
+
+      const result = await userRepository.userByFilter({
+        phone: FormattedCreatedUser.contact.phone,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(null);
+    });
+
+    it('should throw an error if could not get user', async () => {
       jest
         .spyOn(prismaService.user, 'findFirst')
         .mockRejectedValueOnce(
           new AppError(
             'user-repository.getUserByFilter',
-            404,
-            'user not found',
+            500,
+            'could not get user',
           ),
         );
 
@@ -298,8 +309,8 @@ describe('User Repository', () => {
         });
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
-        expect(error.code).toBe(404);
-        expect(error.message).toBe('user not found');
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not get user');
       }
     });
   });
