@@ -45,7 +45,7 @@ export class UserController {
   }
 
   @Get('/filter')
-  getByFilter(@Query() filter: IUserFilter): Promise<User> {
+  getByFilter(@Query() filter: IUserFilter): Promise<User | null> {
     return this.getUserByFilterService.execute(filter);
   }
 

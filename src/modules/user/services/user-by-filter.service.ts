@@ -10,7 +10,7 @@ export class GetUserByFilterService {
     private userRepository: IUserRepository<User>,
   ) {}
 
-  async execute(filter: IUserFilter): Promise<User> {
+  async execute(filter: IUserFilter): Promise<User | null> {
     return await this.userRepository.userByFilter(filter);
   }
 }
