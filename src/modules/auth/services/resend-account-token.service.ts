@@ -3,8 +3,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../structure/auth-repository.structure';
 import { MailerService } from '@nestjs-modules/mailer';
-import { UserRepository } from 'src/modules/user/repository/user.repository';
-import { AppError } from 'src/common/errors/Error';
+import { UserRepository } from '../../../modules/user/repository/user.repository';
+import { AppError } from '../../../common/errors/Error';
 
 @Injectable()
 export class ResendAccountTokenEmailService {

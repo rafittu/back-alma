@@ -129,7 +129,10 @@ describe('AuthController', () => {
 
   describe('resend confirm account token email', () => {
     it('should send an email with confirmation token', async () => {
-      const result = await controller.resendAccountTokenEmail(userPayloadMock);
+      const result = await controller.resendAccountTokenEmail(
+        userPayloadMock,
+        userPayloadMock.email,
+      );
 
       expect(resendAccountTokenEmailService.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual('email sent');
