@@ -24,45 +24,41 @@ export class ResendAccountTokenEmailService {
         throw new AppError(
           'auth-services.resendAccountToken',
           400,
-          'Missing email parameter',
+          'Missing email parameter in request body',
         );
       }
 
       const existingUser = await this.userRepository.userByFilter({ email });
 
-      if (id !== existingUser.id) {
-        throw new AppError(
-          'auth-services.resendAccountToken',
-          400,
-          'The new email provided is already in use',
-        );
+      if (!existingUser || existingUser.id === id) {
+        const { confirmationToken } =
+          await this.authRepository.resendAccountToken(id, email);
+
+        const confirmAccountEmail = {
+          to: email,
+          from: 'noreply@application.com',
+          subject: 'ALMA - Email de confirmação',
+          template: 'email-confirmation',
+          context: {
+            token: confirmationToken,
+          },
+        };
+
+        await this.mailerService.sendMail(confirmAccountEmail);
+
+        return {
+          message: `account confirmation token resent to ${email}`,
+        };
       }
 
-      const { confirmationToken } =
-        await this.authRepository.resendAccountToken(id, email);
-
-      const confirmAccountEmail = {
-        to: email,
-        from: 'noreply@application.com',
-        subject: 'ALMA - Email de confirmação',
-        template: 'email-confirmation',
-        context: {
-          token: confirmationToken,
-        },
-      };
-
-      await this.mailerService.sendMail(confirmAccountEmail);
-
-      return {
-        message: `account confirmation token resent to ${email}`,
-      };
+      throw new AppError(
+        'auth-services.resendAccountToken',
+        400,
+        'The new email provided is already in use',
+      );
     } catch (error) {
       if (error instanceof AppError) {
-        throw new AppError(
-          'auth-repository.createAppointment',
-          error.code,
-          error.message,
-        );
+        throw error;
       }
 
       throw new AppError(
