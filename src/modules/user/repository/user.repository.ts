@@ -305,7 +305,7 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async userByFilter(filter: IUserFilter): Promise<User> {
+  async userByFilter(filter: IUserFilter): Promise<User | null> {
     const { id, email, phone } = filter;
 
     try {
@@ -333,13 +333,17 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
+      if (!user) {
+        return null;
+      }
+
       const userResponse = this.formatUserResponse(user);
       return userResponse;
     } catch (error) {
       throw new AppError(
         'user-repository.getUserByFilter',
-        404,
-        'user not found',
+        500,
+        'could not get user',
       );
     }
   }
