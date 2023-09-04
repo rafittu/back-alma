@@ -3,33 +3,69 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../structure/auth-repository.structure';
 import { MailerService } from '@nestjs-modules/mailer';
+import { UserRepository } from '../../../modules/user/repository/user.repository';
+import { AppError } from '../../../common/errors/Error';
 
 @Injectable()
 export class ResendAccountTokenEmailService {
   constructor(
     @Inject(AuthRepository)
     private authRepository: IAuthRepository<User>,
+
+    @Inject(UserRepository)
+    private userRepository: UserRepository,
+
     private mailerService: MailerService,
   ) {}
 
-  async execute(id: string): Promise<object> {
-    const { email, confirmationToken } =
-      await this.authRepository.resendAccountToken(id);
+  async execute(id: string, email: string): Promise<object> {
+    try {
+      if (!email) {
+        throw new AppError(
+          'auth-services.resendAccountToken',
+          400,
+          'Missing email parameter in request body',
+        );
+      }
 
-    const confirmAccountEmail = {
-      to: email,
-      from: 'noreply@application.com',
-      subject: 'ALMA - Email de confirmação',
-      template: 'email-confirmation',
-      context: {
-        token: confirmationToken,
-      },
-    };
+      const existingUser = await this.userRepository.userByFilter({ email });
 
-    await this.mailerService.sendMail(confirmAccountEmail);
+      if (!existingUser || existingUser.id === id) {
+        const { confirmationToken } =
+          await this.authRepository.resendAccountToken(id, email);
 
-    return {
-      message: `account confirmation token resent to ${email}`,
-    };
+        const confirmAccountEmail = {
+          to: email,
+          from: 'noreply@application.com',
+          subject: 'ALMA - Email de confirmação',
+          template: 'email-confirmation',
+          context: {
+            token: confirmationToken,
+          },
+        };
+
+        await this.mailerService.sendMail(confirmAccountEmail);
+
+        return {
+          message: `account confirmation token resent to ${email}`,
+        };
+      }
+
+      throw new AppError(
+        'auth-services.resendAccountToken',
+        400,
+        'The new email provided is already in use',
+      );
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new AppError(
+        'auth-services.resendAccountToken',
+        500,
+        'Failed to resend account confirmation token',
+      );
+    }
   }
 }

@@ -15,6 +15,7 @@ export const UnformattedCreatedUser = {
   contact: {
     username: faker.internet.userName(),
     email: faker.internet.email(),
+    phone: faker.phone.number(),
   },
   security: {
     confirmation_token: faker.string.alphanumeric(),
@@ -35,6 +36,7 @@ export const FormattedCreatedUser: User = {
     id: UnformattedCreatedUser.user_contact_info_id,
     username: UnformattedCreatedUser.contact.username,
     email: UnformattedCreatedUser.contact.email,
+    phone: UnformattedCreatedUser.contact.phone,
   },
   security: {
     id: UnformattedCreatedUser.user_security_info_id,

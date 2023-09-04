@@ -162,28 +162,29 @@ export class AuthRepository implements IAuthRepository<User> {
     }
   }
 
-  async resendAccountToken(id: string): Promise<ResendAccToken> {
+  async resendAccountToken(id: string, email: string): Promise<ResendAccToken> {
     try {
       const newConfirmationToken = crypto.randomBytes(32).toString('hex');
 
-      const { contact } = await this.prisma.user.update({
+      await this.prisma.user.update({
         data: {
           security: {
             update: {
               confirmation_token: newConfirmationToken,
             },
           },
+          contact: {
+            update: {
+              email,
+            },
+          },
         },
         where: {
           id,
         },
-        select: {
-          contact: true,
-        },
       });
 
       return {
-        email: contact.email,
         confirmationToken: newConfirmationToken,
       };
     } catch (error) {
