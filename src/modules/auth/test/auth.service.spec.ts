@@ -189,5 +189,18 @@ describe('AuthService', () => {
         expect(error.message).toBe('Missing email parameter in request body');
       }
     });
+
+    it('should throw an error if new email provided is already in user', async () => {
+      try {
+        await resendAccountTokenEmailService.execute(
+          mockUser.personal.id,
+          mockUser.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('The new email provided is already in use');
+      }
+    });
   });
 });
