@@ -14,23 +14,12 @@ export const getUserCredentialsResponse = {
   user_personal_info_id: faker.string.uuid(),
   user_contact_info_id: faker.string.uuid(),
   user_security_info_id: faker.string.uuid(),
-  // username: faker.internet.userName(),
-  // email: userCredentialsMock.email,
-  // phone: faker.phone.number(),
   contact: {
     username: faker.internet.userName(),
   },
   security: {
     password: userCredentialsMock.password,
   },
-  // User: [
-  //   {
-  //     id: faker.string.uuid(),
-  //     security: {
-  //       password: faker.internet.password(),
-  //     },
-  //   },
-  // ],
   created_at: faker.date.past(),
   updated_at: faker.date.recent(),
 };
@@ -41,37 +30,37 @@ export const validatedUserMockResponse: UserPayload = {
   username: getUserCredentialsResponse.contact.username,
 };
 
-// export const getUserSecurityInfoResponse = {
-//   id: faker.string.uuid(),
-//   confirmation_token: faker.string.alphanumeric(),
-//   password: faker.internet.password(),
-//   salt: faker.string.numeric(),
-//   recover_token: faker.string.alphanumeric(),
-//   ip_address: faker.internet.ip(),
-//   status: UserStatus.ACTIVE,
-//   created_at: faker.date.past(),
-//   updated_at: faker.date.recent(),
-// };
+export const getUserSecurityInfoResponse = {
+  id: faker.string.uuid(),
+  confirmation_token: faker.string.alphanumeric(),
+  password: faker.internet.password(),
+  salt: faker.string.numeric(),
+  recover_token: faker.string.alphanumeric(),
+  ip_address: faker.internet.ip(),
+  status: UserStatus.ACTIVE,
+  created_at: faker.date.past(),
+  updated_at: faker.date.recent(),
+};
 
-// export const mockPrismaUpdateConfirmationToken = {
-//   id: faker.string.uuid(),
-//   user_personal_info_id: faker.string.uuid(),
-//   user_contact_info_id: faker.string.uuid(),
-//   user_security_info_id: faker.string.uuid(),
-//   contact: {
-//     id: faker.string.uuid(),
-//     username: faker.internet.userName(),
-//     email: userCredentialsMock.email,
-//     phone: faker.phone.number(),
-//     created_at: faker.date.past(),
-//     updated_at: faker.date.recent(),
-//   },
-//   created_at: faker.date.past(),
-//   updated_at: faker.date.recent(),
-// };
+export const mockPrismaUpdateConfirmationToken = {
+  id: faker.string.uuid(),
+  user_personal_info_id: faker.string.uuid(),
+  user_contact_info_id: faker.string.uuid(),
+  user_security_info_id: faker.string.uuid(),
+  contact: {
+    id: faker.string.uuid(),
+    username: faker.internet.userName(),
+    email: userCredentialsMock.email,
+    phone: faker.phone.number(),
+    created_at: faker.date.past(),
+    updated_at: faker.date.recent(),
+  },
+  created_at: faker.date.past(),
+  updated_at: faker.date.recent(),
+};
 
-// export const mockConfirmationToken = faker.string.alphanumeric();
+export const mockConfirmationToken = faker.string.alphanumeric();
 
-// export const mockResendAccountTokenResponse: ResendAccToken = {
-//   confirmationToken: mockConfirmationToken,
-// };
+export const mockResendAccountTokenResponse: ResendAccToken = {
+  confirmationToken: mockConfirmationToken,
+};

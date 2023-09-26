@@ -4,10 +4,10 @@ import * as bcrypt from 'bcrypt';
 import { AuthRepository } from '../repository/auth.repository';
 import {
   getUserCredentialsResponse,
-  // getUserSecurityInfoResponse,
-  // mockConfirmationToken,
-  // mockPrismaUpdateConfirmationToken,
-  // mockResendAccountTokenResponse,
+  getUserSecurityInfoResponse,
+  mockConfirmationToken,
+  mockPrismaUpdateConfirmationToken,
+  mockResendAccountTokenResponse,
   userCredentialsMock,
   validatedUserMockResponse,
 } from './mocks/repository.mock';
@@ -67,168 +67,166 @@ describe('Auth Repository', () => {
     });
   });
 
-  // describe('confirm account email', () => {
-  //   it('should validate user email account successfully', async () => {
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'update')
-  //       .mockResolvedValueOnce(null);
+  describe('confirm account email', () => {
+    it('should validate user email account successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
 
-  //     const result = await authRepository.confirmAccountEmail(
-  //       confirmationTokenMock,
-  //       UserStatus.ACTIVE,
-  //     );
+      const result = await authRepository.confirmAccountEmail(
+        confirmationTokenMock,
+        UserStatus.ACTIVE,
+      );
 
-  //     expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(accountConfirmResponse);
-  //   });
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(accountConfirmResponse);
+    });
 
-  //   it('should throw an error if account not confirmed', async () => {
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'update')
-  //       .mockRejectedValueOnce('invalid confirmation token');
+    it('should throw an error if account not confirmed', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockRejectedValueOnce('invalid confirmation token');
 
-  //     try {
-  //       await authRepository.confirmAccountEmail(
-  //         confirmationTokenMock,
-  //         UserStatus.ACTIVE,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(500);
-  //       expect(error.message).toBe('Account not confirmed');
-  //     }
-  //   });
-  // });
+      try {
+        await authRepository.confirmAccountEmail(
+          confirmationTokenMock,
+          UserStatus.ACTIVE,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('Account not confirmed');
+      }
+    });
+  });
 
-  // describe('send recover password email', () => {
-  //   it('should return an user recover token successfully', async () => {
-  //     jest
-  //       .spyOn(prismaService.userContactInfo, 'findFirst')
-  //       .mockResolvedValueOnce(getUserCredentialsResponse);
+  describe('send recover password email', () => {
+    it('should return an user recover token successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(getUserCredentialsResponse);
 
-  //     jest
-  //       .spyOn(Crypto, 'randomBytes')
-  //       .mockReturnValueOnce(recoverTokenMock as never);
+      jest
+        .spyOn(Crypto, 'randomBytes')
+        .mockReturnValueOnce(recoverTokenMock as never);
 
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'update')
-  //       .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
 
-  //     const result = await authRepository.sendRecoverPasswordEmail(
-  //       userEmailMock,
-  //     );
+      const result = await authRepository.sendRecoverPasswordEmail(
+        userEmailMock,
+      );
 
-  //     expect(prismaService.userContactInfo.findFirst).toHaveBeenCalledTimes(1);
-  //     expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(recoverTokenMock);
-  //   });
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(recoverTokenMock);
+    });
 
-  //   it('should throw an error if password recover email is not sent', async () => {
-  //     jest
-  //       .spyOn(prismaService.userContactInfo, 'findFirst')
-  //       .mockResolvedValueOnce(null);
+    it('should throw an error if password recover email is not sent', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
 
-  //     try {
-  //       await authRepository.sendRecoverPasswordEmail(userEmailMock);
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(404);
-  //       expect(error.message).toBe('user with this email not found');
-  //     }
-  //   });
-  // });
+      try {
+        await authRepository.sendRecoverPasswordEmail(userEmailMock);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user with this email not found');
+      }
+    });
+  });
 
-  // describe('reset password', () => {
-  //   it('should reset user account password', async () => {
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'findFirst')
-  //       .mockResolvedValueOnce(getUserSecurityInfoResponse);
+  describe('reset password', () => {
+    it('should reset user account password', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(getUserSecurityInfoResponse);
 
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'update')
-  //       .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
 
-  //     const result = await authRepository.resetPassword(
-  //       recoverTokenMock,
-  //       userCredentialsMock.password,
-  //     );
+      const result = await authRepository.resetPassword(
+        recoverTokenMock,
+        userCredentialsMock.password,
+      );
 
-  //     expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
-  //     expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(resetPasswordResponse);
-  //   });
+      expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(resetPasswordResponse);
+    });
 
-  //   it('should throw an error if recover token is invalid', async () => {
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'findFirst')
-  //       .mockResolvedValueOnce(null);
+    it('should throw an error if recover token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(null);
 
-  //     try {
-  //       await authRepository.resetPassword(
-  //         recoverTokenMock,
-  //         userCredentialsMock.password,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(404);
-  //       expect(error.message).toBe('invalid recover token');
-  //     }
-  //   });
+      try {
+        await authRepository.resetPassword(
+          recoverTokenMock,
+          userCredentialsMock.password,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('invalid recover token');
+      }
+    });
 
-  //   it('should throw an error if password not reseted', async () => {
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'findFirst')
-  //       .mockResolvedValueOnce(getUserSecurityInfoResponse);
+    it('should throw an error if password not reseted', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(getUserSecurityInfoResponse);
 
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'update')
-  //       .mockRejectedValueOnce('user not updated');
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockRejectedValueOnce('user not updated');
 
-  //     try {
-  //       await authRepository.resetPassword(
-  //         recoverTokenMock,
-  //         userCredentialsMock.password,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(500);
-  //       expect(error.message).toBe('password not reseted');
-  //     }
-  //   });
-  // });
+      try {
+        await authRepository.resetPassword(
+          recoverTokenMock,
+          userCredentialsMock.password,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('password not reseted');
+      }
+    });
+  });
 
-  // describe('resend confirm account token email', () => {
-  //   it('should send an email with confirmation token', async () => {
-  //     jest
-  //       .spyOn(prismaService.user, 'update')
-  //       .mockResolvedValueOnce(mockPrismaUpdateConfirmationToken);
+  describe('resend confirm account token email', () => {
+    it('should send an email with confirmation token', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockResolvedValueOnce(mockPrismaUpdateConfirmationToken);
 
-  //     jest
-  //       .spyOn(Crypto, 'randomBytes')
-  //       .mockReturnValueOnce(mockConfirmationToken as never);
+      jest
+        .spyOn(Crypto, 'randomBytes')
+        .mockReturnValueOnce(mockConfirmationToken as never);
 
-  //     const result = await authRepository.resendAccountToken(
-  //       mockPrismaUpdateConfirmationToken.id,
-  //       mockPrismaUpdateConfirmationToken.contact.email,
-  //     );
+      const result = await authRepository.resendAccountToken(
+        mockPrismaUpdateConfirmationToken.id,
+        mockPrismaUpdateConfirmationToken.contact.email,
+      );
 
-  //     expect(prismaService.user.update).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(mockResendAccountTokenResponse);
-  //   });
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockResendAccountTokenResponse);
+    });
 
-  //   it('should throw an error if confirmation token not generated', async () => {
-  //     jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce(null);
+    it('should throw an error if confirmation token not generated', async () => {
+      jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce(null);
 
-  //     try {
-  //       await authRepository.resendAccountToken(
-  //         mockPrismaUpdateConfirmationToken.id,
-  //         mockPrismaUpdateConfirmationToken.contact.email,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(500);
-  //       expect(error.message).toBe('Account token not generated');
-  //     }
-  //   });
-  // });
+      try {
+        await authRepository.resendAccountToken(
+          mockPrismaUpdateConfirmationToken.id,
+          mockPrismaUpdateConfirmationToken.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('Account token not generated');
+      }
+    });
+  });
 });
