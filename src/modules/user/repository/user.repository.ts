@@ -52,17 +52,17 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   private async formatSecurityInfo(
-    user: IUpdateUser,
+    { password, ipAddress }: IUpdateUser,
     status: UserStatus,
   ): Promise<UserSecurityInfo> {
     const salt = await bcrypt.genSalt();
 
     return {
-      password: await bcrypt.hash(user.password, salt),
+      password: await bcrypt.hash(password, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
-      ip_address: user.ipAddress,
+      ip_address: ipAddress,
       status: status,
     };
   }
