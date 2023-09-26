@@ -20,20 +20,20 @@ export class AuthRepository implements IAuthRepository<User> {
   async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
     const { email, password } = credentials;
 
-    const userData = await this.prisma.userContactInfo.findUnique({
+    const userData = await this.prisma.user.findFirst({
       where: {
-        email,
+        contact: { email },
       },
       select: {
-        username: true,
-        User: {
+        id: true,
+        contact: {
           select: {
-            id: true,
-            security: {
-              select: {
-                password: true,
-              },
-            },
+            username: true,
+          },
+        },
+        security: {
+          select: {
+            password: true,
           },
         },
       },
@@ -42,15 +42,13 @@ export class AuthRepository implements IAuthRepository<User> {
     if (userData) {
       const isPasswordValid = await bcrypt.compare(
         password,
-        userData.User[0].security.password,
+        userData.security.password,
       );
 
       if (isPasswordValid) {
-        delete userData.User[0].security;
-
         return {
-          id: userData.User[0].id,
-          username: userData.username,
+          id: userData.id,
+          username: userData.contact.username,
           email,
         };
       }
@@ -91,18 +89,14 @@ export class AuthRepository implements IAuthRepository<User> {
   }
 
   async sendRecoverPasswordEmail(email: string): Promise<string> {
-    const userContactInfo = await this.prisma.userContactInfo.findFirst({
-      where: { email },
-      include: {
-        User: {
-          select: {
-            user_security_info_id: true,
-          },
-        },
+    const userSecurityInfo = await this.prisma.user.findFirst({
+      where: { contact: { email } },
+      select: {
+        user_security_info_id: true,
       },
     });
 
-    if (!userContactInfo) {
+    if (!userSecurityInfo) {
       throw new AppError(
         'auth-repository.sendRecoverPasswordEmail',
         404,
@@ -116,7 +110,7 @@ export class AuthRepository implements IAuthRepository<User> {
         recover_token: userRecoverToken,
       },
       where: {
-        id: userContactInfo.User[0].user_security_info_id,
+        id: userSecurityInfo.user_security_info_id,
       },
     });
 

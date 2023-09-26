@@ -11,25 +11,23 @@ export const userCredentialsMock: CredentialsDto = {
 
 export const getUserCredentialsResponse = {
   id: faker.string.uuid(),
-  username: faker.internet.userName(),
-  email: userCredentialsMock.email,
-  phone: faker.phone.number(),
-  User: [
-    {
-      id: faker.string.uuid(),
-      security: {
-        password: faker.internet.password(),
-      },
-    },
-  ],
+  user_personal_info_id: faker.string.uuid(),
+  user_contact_info_id: faker.string.uuid(),
+  user_security_info_id: faker.string.uuid(),
+  contact: {
+    username: faker.internet.userName(),
+  },
+  security: {
+    password: userCredentialsMock.password,
+  },
   created_at: faker.date.past(),
   updated_at: faker.date.recent(),
 };
 
 export const validatedUserMockResponse: UserPayload = {
-  id: getUserCredentialsResponse.User[0].id,
-  email: getUserCredentialsResponse.email,
-  username: getUserCredentialsResponse.username,
+  id: getUserCredentialsResponse.id,
+  email: userCredentialsMock.email,
+  username: getUserCredentialsResponse.contact.username,
 };
 
 export const getUserSecurityInfoResponse = {
