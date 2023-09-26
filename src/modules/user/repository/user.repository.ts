@@ -23,36 +23,46 @@ import { Prisma } from '@prisma/client';
 export class UserRepository implements IUserRepository<User> {
   constructor(private prisma: PrismaService) {}
 
-  private formatPersonalInfo(user: IUpdateUser): UserPersonalInfo {
+  private formatPersonalInfo({
+    firstName,
+    lastName,
+    socialName,
+    bornDate,
+    motherName,
+  }: IUpdateUser): UserPersonalInfo {
     return {
-      first_name: user.firstName,
-      last_name: user.lastName,
-      social_name: user.socialName ? user.socialName : null,
-      born_date: user.bornDate,
-      mother_name: user.motherName,
+      first_name: firstName,
+      last_name: lastName,
+      social_name: socialName || null,
+      born_date: bornDate,
+      mother_name: motherName,
     };
   }
 
-  private formatContactInfo(user: IUpdateUser): UserContactInfo {
+  private formatContactInfo({
+    username,
+    email,
+    phone,
+  }: IUpdateUser): UserContactInfo {
     return {
-      username: user.username ? user.username : null,
-      email: user.email,
-      phone: user.phone ? user.phone : null,
+      username: username || null,
+      email: email,
+      phone: phone || null,
     };
   }
 
   private async formatSecurityInfo(
-    user: IUpdateUser,
+    { password, ipAddress }: IUpdateUser,
     status: UserStatus,
   ): Promise<UserSecurityInfo> {
     const salt = await bcrypt.genSalt();
 
     return {
-      password: await bcrypt.hash(user.password, salt),
+      password: await bcrypt.hash(password, salt),
       salt,
       confirmation_token: crypto.randomBytes(32).toString('hex'),
       recover_token: null,
-      ip_address: user.ipAddress,
+      ip_address: ipAddress,
       status: status,
     };
   }
