@@ -43,21 +43,19 @@ describe('Auth Repository', () => {
   describe('validate user', () => {
     it('should validate user credentials successfully', async () => {
       jest
-        .spyOn(prismaService.userContactInfo, 'findUnique')
+        .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(getUserCredentialsResponse);
 
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
       const result = await authRepository.validateUser(userCredentialsMock);
 
-      expect(prismaService.userContactInfo.findUnique).toHaveBeenCalledTimes(1);
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
       expect(result).toEqual(validatedUserMockResponse);
     });
 
     it('should throw an error if email or password is invalid', async () => {
-      jest
-        .spyOn(prismaService.userContactInfo, 'findUnique')
-        .mockReturnValueOnce(null);
+      jest.spyOn(prismaService.user, 'findFirst').mockReturnValueOnce(null);
 
       try {
         await authRepository.validateUser(userCredentialsMock);
@@ -105,7 +103,7 @@ describe('Auth Repository', () => {
   describe('send recover password email', () => {
     it('should return an user recover token successfully', async () => {
       jest
-        .spyOn(prismaService.userContactInfo, 'findFirst')
+        .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(getUserCredentialsResponse);
 
       jest
@@ -120,15 +118,13 @@ describe('Auth Repository', () => {
         userEmailMock,
       );
 
-      expect(prismaService.userContactInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(recoverTokenMock);
     });
 
     it('should throw an error if password recover email is not sent', async () => {
-      jest
-        .spyOn(prismaService.userContactInfo, 'findFirst')
-        .mockResolvedValueOnce(null);
+      jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
 
       try {
         await authRepository.sendRecoverPasswordEmail(userEmailMock);
