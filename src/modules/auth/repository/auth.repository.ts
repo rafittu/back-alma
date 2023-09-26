@@ -20,20 +20,20 @@ export class AuthRepository implements IAuthRepository<User> {
   async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
     const { email, password } = credentials;
 
-    const userData = await this.prisma.userContactInfo.findUnique({
+    const userData = await this.prisma.user.findFirst({
       where: {
-        email,
+        contact: { email },
       },
       select: {
-        username: true,
-        User: {
+        id: true,
+        contact: {
           select: {
-            id: true,
-            security: {
-              select: {
-                password: true,
-              },
-            },
+            username: true,
+          },
+        },
+        security: {
+          select: {
+            password: true,
           },
         },
       },
@@ -42,15 +42,13 @@ export class AuthRepository implements IAuthRepository<User> {
     if (userData) {
       const isPasswordValid = await bcrypt.compare(
         password,
-        userData.User[0].security.password,
+        userData.security.password,
       );
 
       if (isPasswordValid) {
-        delete userData.User[0].security;
-
         return {
-          id: userData.User[0].id,
-          username: userData.username,
+          id: userData.id,
+          username: userData.contact.username,
           email,
         };
       }
