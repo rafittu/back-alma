@@ -39,11 +39,15 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
-  private formatContactInfo(user: IUpdateUser): UserContactInfo {
+  private formatContactInfo({
+    username,
+    email,
+    phone,
+  }: IUpdateUser): UserContactInfo {
     return {
-      username: user.username ? user.username : null,
-      email: user.email,
-      phone: user.phone ? user.phone : null,
+      username: username || null,
+      email: email,
+      phone: phone || null,
     };
   }
 
