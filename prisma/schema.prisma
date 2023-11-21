@@ -7,13 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum OriginChannel {
-  WOPHI
-  LUMIN
-  MIAU
-}
-
-enum AllowedPlatform {
+enum Channel {
   WOPHI
   LUMIN
   MIAU
@@ -73,12 +67,12 @@ model UserSecurityInfo {
 }
 
 model User {
-  id                    String            @id @unique @default(uuid()) @db.Uuid
-  user_personal_info_id String            @db.Uuid
-  user_contact_info_id  String            @db.Uuid
-  user_security_info_id String            @db.Uuid
-  origin_channel        OriginChannel
-  allowed_platforms     AllowedPlatform[]
+  id                    String    @id @unique @default(uuid()) @db.Uuid
+  user_personal_info_id String    @db.Uuid
+  user_contact_info_id  String    @db.Uuid
+  user_security_info_id String    @db.Uuid
+  origin_channel        Channel
+  allowed_channels      Channel[]
 
   created_at DateTime         @default(now())
   updated_at DateTime         @updatedAt()
