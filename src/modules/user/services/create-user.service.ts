@@ -94,11 +94,12 @@ export class CreateUserService {
 
       const user = await this.userRepository.createUser({
         ...data,
-        ipAddress,
+        ipAddressOrigin: ipAddress,
+        onUpdateIpAddress: ipAddress,
         password,
         salt,
         confirmationToken,
-        allowedChannels: data.originChannel,
+        allowedChannels: [data.originChannel],
         status: UserStatus.PENDING_CONFIRMATION,
       });
 
