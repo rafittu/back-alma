@@ -4,7 +4,7 @@ import { UserStatus } from './user-status.enum';
 export interface UserPersonalInfo {
   first_name: string;
   last_name: string;
-  social_name: string;
+  social_name?: string;
   born_date: string;
   mother_name: string;
   updated_at?: string;
@@ -22,7 +22,8 @@ export interface UserSecurityInfo {
   salt: string;
   confirmation_token: string;
   recover_token: string;
-  ip_address: string;
+  ip_address_origin: string;
+  on_update_ip_address: string;
   status: UserStatus;
   updated_at?: string;
 }
@@ -58,36 +59,36 @@ export interface UnformattedUser {
   updated_at: Date;
 }
 
-export interface User {
-  id: string;
-  personal: {
-    id: string;
-    firstName: string;
-    lastName?: string;
-    socialName: string;
-    bornDate?: string;
-    motherName?: string;
-    updatedAt?: Date;
-  };
-  contact: {
-    id: string;
-    username: string;
-    email: string;
-    phone?: string;
-    updatedAt?: Date;
-  };
-  security: {
-    id: string;
-    confirmationToken?: string;
-    status: string;
-    updatedAt?: Date;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
+// export interface User {
+//   id: string;
+//   personal: {
+//     id: string;
+//     firstName: string;
+//     lastName?: string;
+//     socialName: string;
+//     bornDate?: string;
+//     motherName?: string;
+//     updatedAt?: Date;
+//   };
+//   contact: {
+//     id: string;
+//     username: string;
+//     email: string;
+//     phone?: string;
+//     updatedAt?: Date;
+//   };
+//   security: {
+//     id: string;
+//     confirmationToken?: string;
+//     status: string;
+//     updatedAt?: Date;
+//   };
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
 
 export interface IUserRepository<User> {
-  createUser(data: ICreateUser, status: UserStatus): Promise<User>;
+  createUser(data: ICreateUser): Promise<User>;
   getUserById(userId: string): Promise<User>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
