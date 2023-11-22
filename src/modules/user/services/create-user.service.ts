@@ -109,6 +109,10 @@ export class CreateUserService {
 
       return this.mapUserToReturn(data, user, UserStatus.PENDING_CONFIRMATION);
     } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
       throw new AppError(
         'user-service.createUser',
         500,
