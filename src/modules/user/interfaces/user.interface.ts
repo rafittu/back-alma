@@ -35,9 +35,12 @@ export interface ICreateUser {
   email: string;
   phone: string;
   password: string;
-  passwordConfirmation: string;
+  salt: string;
+  confirmationToken: string;
   ipAddress: string;
   originChannel: string;
+  allowedChannels: string;
+  status: string;
 }
 
 export interface IUpdateUser {

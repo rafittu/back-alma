@@ -5,7 +5,6 @@ import { UserRepository } from '../repository/user.repository';
 import { IUserRepository } from '../interfaces/repository.interface';
 import { UserStatus } from '../interfaces/user-status.enum';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { ICreateUser, IUser } from '../interfaces/user.interface';
 import { EmailService } from './email.service';
 import { User } from '@prisma/client';
 
@@ -19,6 +18,46 @@ export class CreateUserService {
 
   private validateIpAddress(ip: string): boolean {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  private mapUserToReturn(
+    {
+      firstName,
+      lastName,
+      socialName,
+      bornDate,
+      motherName,
+      username,
+      email,
+      phone,
+    }: CreateUserDto,
+    user: User,
+    status: string,
+  ): IUser {
+    return {
+      id: user.id,
+      personal: {
+        id: user.user_personal_info_id,
+        firstName,
+        lastName,
+        socialName,
+        bornDate,
+        motherName,
+      },
+      contact: {
+        id: user.user_contact_info_id,
+        username,
+        email,
+        phone,
+      },
+      security: {
+        id: user.user_security_info_id,
+        status,
+      },
+      allowedChannels: user.allowed_channels,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
+    };
   }
 
   async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
@@ -45,10 +84,10 @@ export class CreateUserService {
 
       await this.emailService.sendConfirmationEmail(
         data.email,
-        user.confirmationToken,
+        confirmationToken,
       );
 
-      return user;
+      return this.mapUserToReturn(data, user, UserStatus.PENDING_CONFIRMATION);
     } catch (error) {
       throw new AppError(
         'user-service.createUser',
