@@ -22,7 +22,7 @@ import { User } from './interfaces/repository.interface';
 import { DeleteUserService } from './services/delete-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';
-import { IUserFilter } from './interfaces/user.interface';
+import { IUser, IUserFilter } from './interfaces/user.interface';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -37,7 +37,7 @@ export class UserController {
 
   @isPublic()
   @Post('/signup')
-  create(@Req() req: Request, @Body() body: CreateUserDto): Promise<User> {
+  create(@Req() req: Request, @Body() body: CreateUserDto): Promise<IUser> {
     const createUserDto = body;
     const ipAddress = req.socket.remoteAddress;
 

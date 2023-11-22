@@ -1,5 +1,30 @@
 import { UserStatus } from './user-status.enum';
 
+export interface IUser {
+  id: string;
+  personal: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    socialName?: string;
+    bornDate: string;
+    motherName: string;
+  };
+  contact: {
+    id: string;
+    username?: string;
+    email: string;
+    phone: string;
+  };
+  security: {
+    id: string;
+    status: string;
+  };
+  allowedChannels: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ICreateUser {
   firstName: string;
   lastName: string;
