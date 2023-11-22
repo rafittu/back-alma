@@ -1,7 +1,10 @@
+import { Channel } from '@prisma/client';
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString,
   Matches,
   MaxLength,
@@ -57,8 +60,9 @@ export class CreateUserDto {
   )
   email: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
+  @IsPhoneNumber('BR')
   phone: string;
 
   @IsNotEmpty()
@@ -77,4 +81,9 @@ export class CreateUserDto {
     message: 'passwords doesnt match',
   })
   passwordConfirmation: string;
+
+  @IsNotEmpty()
+  @IsEnum(Channel, { each: true })
+  @IsString()
+  originChannel: Channel;
 }
