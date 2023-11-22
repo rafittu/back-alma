@@ -1,4 +1,4 @@
-import { ICreateUser, IUpdateUser, IUserFilter } from './service.structure';
+import { ICreateUser, IUpdateUser, IUserFilter } from './user.interface';
 import { UserStatus } from './user-status.enum';
 
 export interface UserPersonalInfo {

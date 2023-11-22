@@ -1,6 +1,6 @@
 import { User } from '.prisma/client';
 import { Inject, Injectable } from '@nestjs/common';
-import { UserStatus } from '../../user/structure/user-status.enum';
+import { UserStatus } from '../../user/interfaces/user-status.enum';
 import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../structure/auth-repository.structure';
 

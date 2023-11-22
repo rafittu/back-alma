@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { UserStatus } from '../../structure/user-status.enum';
-import { User } from '../../structure/repository.structure';
+import { UserStatus } from '../../interfaces/user-status.enum';
+import { User } from '../../interfaces/repository.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
 export const UnformattedCreatedUser = {

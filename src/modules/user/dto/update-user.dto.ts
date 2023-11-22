@@ -10,7 +10,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UserStatus } from '../structure/user-status.enum';
+import { UserStatus } from '../interfaces/user-status.enum';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()

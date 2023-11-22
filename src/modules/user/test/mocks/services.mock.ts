@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { ICreateUser } from '../../structure/service.structure';
+import { ICreateUser } from '../../interfaces/user.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
 export const mockCreateUser: ICreateUser = {

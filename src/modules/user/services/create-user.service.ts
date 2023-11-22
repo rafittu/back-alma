@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ipv4Regex, ipv6Regex } from '../../utils/helpers/helpers-user-module';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../structure/repository.structure';
-import { ICreateUser } from '../structure/service.structure';
-import { UserStatus } from '../structure/user-status.enum';
+import { IUserRepository, User } from '../interfaces/repository.interface';
+import { ICreateUser } from '../interfaces/user.interface';
+import { UserStatus } from '../interfaces/user-status.enum';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()

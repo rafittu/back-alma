@@ -12,7 +12,7 @@ import {
   validatedUserMockResponse,
 } from './mocks/repository.mock';
 import { AppError } from '../../../common/errors/Error';
-import { UserStatus } from '../../user/structure/user-status.enum';
+import { UserStatus } from '../../user/interfaces/user-status.enum';
 import {
   accountConfirmResponse,
   confirmationTokenMock,
@@ -114,9 +114,8 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.userSecurityInfo, 'update')
         .mockResolvedValueOnce(null);
 
-      const result = await authRepository.sendRecoverPasswordEmail(
-        userEmailMock,
-      );
+      const result =
+        await authRepository.sendRecoverPasswordEmail(userEmailMock);
 
       expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);

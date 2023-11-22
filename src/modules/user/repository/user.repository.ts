@@ -9,13 +9,13 @@ import {
   UserSecurityInfo,
   UnformattedUser,
   User,
-} from '../structure/repository.structure';
+} from '../interfaces/repository.interface';
 import {
   ICreateUser,
   IUpdateUser,
   IUserFilter,
-} from '../structure/service.structure';
-import { UserStatus } from '../structure/user-status.enum';
+} from '../interfaces/user.interface';
+import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { Prisma } from '@prisma/client';
 

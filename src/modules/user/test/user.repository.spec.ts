@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../prisma.service';
-import { UserStatus } from '../structure/user-status.enum';
+import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
 import { mockCreateUser, mockUpdateUserEmail } from './mocks/services.mock';
