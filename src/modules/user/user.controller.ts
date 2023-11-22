@@ -38,10 +38,9 @@ export class UserController {
   @isPublic()
   @Post('/signup')
   create(@Req() req: Request, @Body() body: CreateUserDto): Promise<IUser> {
-    const createUserDto = body;
     const ipAddress = req.socket.remoteAddress;
 
-    return this.createUserService.execute({ ...createUserDto, ipAddress });
+    return this.createUserService.execute(body, ipAddress);
   }
 
   @Get('/filter')
