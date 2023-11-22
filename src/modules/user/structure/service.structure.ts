@@ -8,10 +8,11 @@ export interface ICreateUser {
   motherName: string;
   username?: string;
   email: string;
-  phone?: string;
+  phone: string;
   password: string;
   passwordConfirmation: string;
   ipAddress: string;
+  originChannel: string;
 }
 
 export interface IUpdateUser {
