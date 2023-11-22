@@ -5,6 +5,8 @@ import { UserRepository } from '../repository/user.repository';
 import { IUserRepository } from '../interfaces/repository.interface';
 import { UserStatus } from '../interfaces/user-status.enum';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { ICreateUser, IUser } from '../interfaces/user.interface';
+import { PasswordService } from './password.service';
 import { EmailService } from './email.service';
 import { User } from '@prisma/client';
 
@@ -13,11 +15,23 @@ export class CreateUserService {
   constructor(
     @Inject(UserRepository)
     private readonly userRepository: IUserRepository<User>,
+    private readonly passwordService: PasswordService,
     private readonly emailService: EmailService,
   ) {}
 
   private validateIpAddress(ip: string): boolean {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  private async formatSecurityInfo(
+    createUserDto: CreateUserDto,
+  ): Promise<Partial<ICreateUser>> {
+    const { password, salt } = await this.passwordService.hashPassword(
+      createUserDto.password,
+    );
+    const confirmationToken = this.passwordService.generateRandomToken();
+
+    return { password, salt, confirmationToken };
   }
 
   private mapUserToReturn(
@@ -75,9 +89,15 @@ export class CreateUserService {
     delete data.passwordConfirmation;
 
     try {
+      const { password, salt, confirmationToken } =
+        await this.formatSecurityInfo(data);
+
       const user = await this.userRepository.createUser({
         ...data,
         ipAddress,
+        password,
+        salt,
+        confirmationToken,
         allowedChannels: data.originChannel,
         status: UserStatus.PENDING_CONFIRMATION,
       });
