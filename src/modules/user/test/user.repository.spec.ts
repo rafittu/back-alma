@@ -44,21 +44,18 @@ describe('User Repository', () => {
       expect(result).toEqual(MockPrismaUser);
     });
 
-    it('should throw an error if username or email is already in use', async () => {
+    it('should throw an error if email or phone is already in use', async () => {
       jest.spyOn(prismaService.user, 'create').mockRejectedValueOnce({
         code: 'P2002',
-        meta: { target: ['username'] },
+        meta: { target: ['email'] },
       });
 
       try {
-        await userRepository.createUser(
-          mockCreateUser,
-          UserStatus.PENDING_CONFIRMATION,
-        );
+        await userRepository.createUser(MockInterfaceCreateUser);
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(409);
-        expect(error.message).toBe('username already in use');
+        expect(error.message).toBe('email already in use');
       }
     });
 
@@ -70,10 +67,7 @@ describe('User Repository', () => {
         );
 
       try {
-        await userRepository.createUser(
-          mockCreateUser,
-          UserStatus.PENDING_CONFIRMATION,
-        );
+        await userRepository.createUser(MockInterfaceCreateUser);
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
