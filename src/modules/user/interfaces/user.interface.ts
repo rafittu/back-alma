@@ -39,7 +39,6 @@ export interface ICreateUser {
   salt: string;
   confirmationToken: string;
   ipAddressOrigin: string;
-  onUpdateIpAddress: string;
   originChannel: Channel;
   allowedChannels: Channel[];
   status: UserStatus;

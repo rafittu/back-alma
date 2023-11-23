@@ -95,7 +95,6 @@ export class CreateUserService {
       const user = await this.userRepository.createUser({
         ...data,
         ipAddressOrigin: ipAddress,
-        onUpdateIpAddress: ipAddress,
         password,
         salt,
         confirmationToken,
