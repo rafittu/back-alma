@@ -17,6 +17,7 @@ import {
 
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { MockInterfaceCreateUser, MockPrismaUser } from './mocks/user.mock';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
@@ -35,12 +36,9 @@ describe('User Repository', () => {
     it('should create a new user successfully', async () => {
       jest
         .spyOn(prismaService.user, 'create')
-        .mockResolvedValueOnce(UnformattedCreatedUser);
+        .mockResolvedValueOnce(MockPrismaUser);
 
-      const result = await userRepository.createUser(
-        mockCreateUser,
-        UserStatus.PENDING_CONFIRMATION,
-      );
+      const result = await userRepository.createUser(MockInterfaceCreateUser);
 
       expect(prismaService.user.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(FormattedCreatedUser);
