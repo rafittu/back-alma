@@ -20,6 +20,14 @@ import {
 } from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
+import {
+  MockCreateUserDto,
+  MockIUser,
+  MockIpAddress,
+  MockPrismaUser,
+} from './mocks/user.mock';
+import { PasswordService } from '../services/password.service';
+import { EmailService } from '../services/email.service';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
@@ -27,6 +35,8 @@ describe('User Services', () => {
   let updateUserService: UpdateUserService;
   let deleteUserService: DeleteUserService;
   let getUserByFilterService: GetUserByFilterService;
+  let passwordService: PasswordService;
+  let emailService: EmailService;
 
   let userRepository: UserRepository;
   let mailerService: MailerService;
@@ -39,10 +49,12 @@ describe('User Services', () => {
         UpdateUserService,
         DeleteUserService,
         GetUserByFilterService,
+        PasswordService,
+        EmailService,
         {
           provide: UserRepository,
           useValue: {
-            createUser: jest.fn().mockResolvedValue(mockNewUser),
+            createUser: jest.fn().mockResolvedValue(MockPrismaUser),
             getUserById: jest.fn().mockResolvedValue(mockNewUser),
             updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
             deleteUser: jest.fn().mockResolvedValue(mockDeleteUserResponse),
@@ -65,6 +77,8 @@ describe('User Services', () => {
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
+    passwordService = module.get<PasswordService>(PasswordService);
+    emailService = module.get<EmailService>(EmailService);
 
     userRepository = module.get<UserRepository>(UserRepository);
     mailerService = module.get<MailerService>(MailerService);
@@ -80,10 +94,13 @@ describe('User Services', () => {
 
   describe('create user', () => {
     it('should create a new user successfully', async () => {
-      const result = await createUserService.execute(mockCreateUser);
+      const result = await createUserService.execute(
+        MockCreateUserDto,
+        MockIpAddress,
+      );
 
       expect(userRepository.createUser).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should send an email confirmation after user created', async () => {

@@ -1,9 +1,12 @@
 import { faker } from '@faker-js/faker';
 import { Channel, User } from '@prisma/client';
-import { ICreateUser } from '../../interfaces/user.interface';
+import { ICreateUser, IUser } from '../../interfaces/user.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
+import { CreateUserDto } from '../../dto/create-user.dto';
 
-export const MockInterfaceCreateUser: ICreateUser = {
+export const MockIpAddress = faker.internet.ip();
+
+export const MockCreateUserDto: CreateUserDto = {
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
   socialName: faker.person.fullName(),
@@ -12,11 +15,25 @@ export const MockInterfaceCreateUser: ICreateUser = {
   username: faker.internet.userName(),
   email: faker.internet.email(),
   phone: faker.phone.number(),
+  password: 'faker.internet.password()',
+  passwordConfirmation: 'faker.internet.password()',
+  originChannel: Channel.WOPHI,
+};
+
+export const MockInterfaceCreateUser: ICreateUser = {
+  firstName: MockCreateUserDto.firstName,
+  lastName: MockCreateUserDto.lastName,
+  socialName: MockCreateUserDto.socialName,
+  bornDate: MockCreateUserDto.bornDate,
+  motherName: MockCreateUserDto.motherName,
+  username: MockCreateUserDto.username,
+  email: MockCreateUserDto.email,
+  phone: MockCreateUserDto.phone,
   password: faker.internet.password(),
   salt: faker.string.binary(),
   confirmationToken: faker.string.alphanumeric(),
-  ipAddressOrigin: faker.internet.ipv4(),
-  originChannel: Channel.WOPHI,
+  ipAddressOrigin: MockIpAddress,
+  originChannel: MockCreateUserDto.originChannel,
   allowedChannels: [Channel.WOPHI],
   status: UserStatus.PENDING_CONFIRMATION,
 };
@@ -31,4 +48,29 @@ export const MockPrismaUser: User = {
 
   created_at: new Date(),
   updated_at: new Date(),
+};
+
+export const MockIUser: IUser = {
+  id: MockPrismaUser.id,
+  personal: {
+    id: MockPrismaUser.user_personal_info_id,
+    firstName: MockInterfaceCreateUser.firstName,
+    lastName: MockInterfaceCreateUser.lastName,
+    socialName: MockInterfaceCreateUser.socialName,
+    bornDate: MockInterfaceCreateUser.bornDate,
+    motherName: MockInterfaceCreateUser.motherName,
+  },
+  contact: {
+    id: MockPrismaUser.user_contact_info_id,
+    username: MockInterfaceCreateUser.username,
+    email: MockInterfaceCreateUser.email,
+    phone: MockInterfaceCreateUser.phone,
+  },
+  security: {
+    id: MockPrismaUser.user_security_info_id,
+    status: UserStatus.PENDING_CONFIRMATION,
+  },
+  allowedChannels: MockPrismaUser.allowed_channels,
+  createdAt: MockPrismaUser.created_at,
+  updatedAt: MockPrismaUser.updated_at,
 };
