@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../interfaces/repository.interface';
+import {
+  IUserRepository,
+  TemporaryUser as User,
+} from '../interfaces/repository.interface';
 import { IUpdateUser } from '../interfaces/user.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 
