@@ -23,7 +23,7 @@ export interface UserSecurityInfo {
   confirmation_token: string;
   recover_token: string;
   ip_address_origin: string;
-  on_update_ip_address: string;
+  on_update_ip_address?: string;
   status: UserStatus;
   updated_at?: string;
 }

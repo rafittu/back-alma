@@ -55,16 +55,14 @@ export class UserRepository implements IUserRepository<User> {
     salt,
     confirmationToken,
     ipAddressOrigin,
-    onUpdateIpAddress,
     status,
-  }: Partial<ICreateUser>): Promise<UserSecurityInfo> {
+  }: ICreateUser): Promise<UserSecurityInfo> {
     return {
       password,
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
       ip_address_origin: ipAddressOrigin,
-      on_update_ip_address: onUpdateIpAddress,
       status,
     };
   }
