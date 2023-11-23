@@ -41,7 +41,7 @@ describe('User Repository', () => {
       const result = await userRepository.createUser(MockInterfaceCreateUser);
 
       expect(prismaService.user.create).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(FormattedCreatedUser);
+      expect(result).toEqual(MockPrismaUser);
     });
 
     it('should throw an error if username or email is already in use', async () => {

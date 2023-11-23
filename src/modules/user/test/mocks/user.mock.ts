@@ -12,9 +12,7 @@ export const MockInterfaceCreateUser: ICreateUser = {
   username: faker.internet.userName(),
   email: faker.internet.email(),
   phone: faker.phone.number(),
-  password: faker.internet.password({
-    pattern: /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/,
-  }),
+  password: faker.internet.password(),
   salt: faker.string.binary(),
   confirmationToken: faker.string.alphanumeric(),
   ipAddressOrigin: faker.internet.ipv4(),
