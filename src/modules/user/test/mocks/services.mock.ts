@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
-import { ICreateUser } from '../../interfaces/user.interface';
+// import { ICreateUser } from '../../interfaces/user.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
-export const mockCreateUser: ICreateUser = {
+export const mockCreateUser = {
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
   socialName: faker.person.fullName(),

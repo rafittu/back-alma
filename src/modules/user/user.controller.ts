@@ -18,7 +18,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserService } from './services/create-user.service';
 import { GetUserByIdService } from './services/get-user-by-id.service';
 import { UpdateUserService } from './services/update-user.service';
-import { User } from './interfaces/repository.interface';
+import { TemporaryUser } from './interfaces/repository.interface';
 import { DeleteUserService } from './services/delete-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';
@@ -44,12 +44,12 @@ export class UserController {
   }
 
   @Get('/filter')
-  getByFilter(@Query() filter: IUserFilter): Promise<User | null> {
+  getByFilter(@Query() filter: IUserFilter): Promise<TemporaryUser | null> {
     return this.getUserByFilterService.execute(filter);
   }
 
   @Get('/:id')
-  getById(@Param('id') userId: string): Promise<User> {
+  getById(@Param('id') userId: string): Promise<TemporaryUser> {
     return this.getUserByIdService.execute(userId);
   }
 
@@ -57,12 +57,12 @@ export class UserController {
   async updateUser(
     @Param('id') userId: string,
     @Body() body: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<TemporaryUser> {
     return await this.updateUserService.execute(body, userId);
   }
 
   @Delete('/delete/:id')
-  async deleteUser(@Param('id') userId: string): Promise<User> {
+  async deleteUser(@Param('id') userId: string): Promise<TemporaryUser> {
     return await this.deleteUserService.execute(userId);
   }
 }

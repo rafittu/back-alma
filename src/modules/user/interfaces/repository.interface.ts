@@ -59,33 +59,33 @@ export interface UnformattedUser {
   updated_at: Date;
 }
 
-// export interface User {
-//   id: string;
-//   personal: {
-//     id: string;
-//     firstName: string;
-//     lastName?: string;
-//     socialName: string;
-//     bornDate?: string;
-//     motherName?: string;
-//     updatedAt?: Date;
-//   };
-//   contact: {
-//     id: string;
-//     username: string;
-//     email: string;
-//     phone?: string;
-//     updatedAt?: Date;
-//   };
-//   security: {
-//     id: string;
-//     confirmationToken?: string;
-//     status: string;
-//     updatedAt?: Date;
-//   };
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
+export interface TemporaryUser {
+  id: string;
+  personal: {
+    id: string;
+    firstName: string;
+    lastName?: string;
+    socialName: string;
+    bornDate?: string;
+    motherName?: string;
+    updatedAt?: Date;
+  };
+  contact: {
+    id: string;
+    username: string;
+    email: string;
+    phone?: string;
+    updatedAt?: Date;
+  };
+  security: {
+    id: string;
+    confirmationToken?: string;
+    status: string;
+    updatedAt?: Date;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export interface IUserRepository<User> {
   createUser(data: ICreateUser): Promise<User>;
