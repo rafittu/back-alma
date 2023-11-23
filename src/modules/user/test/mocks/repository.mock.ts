@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { UserStatus } from '../../interfaces/user-status.enum';
-import { User } from '../../interfaces/repository.interface';
+import { TemporaryUser } from '../../interfaces/repository.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
 export const UnformattedCreatedUser = {
@@ -25,7 +25,7 @@ export const UnformattedCreatedUser = {
   updated_at: new Date(),
 };
 
-export const FormattedCreatedUser: User = {
+export const FormattedCreatedUser: TemporaryUser = {
   id: UnformattedCreatedUser.id,
   personal: {
     id: UnformattedCreatedUser.user_personal_info_id,
@@ -74,7 +74,7 @@ export const UnformattedUserResponse = {
   updated_at: new Date(),
 };
 
-export const FormattedUserResponse: User = {
+export const FormattedUserResponse: TemporaryUser = {
   id: UnformattedUserResponse.id,
   personal: {
     id: UnformattedUserResponse.user_personal_info_id,
@@ -121,7 +121,7 @@ export const UnformattedDeletedUser = {
   updated_at: new Date(),
 };
 
-export const FormattedDeletedUserResponse: User = {
+export const FormattedDeletedUserResponse: TemporaryUser = {
   id: UnformattedDeletedUser.id,
   personal: {
     id: UnformattedDeletedUser.user_personal_info_id,
