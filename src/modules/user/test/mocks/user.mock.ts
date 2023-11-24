@@ -20,7 +20,7 @@ export const MockCreateUserDto: CreateUserDto = {
   originChannel: Channel.WOPHI,
 };
 
-export const MockInterfaceCreateUser: ICreateUser = {
+export const MockICreateUser: ICreateUser = {
   firstName: MockCreateUserDto.firstName,
   lastName: MockCreateUserDto.lastName,
   socialName: MockCreateUserDto.socialName,
@@ -54,17 +54,17 @@ export const MockIUser: IUser = {
   id: MockPrismaUser.id,
   personal: {
     id: MockPrismaUser.user_personal_info_id,
-    firstName: MockInterfaceCreateUser.firstName,
-    lastName: MockInterfaceCreateUser.lastName,
-    socialName: MockInterfaceCreateUser.socialName,
-    bornDate: MockInterfaceCreateUser.bornDate,
-    motherName: MockInterfaceCreateUser.motherName,
+    firstName: MockICreateUser.firstName,
+    lastName: MockICreateUser.lastName,
+    socialName: MockICreateUser.socialName,
+    bornDate: MockICreateUser.bornDate,
+    motherName: MockICreateUser.motherName,
   },
   contact: {
     id: MockPrismaUser.user_contact_info_id,
-    username: MockInterfaceCreateUser.username,
-    email: MockInterfaceCreateUser.email,
-    phone: MockInterfaceCreateUser.phone,
+    username: MockICreateUser.username,
+    email: MockICreateUser.email,
+    phone: MockICreateUser.phone,
   },
   security: {
     id: MockPrismaUser.user_security_info_id,

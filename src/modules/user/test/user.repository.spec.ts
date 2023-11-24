@@ -17,7 +17,7 @@ import {
 
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { MockInterfaceCreateUser, MockPrismaUser } from './mocks/user.mock';
+import { MockICreateUser, MockPrismaUser } from './mocks/user.mock';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
@@ -38,7 +38,7 @@ describe('User Repository', () => {
         .spyOn(prismaService.user, 'create')
         .mockResolvedValueOnce(MockPrismaUser);
 
-      const result = await userRepository.createUser(MockInterfaceCreateUser);
+      const result = await userRepository.createUser(MockICreateUser);
 
       expect(prismaService.user.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockPrismaUser);
@@ -51,7 +51,7 @@ describe('User Repository', () => {
       });
 
       try {
-        await userRepository.createUser(MockInterfaceCreateUser);
+        await userRepository.createUser(MockICreateUser);
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(409);
@@ -67,7 +67,7 @@ describe('User Repository', () => {
         );
 
       try {
-        await userRepository.createUser(MockInterfaceCreateUser);
+        await userRepository.createUser(MockICreateUser);
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
