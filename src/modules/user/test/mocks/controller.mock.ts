@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { faker } from '@faker-js/faker';
 import { CreateUserDto } from '../../dto/create-user.dto';
-import { User } from '../../interfaces/repository.interface';
+import { TemporaryUser as User } from '../../interfaces/repository.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
@@ -22,6 +22,7 @@ export const mockCreateUserBody: CreateUserDto = {
   phone: faker.phone.number(),
   password: '@Password123',
   passwordConfirmation: '@Password123',
+  originChannel: 'LUMIN',
 };
 
 export const mockNewUser: User = {

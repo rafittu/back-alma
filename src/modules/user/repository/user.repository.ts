@@ -55,16 +55,14 @@ export class UserRepository implements IUserRepository<User> {
     salt,
     confirmationToken,
     ipAddressOrigin,
-    onUpdateIpAddress,
     status,
-  }: Partial<ICreateUser>): Promise<UserSecurityInfo> {
+  }: ICreateUser): Promise<UserSecurityInfo> {
     return {
       password,
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
       ip_address_origin: ipAddressOrigin,
-      on_update_ip_address: onUpdateIpAddress,
       status,
     };
   }
@@ -72,30 +70,13 @@ export class UserRepository implements IUserRepository<User> {
   private formatUserResponse(user: UnformattedUser): User {
     return {
       id: user.id,
-      personal: {
-        id: user.user_personal_info_id,
-        firstName: user.personal.first_name,
-        lastName: user.personal.last_name,
-        socialName: user.personal.social_name,
-        bornDate: user.personal.born_date,
-        motherName: user.personal.mother_name,
-        updatedAt: user.personal.updated_at,
-      },
-      contact: {
-        id: user.user_contact_info_id,
-        username: user.contact.username,
-        email: user.contact.email,
-        phone: user.contact.phone,
-        updatedAt: user.contact.updated_at,
-      },
-      security: {
-        id: user.user_security_info_id,
-        confirmationToken: user.security.confirmation_token,
-        status: user.security.status,
-        updatedAt: user.security.updated_at,
-      },
-      createdAt: user.created_at,
-      updatedAt: user.updated_at,
+      user_contact_info_id: user.id,
+      user_personal_info_id: user.id,
+      user_security_info_id: user.id,
+      origin_channel: 'WOPHI',
+      allowed_channels: ['WOPHI'],
+      created_at: user.created_at,
+      updated_at: user.updated_at,
     };
   }
 
@@ -178,7 +159,7 @@ export class UserRepository implements IUserRepository<User> {
 
       if (isPasswordMatch) {
         data.password = data.newPassword;
-        securityInfo = await this.formatSecurityInfo(data, null);
+        // securityInfo = await this.formatSecurityInfo(data);
         securityInfo.confirmation_token = null;
       } else {
         throw new AppError(
