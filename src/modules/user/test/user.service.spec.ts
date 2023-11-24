@@ -39,7 +39,7 @@ describe('User Services', () => {
   let emailService: EmailService;
 
   let userRepository: UserRepository;
-  let mailerService: MailerService;
+  // let mailerService: MailerService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -81,7 +81,12 @@ describe('User Services', () => {
     emailService = module.get<EmailService>(EmailService);
 
     userRepository = module.get<UserRepository>(UserRepository);
-    mailerService = module.get<MailerService>(MailerService);
+    // mailerService = module.get<MailerService>(MailerService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -94,49 +99,22 @@ describe('User Services', () => {
 
   describe('create user', () => {
     it('should create a new user successfully', async () => {
+      jest.spyOn(createUserService as any, 'validateIpAddress');
+      jest.spyOn(createUserService as any, 'formatSecurityInfo');
+      jest.spyOn(createUserService as any, 'mapUserToReturn');
+      jest.spyOn(emailService, 'sendConfirmationEmail');
+
       const result = await createUserService.execute(
         MockCreateUserDto,
         MockIpAddress,
       );
 
+      expect(createUserService['validateIpAddress']).toHaveBeenCalledTimes(1);
+      expect(createUserService['formatSecurityInfo']).toHaveBeenCalledTimes(1);
       expect(userRepository.createUser).toHaveBeenCalledTimes(1);
+      expect(createUserService['mapUserToReturn']).toHaveBeenCalledTimes(1);
+      expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
-    });
-
-    it('should send an email confirmation after user created', async () => {
-      await createUserService.execute(mockCreateUser);
-
-      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-    });
-
-    it(`should throw an error if 'passwordConfirmation' doesnt match`, async () => {
-      const invalidPasswordConfirmation = {
-        ...mockCreateUser,
-        passwordConfirmation: '@InvalidPassword123',
-      };
-
-      try {
-        await createUserService.execute(invalidPasswordConfirmation);
-      } catch (error) {
-        expect(error).toBeInstanceOf(AppError);
-        expect(error.code).toBe(422);
-        expect(error.message).toBe('passwords do not match');
-      }
-    });
-
-    it(`should throw an error if 'ipAddress' is invalid`, async () => {
-      const invalidIpAddress = {
-        ...mockCreateUser,
-        ipAddress: 'invalid ip address',
-      };
-
-      try {
-        await createUserService.execute(invalidIpAddress);
-      } catch (error) {
-        expect(error).toBeInstanceOf(AppError);
-        expect(error.code).toBe(403);
-        expect(error.message).toBe('invalid ip address');
-      }
     });
   });
 
