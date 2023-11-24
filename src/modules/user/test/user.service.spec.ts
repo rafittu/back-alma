@@ -98,6 +98,10 @@ describe('User Services', () => {
   });
 
   describe('create user', () => {
+    beforeEach(() => {
+      MockCreateUserDto.passwordConfirmation = MockCreateUserDto.password;
+    });
+
     it('should create a new user successfully', async () => {
       jest.spyOn(createUserService as any, 'validateIpAddress');
       jest.spyOn(createUserService as any, 'formatSecurityInfo');
@@ -115,6 +119,64 @@ describe('User Services', () => {
       expect(createUserService['mapUserToReturn']).toHaveBeenCalledTimes(1);
       expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
+    });
+
+    it(`should throw an error if 'ipAddress' is invalid`, async () => {
+      const invalidIpAddress = 'invalid_ip_address';
+
+      try {
+        await createUserService.execute(MockCreateUserDto, invalidIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid ip address');
+      }
+    });
+
+    it(`should throw an error if 'passwordConfirmation' doesnt match`, async () => {
+      const invalidPasswordConfirmation = 'invalid_password_confirmation';
+      const newBodyRequest = {
+        ...MockCreateUserDto,
+        passwordConfirmation: invalidPasswordConfirmation,
+      };
+
+      try {
+        await createUserService.execute(newBodyRequest, MockIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(422);
+        expect(error.message).toBe('passwords do not match');
+      }
+    });
+
+    it('should throw an error if user not created', async () => {
+      jest
+        .spyOn(userRepository, 'createUser')
+        .mockRejectedValueOnce(new Error());
+
+      try {
+        await createUserService.execute(MockCreateUserDto, MockIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to create user');
+      }
+    });
+
+    it('should throw an AppError', async () => {
+      jest
+        .spyOn(userRepository, 'createUser')
+        .mockRejectedValueOnce(
+          new AppError('error_message', 500, 'error_description'),
+        );
+
+      try {
+        await createUserService.execute(MockCreateUserDto, MockIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('error_description');
+      }
     });
   });
 
