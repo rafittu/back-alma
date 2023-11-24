@@ -3,8 +3,15 @@ import { Channel, User } from '@prisma/client';
 import { ICreateUser, IUser } from '../../interfaces/user.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
 import { CreateUserDto } from '../../dto/create-user.dto';
+import { Request } from 'express';
 
-export const MockIpAddress = faker.internet.ip();
+export const MockFakeRequest: Request = {
+  socket: {
+    remoteAddress: faker.internet.ip(),
+  },
+} as Request;
+
+export const MockIpAddress = MockFakeRequest.socket.remoteAddress;
 
 export const MockCreateUserDto: CreateUserDto = {
   firstName: faker.person.firstName(),
