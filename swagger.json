@@ -10,10 +10,11 @@
     },
     "version": "1.0.0"
   },
+
   "paths": {
     "/user/signup": {
       "post": {
-        "summary": "Create a new user",
+        "summary": "Create user",
         "description": "Route to register new users",
         "tags": ["User"],
         "requestBody": {
@@ -28,14 +29,15 @@
                   "value": {
                     "firstName": "John",
                     "lastName": "Doe",
-                    "socialName": "JD",
-                    "username": "johndoe",
+                    "socialName": "Joane Eod",
+                    "username": "jd",
                     "bornDate": "1990-01-01",
                     "motherName": "Jane Doe",
                     "email": "johndoe@example.com",
                     "phone": "1234567890",
-                    "password": "password123",
-                    "passwordConfirmation": "password123"
+                    "password": "#Password123",
+                    "passwordConfirmation": "#Password123",
+                    "originChannel": "WOPHI"
                   }
                 },
                 "example2": {
@@ -44,9 +46,11 @@
                     "firstName": "John",
                     "lastName": "Doe",
                     "motherName": "Jane Doe",
+                    "phone": "1234567890",
                     "email": "johndoe@example.com",
-                    "password": "password123",
-                    "passwordConfirmation": "password123"
+                    "password": "#Password123",
+                    "passwordConfirmation": "#Password123",
+                    "originChannel": "WOPHI"
                   }
                 }
               }
@@ -66,17 +70,22 @@
                   "personal": {
                     "id": "789012",
                     "firstName": "John",
-                    "socialName": "JD"
+                    "lastName": "Doe",
+                    "socialName": "Joane Oed",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe"
                   },
                   "contact": {
                     "id": "345678",
-                    "username": "johndoe",
+                    "username": "jd",
+                    "phone": "1234567890",
                     "email": "johndoe@example.com"
                   },
                   "security": {
                     "id": "901234",
                     "status": "PENDING_CONFIRMATION"
                   },
+                  "allowedChannels": ["WOPHI"],
                   "createdAt": "2023-05-10T12:00:00Z",
                   "updatedAt": "2023-05-10T12:00:00Z"
                 }
@@ -94,24 +103,6 @@
                   "error": {
                     "message": ["One or more fields are missing or invalid"],
                     "code": "bad.request",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "email/phone already taken",
-                    "code": "user-repository.createUser",
                     "status": true
                   },
                   "data": {}
@@ -137,8 +128,8 @@
               }
             }
           },
-          "500": {
-            "description": "Internal server error",
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -146,7 +137,7 @@
                 },
                 "example": {
                   "error": {
-                    "message": "user not created",
+                    "message": "[ 'email', 'phone' ] already in use",
                     "code": "user-repository.createUser",
                     "status": true
                   },
@@ -154,10 +145,75 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "passwords do not match",
+                    "code": "user-service.createUser",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+
+                "examples": {
+                  "example1": {
+                    "summary": "repository error",
+                    "value": {
+                      "error": {
+                        "message": "user not created",
+                        "code": "user-repository.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to create user",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "summary": "email service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to send email for account confirmation",
+                        "code": "email-service.sendConfirmationEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
+
     "/auth/account/{token}": {
       "patch": {
         "summary": "Confirm user account email",
@@ -1121,6 +1177,7 @@
       }
     }
   },
+
   "components": {
     "schemas": {
       "SignUp": {
@@ -1141,20 +1198,20 @@
             "maxLength": 250,
             "description": "Social name of the user"
           },
-          "username": {
-            "type": "string",
-            "maxLength": 45,
-            "description": "Username of the user"
-          },
           "bornDate": {
             "type": "string",
-            "formate": "date",
-            "description": "Date of birth of the user"
+            "formate": "date-time",
+            "description": "Date of birth of the user (yyyy-mm-dd)"
           },
           "motherName": {
             "type": "string",
             "maxLength": 250,
             "description": "Mother's name of the user"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 45,
+            "description": "Username of the user"
           },
           "email": {
             "type": "string",
@@ -1174,17 +1231,26 @@
           "passwordConfirmation": {
             "type": "string",
             "description": "Password confirmation"
+          },
+          "originChannel": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
           }
         },
         "required": [
           "firstName",
           "lastName",
+          "bornDate",
           "motherName",
           "email",
+          "phone",
           "password",
-          "passwordConfirmation"
+          "passwordConfirmation",
+          "originChannel"
         ]
       },
+
       "User": {
         "type": "object",
         "properties": {
@@ -1200,6 +1266,11 @@
           },
           "security": {
             "$ref": "#/components/schemas/Security"
+          },
+          "allowedChannels": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Channels that user can access"
           },
           "createdAt": {
             "type": "string",
@@ -1270,6 +1341,13 @@
           },
           "status": {
             "type": "string",
+            "enum": [
+              "PENDING_CONFIRMATION",
+              "ACTIVE",
+              "BLOCKED",
+              "CANCELLED",
+              "BANNED"
+            ],
             "description": "User status"
           }
         }
