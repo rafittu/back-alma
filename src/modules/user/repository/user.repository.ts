@@ -8,16 +8,15 @@ import {
   UserPersonalInfo,
   UserSecurityInfo,
   UnformattedUser,
-  User,
-} from '../structure/repository.structure';
+} from '../interfaces/repository.interface';
 import {
   ICreateUser,
   IUpdateUser,
   IUserFilter,
-} from '../structure/service.structure';
-import { UserStatus } from '../structure/user-status.enum';
+} from '../interfaces/user.interface';
+import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
@@ -29,7 +28,7 @@ export class UserRepository implements IUserRepository<User> {
     socialName,
     bornDate,
     motherName,
-  }: IUpdateUser): UserPersonalInfo {
+  }: Partial<ICreateUser>): UserPersonalInfo {
     return {
       first_name: firstName,
       last_name: lastName,
@@ -43,61 +42,45 @@ export class UserRepository implements IUserRepository<User> {
     username,
     email,
     phone,
-  }: IUpdateUser): UserContactInfo {
+  }: Partial<ICreateUser>): UserContactInfo {
     return {
       username: username || null,
       email: email,
-      phone: phone || null,
+      phone: phone,
     };
   }
 
-  private async formatSecurityInfo(
-    { password, ipAddress }: IUpdateUser,
-    status: UserStatus,
-  ): Promise<UserSecurityInfo> {
-    const salt = await bcrypt.genSalt();
-
+  private async formatSecurityInfo({
+    password,
+    salt,
+    confirmationToken,
+    ipAddressOrigin,
+    status,
+  }: ICreateUser): Promise<UserSecurityInfo> {
     return {
-      password: await bcrypt.hash(password, salt),
+      password,
       salt,
-      confirmation_token: crypto.randomBytes(32).toString('hex'),
+      confirmation_token: confirmationToken,
       recover_token: null,
-      ip_address: ipAddress,
-      status: status,
+      ip_address_origin: ipAddressOrigin,
+      status,
     };
   }
 
   private formatUserResponse(user: UnformattedUser): User {
     return {
       id: user.id,
-      personal: {
-        id: user.user_personal_info_id,
-        firstName: user.personal.first_name,
-        lastName: user.personal.last_name,
-        socialName: user.personal.social_name,
-        bornDate: user.personal.born_date,
-        motherName: user.personal.mother_name,
-        updatedAt: user.personal.updated_at,
-      },
-      contact: {
-        id: user.user_contact_info_id,
-        username: user.contact.username,
-        email: user.contact.email,
-        phone: user.contact.phone,
-        updatedAt: user.contact.updated_at,
-      },
-      security: {
-        id: user.user_security_info_id,
-        confirmationToken: user.security.confirmation_token,
-        status: user.security.status,
-        updatedAt: user.security.updated_at,
-      },
-      createdAt: user.created_at,
-      updatedAt: user.updated_at,
+      user_contact_info_id: user.id,
+      user_personal_info_id: user.id,
+      user_security_info_id: user.id,
+      origin_channel: 'WOPHI',
+      allowed_channels: ['WOPHI'],
+      created_at: user.created_at,
+      updated_at: user.updated_at,
     };
   }
 
-  async createUser(data: ICreateUser, status: UserStatus): Promise<User> {
+  async createUser(data: ICreateUser): Promise<User> {
     const userData = {
       personal: {
         create: this.formatPersonalInfo(data),
@@ -106,37 +89,18 @@ export class UserRepository implements IUserRepository<User> {
         create: this.formatContactInfo(data),
       },
       security: {
-        create: await this.formatSecurityInfo(data, status),
+        create: await this.formatSecurityInfo(data),
       },
+      origin_channel: data.originChannel,
+      allowed_channels: data.allowedChannels,
     };
 
     try {
       const user = await this.prisma.user.create({
         data: userData,
-        include: {
-          personal: {
-            select: {
-              first_name: true,
-              social_name: true,
-            },
-          },
-          contact: {
-            select: {
-              username: true,
-              email: true,
-            },
-          },
-          security: {
-            select: {
-              confirmation_token: true,
-              status: true,
-            },
-          },
-        },
       });
 
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
+      return user;
     } catch (error) {
       if (error.code === 'P2002') {
         throw new AppError(
@@ -145,6 +109,7 @@ export class UserRepository implements IUserRepository<User> {
           `${error.meta.target[0]} already in use`,
         );
       }
+
       throw new AppError('user-repository.createUser', 500, 'user not created');
     }
   }
@@ -194,7 +159,7 @@ export class UserRepository implements IUserRepository<User> {
 
       if (isPasswordMatch) {
         data.password = data.newPassword;
-        securityInfo = await this.formatSecurityInfo(data, null);
+        // securityInfo = await this.formatSecurityInfo(data);
         securityInfo.confirmation_token = null;
       } else {
         throw new AppError(

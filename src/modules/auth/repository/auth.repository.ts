@@ -10,7 +10,7 @@ import {
   ResendAccToken,
 } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
-import { UserStatus } from 'src/modules/user/structure/user-status.enum';
+import { UserStatus } from 'src/modules/user/interfaces/user-status.enum';
 import { randomBytes } from 'crypto';
 
 @Injectable()

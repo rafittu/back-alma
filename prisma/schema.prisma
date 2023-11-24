@@ -56,7 +56,7 @@ model UserSecurityInfo {
   confirmation_token   String?    @unique @db.VarChar(64)
   recover_token        String?    @db.VarChar(64)
   ip_address_origin    String     @db.Inet()
-  on_update_ip_address String     @db.Inet()
+  on_update_ip_address String?    @db.Inet()
   status               UserStatus
 
   created_at DateTime @default(now())

@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../structure/repository.structure';
-import { IUserFilter } from '../structure/service.structure';
+import {
+  IUserRepository,
+  TemporaryUser as User,
+} from '../interfaces/repository.interface';
+import { IUserFilter } from '../interfaces/user.interface';
 
 @Injectable()
 export class GetUserByFilterService {

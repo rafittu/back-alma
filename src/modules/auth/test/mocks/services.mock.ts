@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { JtwPayload, UserPayload } from '../../structure/service.structure';
 import { ResendAccToken } from '../../structure/auth-repository.structure';
-import { User } from '../../../../modules/user/structure/repository.structure';
-import { UserStatus } from '../../../../modules/user/structure/user-status.enum';
+import { TemporaryUser as User } from '../../../user/interfaces/repository.interface';
+import { UserStatus } from '../../../user/interfaces/user-status.enum';
 
 export const signinPayloadMock: UserPayload = {
   id: faker.string.uuid(),

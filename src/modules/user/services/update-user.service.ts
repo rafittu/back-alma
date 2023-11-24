@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../structure/repository.structure';
-import { IUpdateUser } from '../structure/service.structure';
+import {
+  IUserRepository,
+  TemporaryUser as User,
+} from '../interfaces/repository.interface';
+import { IUpdateUser } from '../interfaces/user.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()

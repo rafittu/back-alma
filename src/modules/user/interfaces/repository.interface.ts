@@ -1,10 +1,10 @@
-import { ICreateUser, IUpdateUser, IUserFilter } from './service.structure';
+import { ICreateUser, IUpdateUser, IUserFilter } from './user.interface';
 import { UserStatus } from './user-status.enum';
 
 export interface UserPersonalInfo {
   first_name: string;
   last_name: string;
-  social_name: string;
+  social_name?: string;
   born_date: string;
   mother_name: string;
   updated_at?: string;
@@ -22,7 +22,8 @@ export interface UserSecurityInfo {
   salt: string;
   confirmation_token: string;
   recover_token: string;
-  ip_address: string;
+  ip_address_origin: string;
+  on_update_ip_address?: string;
   status: UserStatus;
   updated_at?: string;
 }
@@ -58,7 +59,7 @@ export interface UnformattedUser {
   updated_at: Date;
 }
 
-export interface User {
+export interface TemporaryUser {
   id: string;
   personal: {
     id: string;
@@ -87,7 +88,7 @@ export interface User {
 }
 
 export interface IUserRepository<User> {
-  createUser(data: ICreateUser, status: UserStatus): Promise<User>;
+  createUser(data: ICreateUser): Promise<User>;
   getUserById(userId: string): Promise<User>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;

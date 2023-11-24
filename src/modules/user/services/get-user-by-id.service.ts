@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../structure/repository.structure';
+import {
+  IUserRepository,
+  TemporaryUser as User,
+} from '../interfaces/repository.interface';
 
 @Injectable()
 export class GetUserByIdService {

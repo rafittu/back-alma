@@ -13,6 +13,11 @@ import {
   mockDeleteUserResponse,
 } from './mocks/controller.mock';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
+import {
+  MockCreateUserDto,
+  MockFakeRequest,
+  MockIUser,
+} from './mocks/user.mock';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -29,7 +34,7 @@ describe('UserController', () => {
         {
           provide: CreateUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockNewUser),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
@@ -76,12 +81,12 @@ describe('UserController', () => {
   describe('create user', () => {
     it('should create a new user successfully', async () => {
       const result = await controller.create(
-        mockFakeRequest,
-        mockCreateUserBody,
+        MockFakeRequest,
+        MockCreateUserDto,
       );
 
       expect(createUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {

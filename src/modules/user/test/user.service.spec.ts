@@ -20,6 +20,14 @@ import {
 } from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
+import {
+  MockCreateUserDto,
+  MockIUser,
+  MockIpAddress,
+  MockPrismaUser,
+} from './mocks/user.mock';
+import { PasswordService } from '../services/password.service';
+import { EmailService } from '../services/email.service';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
@@ -27,9 +35,11 @@ describe('User Services', () => {
   let updateUserService: UpdateUserService;
   let deleteUserService: DeleteUserService;
   let getUserByFilterService: GetUserByFilterService;
+  let passwordService: PasswordService;
+  let emailService: EmailService;
 
   let userRepository: UserRepository;
-  let mailerService: MailerService;
+  // let mailerService: MailerService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,10 +49,12 @@ describe('User Services', () => {
         UpdateUserService,
         DeleteUserService,
         GetUserByFilterService,
+        PasswordService,
+        EmailService,
         {
           provide: UserRepository,
           useValue: {
-            createUser: jest.fn().mockResolvedValue(mockNewUser),
+            createUser: jest.fn().mockResolvedValue(MockPrismaUser),
             getUserById: jest.fn().mockResolvedValue(mockNewUser),
             updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
             deleteUser: jest.fn().mockResolvedValue(mockDeleteUserResponse),
@@ -65,9 +77,16 @@ describe('User Services', () => {
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
+    passwordService = module.get<PasswordService>(PasswordService);
+    emailService = module.get<EmailService>(EmailService);
 
     userRepository = module.get<UserRepository>(UserRepository);
-    mailerService = module.get<MailerService>(MailerService);
+    // mailerService = module.get<MailerService>(MailerService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -79,27 +98,50 @@ describe('User Services', () => {
   });
 
   describe('create user', () => {
-    it('should create a new user successfully', async () => {
-      const result = await createUserService.execute(mockCreateUser);
-
-      expect(userRepository.createUser).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+    beforeEach(() => {
+      MockCreateUserDto.passwordConfirmation = MockCreateUserDto.password;
     });
 
-    it('should send an email confirmation after user created', async () => {
-      await createUserService.execute(mockCreateUser);
+    it('should create a new user successfully', async () => {
+      jest.spyOn(createUserService as any, 'validateIpAddress');
+      jest.spyOn(createUserService as any, 'formatSecurityInfo');
+      jest.spyOn(createUserService as any, 'mapUserToReturn');
+      jest.spyOn(emailService, 'sendConfirmationEmail');
 
-      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
+      const result = await createUserService.execute(
+        MockCreateUserDto,
+        MockIpAddress,
+      );
+
+      expect(createUserService['validateIpAddress']).toHaveBeenCalledTimes(1);
+      expect(createUserService['formatSecurityInfo']).toHaveBeenCalledTimes(1);
+      expect(userRepository.createUser).toHaveBeenCalledTimes(1);
+      expect(createUserService['mapUserToReturn']).toHaveBeenCalledTimes(1);
+      expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockIUser);
+    });
+
+    it(`should throw an error if 'ipAddress' is invalid`, async () => {
+      const invalidIpAddress = 'invalid_ip_address';
+
+      try {
+        await createUserService.execute(MockCreateUserDto, invalidIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid ip address');
+      }
     });
 
     it(`should throw an error if 'passwordConfirmation' doesnt match`, async () => {
-      const invalidPasswordConfirmation = {
-        ...mockCreateUser,
-        passwordConfirmation: '@InvalidPassword123',
+      const invalidPasswordConfirmation = 'invalid_password_confirmation';
+      const newBodyRequest = {
+        ...MockCreateUserDto,
+        passwordConfirmation: invalidPasswordConfirmation,
       };
 
       try {
-        await createUserService.execute(invalidPasswordConfirmation);
+        await createUserService.execute(newBodyRequest, MockIpAddress);
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(422);
@@ -107,18 +149,33 @@ describe('User Services', () => {
       }
     });
 
-    it(`should throw an error if 'ipAddress' is invalid`, async () => {
-      const invalidIpAddress = {
-        ...mockCreateUser,
-        ipAddress: 'invalid ip address',
-      };
+    it('should throw an error if user not created', async () => {
+      jest
+        .spyOn(userRepository, 'createUser')
+        .mockRejectedValueOnce(new Error());
 
       try {
-        await createUserService.execute(invalidIpAddress);
+        await createUserService.execute(MockCreateUserDto, MockIpAddress);
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
-        expect(error.code).toBe(403);
-        expect(error.message).toBe('invalid ip address');
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to create user');
+      }
+    });
+
+    it('should throw an AppError', async () => {
+      jest
+        .spyOn(userRepository, 'createUser')
+        .mockRejectedValueOnce(
+          new AppError('error_message', 500, 'error_description'),
+        );
+
+      try {
+        await createUserService.execute(MockCreateUserDto, MockIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('error_description');
       }
     });
   });

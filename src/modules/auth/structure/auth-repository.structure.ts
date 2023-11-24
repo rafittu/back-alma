@@ -1,4 +1,4 @@
-import { UserStatus } from 'src/modules/user/structure/user-status.enum';
+import { UserStatus } from 'src/modules/user/interfaces/user-status.enum';
 import { CredentialsDto } from '../dto/credentials.dto';
 import { UserPayload } from './service.structure';
 

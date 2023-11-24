@@ -2,54 +2,122 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ipv4Regex, ipv6Regex } from '../../utils/helpers/helpers-user-module';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../structure/repository.structure';
-import { ICreateUser } from '../structure/service.structure';
-import { UserStatus } from '../structure/user-status.enum';
-import { MailerService } from '@nestjs-modules/mailer';
+import { IUserRepository } from '../interfaces/repository.interface';
+import { UserStatus } from '../interfaces/user-status.enum';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { ICreateUser, IUser } from '../interfaces/user.interface';
+import { PasswordService } from './password.service';
+import { EmailService } from './email.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class CreateUserService {
   constructor(
     @Inject(UserRepository)
-    private userRepository: IUserRepository<User>,
-    private mailerService: MailerService,
+    private readonly userRepository: IUserRepository<User>,
+    private readonly passwordService: PasswordService,
+    private readonly emailService: EmailService,
   ) {}
 
-  async execute(data: ICreateUser): Promise<User> {
-    if (data.password != data.passwordConfirmation) {
+  private validateIpAddress(ip: string): boolean {
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  private async formatSecurityInfo(
+    createUserDto: CreateUserDto,
+  ): Promise<Partial<ICreateUser>> {
+    const { password, salt } = await this.passwordService.hashPassword(
+      createUserDto.password,
+    );
+    const confirmationToken = this.passwordService.generateRandomToken();
+
+    return { password, salt, confirmationToken };
+  }
+
+  private mapUserToReturn(
+    {
+      firstName,
+      lastName,
+      socialName,
+      bornDate,
+      motherName,
+      username,
+      email,
+      phone,
+    }: CreateUserDto,
+    user: User,
+    status: string,
+  ): IUser {
+    return {
+      id: user.id,
+      personal: {
+        id: user.user_personal_info_id,
+        firstName,
+        lastName,
+        socialName,
+        bornDate,
+        motherName,
+      },
+      contact: {
+        id: user.user_contact_info_id,
+        username,
+        email,
+        phone,
+      },
+      security: {
+        id: user.user_security_info_id,
+        status,
+      },
+      allowedChannels: user.allowed_channels,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
+    };
+  }
+
+  async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
+    if (!this.validateIpAddress(ipAddress)) {
+      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+    }
+
+    if (data.password !== data.passwordConfirmation) {
       throw new AppError(
         'user-service.createUser',
         422,
         'passwords do not match',
       );
     }
+    delete data.passwordConfirmation;
 
-    const validateIp = (ip: string): boolean => {
-      return ipv4Regex.test(ip) || ipv6Regex.test(ip);
-    };
+    try {
+      const { password, salt, confirmationToken } =
+        await this.formatSecurityInfo(data);
 
-    if (!validateIp(data.ipAddress)) {
-      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+      const user = await this.userRepository.createUser({
+        ...data,
+        ipAddressOrigin: ipAddress,
+        password,
+        salt,
+        confirmationToken,
+        allowedChannels: [data.originChannel],
+        status: UserStatus.PENDING_CONFIRMATION,
+      });
+
+      await this.emailService.sendConfirmationEmail(
+        data.email,
+        confirmationToken,
+      );
+
+      return this.mapUserToReturn(data, user, UserStatus.PENDING_CONFIRMATION);
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new AppError(
+        'user-service.createUser',
+        500,
+        'failed to create user',
+      );
     }
-
-    const user = await this.userRepository.createUser(
-      data,
-      UserStatus.PENDING_CONFIRMATION,
-    );
-
-    const email = {
-      to: user.contact.email,
-      from: 'noreply@application.com',
-      subject: 'ALMA - Email de confirmação',
-      template: 'email-confirmation',
-      context: {
-        token: user.security.confirmationToken,
-      },
-    };
-
-    await this.mailerService.sendMail(email);
-    delete user.security.confirmationToken;
-
-    return user;
   }
 }
