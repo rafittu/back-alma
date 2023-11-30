@@ -81,6 +81,24 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
+  private fieldsToDelete(prismaUser: PrismaUser, fields: string[]): PrismaUser {
+    fields.forEach((field) => {
+      if (field === 'updated_at') {
+        return;
+      }
+
+      if (field !== 'created_at') {
+        delete prismaUser[field];
+      }
+
+      delete prismaUser.personal[field];
+      delete prismaUser.contact[field];
+      delete prismaUser.security[field];
+    });
+
+    return prismaUser;
+  }
+
   async createUser(data: ICreateUser): Promise<User> {
     const userData = {
       personal: {
@@ -113,24 +131,6 @@ export class UserRepository implements IUserRepository<User> {
 
       throw new AppError('user-repository.createUser', 500, 'user not created');
     }
-  }
-
-  private fieldsToDelete(prismaUser: PrismaUser, fields: string[]): PrismaUser {
-    fields.forEach((field) => {
-      if (field === 'updated_at') {
-        return;
-      }
-
-      if (field !== 'created_at') {
-        delete prismaUser[field];
-      }
-
-      delete prismaUser.personal[field];
-      delete prismaUser.contact[field];
-      delete prismaUser.security[field];
-    });
-
-    return prismaUser;
   }
 
   async userByFilter(filter: IUserFilter): Promise<PrismaUser | null> {

@@ -6,7 +6,7 @@ import {
 } from '../interfaces/repository.interface';
 import { IUser, IUserFilter } from '../interfaces/user.interface';
 import { User } from '@prisma/client';
-import { mapUserToReturn } from 'src/modules/utils/helpers/helpers-user-module';
+import { mapUserToReturn } from '../../../modules/utils/helpers/helpers-user-module';
 
 @Injectable()
 export class GetUserByFilterService {
