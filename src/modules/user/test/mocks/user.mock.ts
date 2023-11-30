@@ -45,7 +45,7 @@ export const MockICreateUser: ICreateUser = {
   status: UserStatus.PENDING_CONFIRMATION,
 };
 
-export const MockPrismaUser: User = {
+export const MockUser: User = {
   id: faker.string.uuid(),
   user_personal_info_id: faker.string.uuid(),
   user_contact_info_id: faker.string.uuid(),
@@ -58,9 +58,9 @@ export const MockPrismaUser: User = {
 };
 
 export const MockIUser: IUser = {
-  id: MockPrismaUser.id,
+  id: MockUser.id,
   personal: {
-    id: MockPrismaUser.user_personal_info_id,
+    id: MockUser.user_personal_info_id,
     firstName: MockICreateUser.firstName,
     lastName: MockICreateUser.lastName,
     socialName: MockICreateUser.socialName,
@@ -68,16 +68,16 @@ export const MockIUser: IUser = {
     motherName: MockICreateUser.motherName,
   },
   contact: {
-    id: MockPrismaUser.user_contact_info_id,
+    id: MockUser.user_contact_info_id,
     username: MockICreateUser.username,
     email: MockICreateUser.email,
     phone: MockICreateUser.phone,
   },
   security: {
-    id: MockPrismaUser.user_security_info_id,
+    id: MockUser.user_security_info_id,
     status: UserStatus.PENDING_CONFIRMATION,
   },
-  allowedChannels: MockPrismaUser.allowed_channels,
-  createdAt: MockPrismaUser.created_at,
-  updatedAt: MockPrismaUser.updated_at,
+  allowedChannels: MockUser.allowed_channels,
+  createdAt: MockUser.created_at,
+  updatedAt: MockUser.updated_at,
 };

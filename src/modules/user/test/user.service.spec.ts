@@ -24,7 +24,7 @@ import {
   MockCreateUserDto,
   MockIUser,
   MockIpAddress,
-  MockPrismaUser,
+  MockUser,
 } from './mocks/user.mock';
 import { PasswordService } from '../services/password.service';
 import { EmailService } from '../services/email.service';
@@ -54,7 +54,7 @@ describe('User Services', () => {
         {
           provide: UserRepository,
           useValue: {
-            createUser: jest.fn().mockResolvedValue(MockPrismaUser),
+            createUser: jest.fn().mockResolvedValue(MockUser),
             getUserById: jest.fn().mockResolvedValue(mockNewUser),
             updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
             deleteUser: jest.fn().mockResolvedValue(mockDeleteUserResponse),
