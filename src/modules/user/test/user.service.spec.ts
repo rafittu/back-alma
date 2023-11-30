@@ -197,16 +197,6 @@ describe('User Services', () => {
       expect(userRepository.userByFilter).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
     });
-
-    // it('should throw an error if user not found', async () => {
-    //   try {
-    //     await getUserByFilterService.execute({ email: undefined });
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(404);
-    //     expect(error.message).toBe('user not found');
-    //   }
-    // });
   });
 
   // describe('get user by id', () => {
