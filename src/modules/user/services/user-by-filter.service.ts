@@ -22,6 +22,8 @@ export class GetUserByFilterService {
   async execute(filter: IUserFilter): Promise<IUser | null> {
     const user = await this.userRepository.userByFilter(filter);
 
-    return this.formatUserToReturn(user);
+    if (user) {
+      return this.formatUserToReturn(user);
+    }
   }
 }
