@@ -17,7 +17,12 @@ import {
 
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { MockICreateUser, MockUser } from './mocks/user.mock';
+import {
+  MockICreateUser,
+  MockPrismaUser,
+  MockUser,
+  MockUserData,
+} from './mocks/user.mock';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
@@ -70,6 +75,80 @@ describe('User Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not created');
+      }
+    });
+  });
+
+  describe('get user by filter', () => {
+    it('should get by id successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUserData);
+
+      const result = await userRepository.userByFilter({
+        id: MockUserData.id,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockPrismaUser);
+    });
+
+    it('should get by email successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUserData);
+
+      const result = await userRepository.userByFilter({
+        email: MockUserData.contact.email,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockPrismaUser);
+    });
+
+    it('should get by phone successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUserData);
+
+      const result = await userRepository.userByFilter({
+        phone: MockUserData.contact.phone,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockPrismaUser);
+    });
+
+    it('should return null if user not found', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
+
+      const result = await userRepository.userByFilter({
+        phone: FormattedCreatedUser.contact.phone,
+      });
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(null);
+    });
+
+    it('should throw an error if could not get user', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockRejectedValueOnce(
+          new AppError(
+            'user-repository.getUserByFilter',
+            500,
+            'could not get user',
+          ),
+        );
+
+      try {
+        await userRepository.userByFilter({
+          email: FormattedCreatedUser.contact.email,
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not get user');
       }
     });
   });
@@ -227,80 +306,6 @@ describe('User Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not cancelled');
-      }
-    });
-  });
-
-  describe('get user by filter', () => {
-    it('should get a user by id successfully', async () => {
-      jest
-        .spyOn(prismaService.user, 'findFirst')
-        .mockResolvedValueOnce(UnformattedUserResponse);
-
-      const result = await userRepository.userByFilter({
-        id: FormattedCreatedUser.id,
-      });
-
-      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(FormattedUserResponse);
-    });
-
-    it('should get a user by email successfully', async () => {
-      jest
-        .spyOn(prismaService.user, 'findFirst')
-        .mockResolvedValueOnce(UnformattedUserResponse);
-
-      const result = await userRepository.userByFilter({
-        email: FormattedCreatedUser.contact.email,
-      });
-
-      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(FormattedUserResponse);
-    });
-
-    it('should get a user by phone successfully', async () => {
-      jest
-        .spyOn(prismaService.user, 'findFirst')
-        .mockResolvedValueOnce(UnformattedUserResponse);
-
-      const result = await userRepository.userByFilter({
-        phone: FormattedCreatedUser.contact.phone,
-      });
-
-      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(FormattedUserResponse);
-    });
-
-    it('should return null if user not found', async () => {
-      jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
-
-      const result = await userRepository.userByFilter({
-        phone: FormattedCreatedUser.contact.phone,
-      });
-
-      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(null);
-    });
-
-    it('should throw an error if could not get user', async () => {
-      jest
-        .spyOn(prismaService.user, 'findFirst')
-        .mockRejectedValueOnce(
-          new AppError(
-            'user-repository.getUserByFilter',
-            500,
-            'could not get user',
-          ),
-        );
-
-      try {
-        await userRepository.userByFilter({
-          email: FormattedCreatedUser.contact.email,
-        });
-      } catch (error) {
-        expect(error).toBeInstanceOf(AppError);
-        expect(error.code).toBe(500);
-        expect(error.message).toBe('could not get user');
       }
     });
   });
