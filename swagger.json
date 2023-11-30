@@ -700,80 +700,10 @@
       }
     },
 
-    "/user/{id}": {
-      "get": {
-        "summary": "Get user by id",
-        "description": "Route to get an user by id",
-        "tags": ["User"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "description": "User id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                },
-                "example": {
-                  "id": "123456",
-                  "personal": {
-                    "id": "789012",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "socialName": "JD",
-                    "bornDate": "1990-01-01",
-                    "motherName": "Jane Doe",
-                    "updatedAt": "2023-05-10T12:00:00Z"
-                  },
-                  "contact": {
-                    "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com",
-                    "phone": "1234567890",
-                    "updatedAt": "2023-05-10T12:00:00Z"
-                  },
-                  "security": {
-                    "id": "901234",
-                    "status": "ACTIVE",
-                    "updatedAt": "2023-05-11T12:00:00Z"
-                  },
-                  "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-11T12:00:00Z"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/user/filter": {
       "get": {
         "summary": "Get user by filter",
-        "description": "Route to get an user by filter (id ||email || phone)",
+        "description": "Route to get users by filter [id | email | phone]",
         "tags": ["User"],
         "security": [
           {
@@ -852,6 +782,7 @@
                         "status": "ACTIVE",
                         "updatedAt": "2023-05-11T12:00:00Z"
                       },
+                      "allowedChannels": ["WOPHI"],
                       "createdAt": "2023-05-10T12:00:00Z",
                       "updatedAt": "2023-05-11T12:00:00Z"
                     }
@@ -860,6 +791,24 @@
                     "summary": "User not found",
                     "value": {}
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -878,6 +827,76 @@
                     "status": true
                   },
                   "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "summary": "Get user by id",
+        "description": "Route to get an user by id",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "phone": "1234567890",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "ACTIVE",
+                    "updatedAt": "2023-05-11T12:00:00Z"
+                  },
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-11T12:00:00Z"
                 }
               }
             }
