@@ -52,7 +52,6 @@ export interface PrismaUser {
     status: string;
     updated_at: Date;
   };
-  origin_channel: Channel;
   allowed_channels: Channel[];
   created_at: Date;
   updated_at: Date;

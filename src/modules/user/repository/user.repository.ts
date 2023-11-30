@@ -172,6 +172,7 @@ export class UserRepository implements IUserRepository<User> {
         'recover_token',
         'ip_address_origin',
         'on_update_ip_address',
+        'origin_channel',
         'created_at',
       ];
 
