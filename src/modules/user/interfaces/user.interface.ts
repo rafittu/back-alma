@@ -10,16 +10,19 @@ export interface IUser {
     socialName?: string;
     bornDate: string;
     motherName: string;
+    updatedAt?: Date;
   };
   contact: {
     id: string;
     username?: string;
     email: string;
     phone: string;
+    updatedAt?: Date;
   };
   security: {
     id: string;
     status: string;
+    updatedAt?: Date;
   };
   allowedChannels: Channel[];
   createdAt: Date;

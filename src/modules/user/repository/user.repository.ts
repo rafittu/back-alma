@@ -8,6 +8,7 @@ import {
   UserPersonalInfo,
   UserSecurityInfo,
   UnformattedUser,
+  PrismaUser,
 } from '../interfaces/repository.interface';
 import {
   ICreateUser,
@@ -80,6 +81,24 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
+  private fieldsToDelete(prismaUser: PrismaUser, fields: string[]): PrismaUser {
+    fields.forEach((field) => {
+      if (field === 'updated_at') {
+        return;
+      }
+
+      if (field !== 'created_at') {
+        delete prismaUser[field];
+      }
+
+      delete prismaUser.personal[field];
+      delete prismaUser.contact[field];
+      delete prismaUser.security[field];
+    });
+
+    return prismaUser;
+  }
+
   async createUser(data: ICreateUser): Promise<User> {
     const userData = {
       personal: {
@@ -111,6 +130,59 @@ export class UserRepository implements IUserRepository<User> {
       }
 
       throw new AppError('user-repository.createUser', 500, 'user not created');
+    }
+  }
+
+  async userByFilter(filter: IUserFilter): Promise<PrismaUser | null> {
+    const { id, email, phone } = filter;
+
+    try {
+      const userQuery: Prisma.UserWhereInput = {
+        ...(id && { id }),
+        ...(email || phone
+          ? {
+              contact: {
+                ...(email && { email }),
+                ...(phone && { phone }),
+              },
+            }
+          : {}),
+      };
+
+      const user = await this.prisma.user.findFirst({
+        where: userQuery,
+        include: {
+          personal: true,
+          contact: true,
+          security: true,
+        },
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      const fieldsToDelete = [
+        'user_personal_info_id',
+        'user_contact_info_id',
+        'user_security_info_id',
+        'password',
+        'salt',
+        'confirmation_token',
+        'recover_token',
+        'ip_address_origin',
+        'on_update_ip_address',
+        'origin_channel',
+        'created_at',
+      ];
+
+      return this.fieldsToDelete(user, fieldsToDelete);
+    } catch (error) {
+      throw new AppError(
+        'user-repository.getUserByFilter',
+        500,
+        'could not get user',
+      );
     }
   }
 
@@ -276,49 +348,6 @@ export class UserRepository implements IUserRepository<User> {
         'user-repository.deleteUser',
         500,
         'user not cancelled',
-      );
-    }
-  }
-
-  async userByFilter(filter: IUserFilter): Promise<User | null> {
-    const { id, email, phone } = filter;
-
-    try {
-      const userQuery: Prisma.UserWhereInput = {};
-
-      id ? (userQuery.id = id) : userQuery;
-      if (email || phone) {
-        userQuery.contact = {
-          ...(email && { email }),
-          ...(phone && { phone }),
-        };
-      }
-
-      const user = await this.prisma.user.findFirst({
-        where: userQuery,
-        include: {
-          personal: true,
-          contact: true,
-          security: {
-            select: {
-              status: true,
-              updated_at: true,
-            },
-          },
-        },
-      });
-
-      if (!user) {
-        return null;
-      }
-
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
-    } catch (error) {
-      throw new AppError(
-        'user-repository.getUserByFilter',
-        500,
-        'could not get user',
       );
     }
   }

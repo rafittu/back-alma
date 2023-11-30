@@ -37,15 +37,18 @@ export class UserController {
 
   @isPublic()
   @Post('/signup')
-  create(@Req() req: Request, @Body() body: CreateUserDto): Promise<IUser> {
+  async create(
+    @Req() req: Request,
+    @Body() body: CreateUserDto,
+  ): Promise<IUser> {
     const ipAddress = req.socket.remoteAddress;
 
-    return this.createUserService.execute(body, ipAddress);
+    return await this.createUserService.execute(body, ipAddress);
   }
 
   @Get('/filter')
-  getByFilter(@Query() filter: IUserFilter): Promise<TemporaryUser | null> {
-    return this.getUserByFilterService.execute(filter);
+  async getByFilter(@Query() filter: IUserFilter): Promise<IUser | null> {
+    return await this.getUserByFilterService.execute(filter);
   }
 
   @Get('/:id')

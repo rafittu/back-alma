@@ -75,6 +75,16 @@ export class CreateUserService {
   }
 
   async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
+    // const { allowedChannels } = await this.userRepository.userByFilter(
+    //   data.email,
+    // );
+
+    // if (allowedChannels) {
+    //   allowedChannels.includes(data.originChannel)
+    //     ? 'envia token de confirmação para acessar nova plataforma'
+    //     : 'segue o baile';
+    // }
+
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
     }

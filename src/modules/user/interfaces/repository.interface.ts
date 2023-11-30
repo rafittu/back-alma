@@ -1,5 +1,6 @@
 import { ICreateUser, IUpdateUser, IUserFilter } from './user.interface';
 import { UserStatus } from './user-status.enum';
+import { Channel } from '@prisma/client';
 
 export interface UserPersonalInfo {
   first_name: string;
@@ -26,6 +27,34 @@ export interface UserSecurityInfo {
   on_update_ip_address?: string;
   status: UserStatus;
   updated_at?: string;
+}
+
+export interface PrismaUser {
+  id: string;
+  personal: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    social_name?: string;
+    born_date: string;
+    mother_name: string;
+    updated_at: Date;
+  };
+  contact: {
+    id: string;
+    username?: string;
+    email: string;
+    phone: string;
+    updated_at: Date;
+  };
+  security: {
+    id: string;
+    status: string;
+    updated_at: Date;
+  };
+  allowed_channels: Channel[];
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface UnformattedUser {
@@ -89,8 +118,8 @@ export interface TemporaryUser {
 
 export interface IUserRepository<User> {
   createUser(data: ICreateUser): Promise<User>;
+  userByFilter(filter: IUserFilter): Promise<PrismaUser | null>;
   getUserById(userId: string): Promise<User>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
-  userByFilter(filter: IUserFilter): Promise<User | null>;
 }
