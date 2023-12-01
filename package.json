@@ -1,5 +1,5 @@
 {
-  "name": "alma",
+  "name": "@wophi/alma-api",
   "version": "1.2.0",
   "description": "back-end api to manage users",
   "author": "Rafael Ribeiro",
