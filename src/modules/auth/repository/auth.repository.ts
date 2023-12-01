@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
-import { User } from '@prisma/client';
+import { Channel, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { AppError } from '../../../common/errors/Error';
@@ -64,9 +64,10 @@ export class AuthRepository implements IAuthRepository<User> {
   async confirmAccountEmail(
     confirmationToken: string,
     status: UserStatus,
+    newChannel?: Channel,
   ): Promise<object> {
     try {
-      await this.prisma.userSecurityInfo.update({
+      const userInfo = await this.prisma.userSecurityInfo.update({
         data: {
           confirmation_token: null,
           status,
@@ -74,7 +75,25 @@ export class AuthRepository implements IAuthRepository<User> {
         where: {
           confirmation_token: confirmationToken,
         },
+        select: {
+          User: {
+            select: {
+              id: true,
+            },
+          },
+        },
       });
+
+      if (newChannel) {
+        await this.prisma.user.update({
+          data: {
+            allowed_channels: {
+              push: newChannel,
+            },
+          },
+          where: { id: userInfo.User[0].id },
+        });
+      }
 
       return {
         message: 'account email successfully confirmed',
