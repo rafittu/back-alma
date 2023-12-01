@@ -21,6 +21,8 @@ import { mailerConfig } from './modules/utils/configs/mailer.config';
         POSTGRES_HOST_CONTAINER: Joi.string().required(),
         REDIS_HOST_CONTAINER: Joi.string().required(),
         REDIS_PASSWORD: Joi.string().required(),
+        REDIS_CONFIG_HOST: Joi.string().required(),
+        REDIS_CONFIG_PORT: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION: Joi.string().required(),
         MAILER_EMAIL: Joi.string().required(),
