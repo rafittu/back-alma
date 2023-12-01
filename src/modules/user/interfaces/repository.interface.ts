@@ -1,4 +1,9 @@
-import { ICreateUser, IUpdateUser, IUserFilter } from './user.interface';
+import {
+  ICreateUser,
+  IRequestChannelAccess,
+  IUpdateUser,
+  IUserFilter,
+} from './user.interface';
 import { UserStatus } from './user-status.enum';
 import { Channel } from '@prisma/client';
 
@@ -118,6 +123,7 @@ export interface TemporaryUser {
 
 export interface IUserRepository<User> {
   createUser(data: ICreateUser): Promise<User>;
+  createAccessToAdditionalChannel(data: IRequestChannelAccess): Promise<void>;
   userByFilter(filter: IUserFilter): Promise<PrismaUser | null>;
   getUserById(userId: string): Promise<User>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;

@@ -1,6 +1,24 @@
 import { Channel } from '@prisma/client';
 import { UserStatus } from './user-status.enum';
 
+export interface ICreateUser {
+  firstName: string;
+  lastName: string;
+  socialName?: string;
+  bornDate: string;
+  motherName: string;
+  username?: string;
+  email: string;
+  phone: string;
+  password: string;
+  salt: string;
+  confirmationToken: string;
+  ipAddressOrigin: string;
+  originChannel: Channel;
+  allowedChannels: Channel[];
+  status: UserStatus;
+}
+
 export interface IUser {
   id: string;
   personal: {
@@ -29,22 +47,10 @@ export interface IUser {
   updatedAt: Date;
 }
 
-export interface ICreateUser {
-  firstName: string;
-  lastName: string;
-  socialName?: string;
-  bornDate: string;
-  motherName: string;
-  username?: string;
-  email: string;
-  phone: string;
-  password: string;
-  salt: string;
+export interface IRequestChannelAccess {
+  id: string;
+  ipAddress: string;
   confirmationToken: string;
-  ipAddressOrigin: string;
-  originChannel: Channel;
-  allowedChannels: Channel[];
-  status: UserStatus;
 }
 
 export interface IUpdateUser {
