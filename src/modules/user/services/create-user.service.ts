@@ -9,6 +9,7 @@ import { ICreateUser, IUser } from '../interfaces/user.interface';
 import { PasswordService } from './password.service';
 import { EmailService } from './email.service';
 import { User } from '@prisma/client';
+import { RedisCacheService } from '../../../modules/auth/infra/redis/redis-cache.service';
 
 @Injectable()
 export class CreateUserService {
@@ -17,6 +18,7 @@ export class CreateUserService {
     private readonly userRepository: IUserRepository<User>,
     private readonly passwordService: PasswordService,
     private readonly emailService: EmailService,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
 
   private validateIpAddress(ip: string): boolean {
@@ -75,36 +77,56 @@ export class CreateUserService {
   }
 
   async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
-    const {
-      id,
-      allowed_channels: allowedChannels,
-      contact,
-    } = await this.userRepository.userByFilter({
-      email: data.email,
-    });
+    if (!this.validateIpAddress(ipAddress)) {
+      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+    }
 
-    if (allowedChannels) {
+    const user =
+      (await this.userRepository.userByFilter({
+        email: data.email,
+      })) ||
+      (await this.userRepository.userByFilter({
+        phone: data.phone,
+      }));
+
+    if (user && !user.allowed_channels.includes(data.originChannel)) {
       try {
         const confirmationToken = this.passwordService.generateRandomToken();
 
-        console.log(confirmationToken);
+        await this.userRepository.createAccessToAdditionalChannel(
+          user.security.id,
+          ipAddress,
+          confirmationToken,
+        );
+
+        const redisExpirationTime = 1620;
+        await this.redisCacheService.set(
+          confirmationToken,
+          data.originChannel,
+          redisExpirationTime,
+        );
+
+        await this.emailService.sendConfirmationEmail(
+          data.email,
+          confirmationToken,
+        );
 
         throw new AppError(
           'user-service.createUser',
           409,
-          `${id} cadastrado na plataforma ${allowedChannels}. Foi enviado um token de confirmação para ${contact.email}. Após confirmação, utilize os mesmo dados de ${allowedChannels} para acessar ${data.originChannel}.`,
+          `User '${user.id}' registered on [ ${user.allowed_channels} ] platform. A confirmation token was sent to '${user.contact.email}' and after confirmation, use the same credentials from ${user.allowed_channels} to access [ ${data.originChannel} ].`,
         );
       } catch (error) {
-        throw error;
+        if (error instanceof AppError) {
+          throw error;
+        }
+
+        throw new AppError(
+          'user-service.createUser',
+          500,
+          'failed to create access to new channel',
+        );
       }
-
-      // allowedChannels.includes(data.originChannel)
-      // ? '1- Gera novo token; 2- Associar o token ao id do usuário e originChannel desejado; 3- Salva o novo token no banco de dados; 4- Enviar email de confirmação com o novo token;'
-      // : 'segue o baile';
-    }
-
-    if (!this.validateIpAddress(ipAddress)) {
-      throw new AppError('user-service.createUser', 403, 'invalid ip address');
     }
 
     if (data.password !== data.passwordConfirmation) {
