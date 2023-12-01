@@ -93,11 +93,11 @@ export class CreateUserService {
       try {
         const confirmationToken = this.passwordService.generateRandomToken();
 
-        await this.userRepository.createAccessToAdditionalChannel(
-          user.security.id,
+        await this.userRepository.createAccessToAdditionalChannel({
+          id: user.security.id,
           ipAddress,
           confirmationToken,
-        );
+        });
 
         const redisExpirationTime = 1620;
         await this.redisCacheService.set(
