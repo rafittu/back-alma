@@ -12,6 +12,7 @@ import {
 } from '../interfaces/repository.interface';
 import {
   ICreateUser,
+  IRequestChannelAccess,
   IUpdateUser,
   IUserFilter,
 } from '../interfaces/user.interface';
@@ -130,6 +131,30 @@ export class UserRepository implements IUserRepository<User> {
       }
 
       throw new AppError('user-repository.createUser', 500, 'user not created');
+    }
+  }
+
+  async createAccessToAdditionalChannel(
+    data: IRequestChannelAccess,
+  ): Promise<void> {
+    const { id, ipAddress, confirmationToken } = data;
+
+    try {
+      await this.prisma.userSecurityInfo.update({
+        data: {
+          confirmation_token: confirmationToken,
+          on_update_ip_address: ipAddress,
+        },
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new AppError(
+        'user-repository.createAccessToAdditionalChannel',
+        500,
+        'failed to create access to the new channel',
+      );
     }
   }
 
