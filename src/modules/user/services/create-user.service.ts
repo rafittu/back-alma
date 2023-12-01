@@ -75,15 +75,33 @@ export class CreateUserService {
   }
 
   async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
-    // const { allowedChannels } = await this.userRepository.userByFilter(
-    //   data.email,
-    // );
+    const {
+      id,
+      allowed_channels: allowedChannels,
+      contact,
+    } = await this.userRepository.userByFilter({
+      email: data.email,
+    });
 
-    // if (allowedChannels) {
-    //   allowedChannels.includes(data.originChannel)
-    //     ? 'envia token de confirmação para acessar nova plataforma'
-    //     : 'segue o baile';
-    // }
+    if (allowedChannels) {
+      try {
+        const confirmationToken = this.passwordService.generateRandomToken();
+
+        console.log(confirmationToken);
+
+        throw new AppError(
+          'user-service.createUser',
+          409,
+          `${id} cadastrado na plataforma ${allowedChannels}. Foi enviado um token de confirmação para ${contact.email}. Após confirmação, utilize os mesmo dados de ${allowedChannels} para acessar ${data.originChannel}.`,
+        );
+      } catch (error) {
+        throw error;
+      }
+
+      // allowedChannels.includes(data.originChannel)
+      // ? '1- Gera novo token; 2- Associar o token ao id do usuário e originChannel desejado; 3- Salva o novo token no banco de dados; 4- Enviar email de confirmação com o novo token;'
+      // : 'segue o baile';
+    }
 
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
