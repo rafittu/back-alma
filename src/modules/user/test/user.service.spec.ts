@@ -4,7 +4,6 @@ import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
 import { DeleteUserService } from '../services/delete-user.service';
 import { UserRepository } from '../repository/user.repository';
-import { MailerService } from '@nestjs-modules/mailer';
 import {
   invalidUserId,
   mockCreateUser,
@@ -30,6 +29,9 @@ import {
 } from './mocks/user.mock';
 import { PasswordService } from '../services/password.service';
 import { EmailService } from '../services/email.service';
+import { RedisCacheService } from '../../../modules/auth/infra/redis/redis-cache.service';
+import { Channel } from '@prisma/client';
+import { MailerService } from '@nestjs-modules/mailer';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
@@ -39,9 +41,9 @@ describe('User Services', () => {
   let getUserByFilterService: GetUserByFilterService;
   let passwordService: PasswordService;
   let emailService: EmailService;
+  let redisCacheService: RedisCacheService;
 
   let userRepository: UserRepository;
-  // let mailerService: MailerService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -51,12 +53,32 @@ describe('User Services', () => {
         UpdateUserService,
         DeleteUserService,
         GetUserByFilterService,
-        PasswordService,
-        EmailService,
+        {
+          provide: PasswordService,
+          useValue: {
+            hashPassword: jest.fn().mockResolvedValueOnce('hashed_password'),
+            generateRandomToken: jest
+              .fn()
+              .mockResolvedValueOnce('random_token'),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendConfirmationEmail: jest.fn(),
+          },
+        },
+        {
+          provide: RedisCacheService,
+          useValue: {
+            set: jest.fn(),
+          },
+        },
         {
           provide: UserRepository,
           useValue: {
             createUser: jest.fn().mockResolvedValue(MockUser),
+            createAccessToAdditionalChannel: jest.fn().mockResolvedValue(null),
             userByFilter: jest.fn().mockResolvedValue(MockPrismaUser),
             getUserById: jest.fn().mockResolvedValue(mockNewUser),
             updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
@@ -81,9 +103,9 @@ describe('User Services', () => {
     );
     passwordService = module.get<PasswordService>(PasswordService);
     emailService = module.get<EmailService>(EmailService);
+    redisCacheService = module.get<RedisCacheService>(RedisCacheService);
 
     userRepository = module.get<UserRepository>(UserRepository);
-    // mailerService = module.get<MailerService>(MailerService);
   });
 
   afterEach(() => {
@@ -103,6 +125,8 @@ describe('User Services', () => {
     expect(updateUserService).toBeDefined();
     expect(deleteUserService).toBeDefined();
     expect(getUserByFilterService).toBeDefined();
+    expect(emailService).toBeDefined();
+    expect(redisCacheService).toBeDefined();
   });
 
   describe('create user', () => {
@@ -110,7 +134,6 @@ describe('User Services', () => {
       jest.spyOn(createUserService as any, 'validateIpAddress');
       jest.spyOn(createUserService as any, 'formatSecurityInfo');
       jest.spyOn(createUserService as any, 'mapUserToReturn');
-      jest.spyOn(emailService, 'sendConfirmationEmail');
 
       const result = await createUserService.execute(
         MockCreateUserDto,
@@ -127,6 +150,42 @@ describe('User Services', () => {
       expect(createUserService['mapUserToReturn']).toHaveBeenCalledTimes(1);
       expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
+    });
+
+    it('should create access to new channel successfully', async () => {
+      jest
+        .spyOn(userRepository, 'userByFilter')
+        .mockResolvedValueOnce(MockUserData);
+
+      MockUserData.allowed_channels = [Channel.MIAU];
+
+      try {
+        await createUserService.execute(MockCreateUserDto, MockIpAddress);
+      } catch (error) {
+        expect(passwordService.generateRandomToken).toHaveBeenCalledTimes(1);
+        expect(
+          userRepository.createAccessToAdditionalChannel,
+        ).toHaveBeenCalledTimes(1);
+        expect(redisCacheService.set).toHaveBeenCalledTimes(1);
+        expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it('should throw an error if access to new channel is not created', async () => {
+      jest
+        .spyOn(userRepository, 'userByFilter')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(MockUserData);
+
+      jest.spyOn(redisCacheService, 'set').mockRejectedValueOnce(new Error());
+
+      try {
+        await createUserService.execute(MockCreateUserDto, MockIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to create access to new channel');
+      }
     });
 
     it(`should throw an error if 'ipAddress' is invalid`, async () => {
