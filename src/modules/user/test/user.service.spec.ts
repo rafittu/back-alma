@@ -80,7 +80,7 @@ describe('User Services', () => {
             createUser: jest.fn().mockResolvedValue(MockUser),
             createAccessToAdditionalChannel: jest.fn().mockResolvedValue(null),
             userByFilter: jest.fn().mockResolvedValue(MockPrismaUser),
-            getUserById: jest.fn().mockResolvedValue(mockNewUser),
+            getUserById: jest.fn().mockResolvedValue(MockPrismaUser),
             updateUser: jest.fn().mockResolvedValue(mockUpdateUserResponse),
             deleteUser: jest.fn().mockResolvedValue(mockDeleteUserResponse),
           },
@@ -258,24 +258,24 @@ describe('User Services', () => {
     });
   });
 
-  // describe('get user by id', () => {
-  //   it('should get an user successfully', async () => {
-  //     const result = await getUserByIdService.execute(mockNewUser.id);
+  describe('get user by id', () => {
+    it('should get an user successfully', async () => {
+      const result = await getUserByIdService.execute(MockUserData.id);
 
-  //     expect(userRepository.getUserById).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(mockNewUser);
-  //   });
+      expect(userRepository.getUserById).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockIUser);
+    });
 
-  //   it('should throw an error if user not found', async () => {
-  //     try {
-  //       await getUserByIdService.execute(invalidUserId);
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(404);
-  //       expect(error.message).toBe('user not found');
-  //     }
-  //   });
-  // });
+    it('should throw an error if user not found', async () => {
+      try {
+        await getUserByIdService.execute('invalid_id');
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user not found');
+      }
+    });
+  });
 
   // describe('update user', () => {
   //   it('should update an user successfully', async () => {
