@@ -3,24 +3,26 @@ import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
 import {
   IUserRepository,
-  TemporaryUser as User,
+  PrismaUser,
 } from '../interfaces/repository.interface';
-import { IUpdateUser } from '../interfaces/user.interface';
-import { MailerService } from '@nestjs-modules/mailer';
+import { IUser } from '../interfaces/user.interface';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { EmailService } from './email.service';
+import { User } from '@prisma/client';
+import { PasswordService } from './password.service';
+import { mapUserToReturn } from 'src/modules/utils/helpers/helpers-user-module';
 
 @Injectable()
 export class UpdateUserService {
   constructor(
     @Inject(UserRepository)
     private userRepository: IUserRepository<User>,
-    private mailerService: MailerService,
+    private readonly passwordService: PasswordService,
+    private readonly emailService: EmailService,
   ) {}
 
-  async execute(data: IUpdateUser, userId: string): Promise<User> {
-    if (
-      data.newPassword &&
-      (!data.oldPassword || data.newPassword != data.passwordConfirmation)
-    ) {
+  private validatePassword(data: UpdateUserDto): void {
+    if (!data.oldPassword || data.newPassword !== data.passwordConfirmation) {
       throw new AppError(
         'user-service.updateUser',
         422,
@@ -29,27 +31,62 @@ export class UpdateUserService {
           : 'new passwords do not match',
       );
     }
+  }
 
-    const user = await this.userRepository.updateUser(data, userId);
+  private formatUserToReturn(user: PrismaUser): IUser {
+    return mapUserToReturn(user);
+  }
 
-    if (data.email) {
-      const email = {
-        to: user.contact.email,
-        from: 'noreply@application.com',
-        subject: 'ALMA - Email de confirmação',
-        template: 'email-confirmation',
-        context: {
-          token: user.security.confirmationToken,
-        },
-      };
+  async execute(data: UpdateUserDto, userId: string): Promise<IUser> {
+    try {
+      let securityInfo;
 
-      await this.mailerService.sendMail(email);
-      delete user.security.confirmationToken;
+      if (data.newPassword) {
+        this.validatePassword(data);
 
-      return user;
+        const { password, salt } = await this.passwordService.hashPassword(
+          data.newPassword,
+        );
+
+        securityInfo = {
+          password,
+          salt,
+        };
+      }
+
+      if (data.email) {
+        const confirmationToken = this.passwordService.generateRandomToken();
+
+        securityInfo = {
+          ...securityInfo,
+          confirmationToken,
+        };
+      }
+
+      const user = await this.userRepository.updateUser(
+        data,
+        userId,
+        securityInfo,
+      );
+
+      if (securityInfo.confirmationToken) {
+        await this.emailService.sendConfirmationEmail(
+          user.contact.email,
+          securityInfo.confirmationToken,
+        );
+      }
+
+      return this.formatUserToReturn(user);
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new AppError(
+        'user-service.updateUser',
+        500,
+        'failed to update user data',
+      );
     }
-
-    delete user.security.confirmationToken;
-    return user;
   }
 }
