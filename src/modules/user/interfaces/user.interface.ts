@@ -53,23 +53,6 @@ export interface IRequestChannelAccess {
   confirmationToken: string;
 }
 
-export interface IUpdateUser {
-  firstName?: string;
-  lastName?: string;
-  socialName?: string;
-  bornDate?: string;
-  motherName?: string;
-  username?: string;
-  email?: string;
-  phone?: string;
-  password?: string;
-  oldPassword?: string;
-  newPassword?: string;
-  passwordConfirmation?: string;
-  ipAddress?: string;
-  status?: UserStatus;
-}
-
 export interface IUserFilter {
   id?: string;
   email?: string;

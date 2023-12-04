@@ -60,7 +60,7 @@ export class UserController {
   async updateUser(
     @Param('id') userId: string,
     @Body() body: UpdateUserDto,
-  ): Promise<TemporaryUser> {
+  ): Promise<IUser> {
     return await this.updateUserService.execute(body, userId);
   }
 
