@@ -6,7 +6,11 @@ import {
   UserPersonalInfo,
   UserSecurityInfo,
 } from '@prisma/client';
-import { ICreateUser, IUser } from '../../interfaces/user.interface';
+import {
+  ICreateUser,
+  IRequestChannelAccess,
+  IUser,
+} from '../../interfaces/user.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { Request } from 'express';
@@ -62,6 +66,12 @@ export const MockUser: User = {
 
   created_at: new Date(),
   updated_at: new Date(),
+};
+
+export const MockRequestChannelAccess: IRequestChannelAccess = {
+  id: MockUser.user_security_info_id,
+  ipAddress: MockIpAddress,
+  confirmationToken: faker.string.alphanumeric(),
 };
 
 const MockUserPersonalInfo: UserPersonalInfo = {

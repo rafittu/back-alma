@@ -20,6 +20,7 @@ import * as bcrypt from 'bcrypt';
 import {
   MockICreateUser,
   MockPrismaUser,
+  MockRequestChannelAccess,
   MockUser,
   MockUserData,
 } from './mocks/user.mock';
@@ -75,6 +76,42 @@ describe('User Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not created');
+      }
+    });
+
+    it('should create access to additional channel successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
+
+      await userRepository.createAccessToAdditionalChannel(
+        MockRequestChannelAccess,
+      );
+
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error if access to new channel is not created', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockRejectedValueOnce(
+          new AppError(
+            'user-repository.createAccessToAdditionalChannel',
+            500,
+            'failed to create access to the new channel',
+          ),
+        );
+
+      try {
+        await userRepository.createAccessToAdditionalChannel(
+          MockRequestChannelAccess,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe(
+          'failed to create access to the new channel',
+        );
       }
     });
   });
