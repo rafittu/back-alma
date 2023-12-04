@@ -125,7 +125,7 @@ export interface IUserRepository<User> {
   createUser(data: ICreateUser): Promise<User>;
   createAccessToAdditionalChannel(data: IRequestChannelAccess): Promise<void>;
   userByFilter(filter: IUserFilter): Promise<PrismaUser | null>;
-  getUserById(userId: string): Promise<User>;
+  getUserById(userId: string): Promise<PrismaUser>;
   updateUser(data: IUpdateUser, userId: string): Promise<User>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
 }

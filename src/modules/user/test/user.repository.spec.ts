@@ -190,34 +190,34 @@ describe('User Repository', () => {
     });
   });
 
-  // describe('get user by id', () => {
-  //   it('should get a user by id successfully', async () => {
-  //     jest
-  //       .spyOn(prismaService.user, 'findFirst')
-  //       .mockResolvedValueOnce(UnformattedUserResponse);
+  describe('get user by id', () => {
+    it('should get a user by id successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUserData);
 
-  //     const result = await userRepository.getUserById(FormattedCreatedUser.id);
+      const result = await userRepository.getUserById(MockUserData.id);
 
-  //     expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(FormattedUserResponse);
-  //   });
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockPrismaUser);
+    });
 
-  //   it('should throw an error if user is not found', async () => {
-  //     jest
-  //       .spyOn(prismaService.user, 'findFirst')
-  //       .mockRejectedValueOnce(
-  //         new AppError('user-repository.getUserById', 404, 'user not found'),
-  //       );
+    it('should throw an error if user is not found', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockRejectedValueOnce(
+          new AppError('user-repository.getUserById', 404, 'user not found'),
+        );
 
-  //     try {
-  //       await userRepository.getUserById(FormattedCreatedUser.id);
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(404);
-  //       expect(error.message).toBe('user not found');
-  //     }
-  //   });
-  // });
+      try {
+        await userRepository.getUserById(FormattedCreatedUser.id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user not found');
+      }
+    });
+  });
 
   // describe('update user', () => {
   //   it('should update user data successfully', async () => {
