@@ -135,13 +135,29 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "[ 'email', 'phone' ] already in use",
-                    "code": "user-repository.createUser",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "field already in use by another user",
+                    "value": {
+                      "error": {
+                        "message": "[ 'email', 'phone' ] already in use",
+                        "code": "user-repository.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "accessing new channel",
+                    "value": {
+                      "error": {
+                        "message": "User 'user.id' registered on [ user.allowed_channels ] platform. A confirmation token was sent to 'user.contact.email' and after confirmation, use the same credentials from 'user.allowed_channels' to access [ data.originChannel ].",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -201,6 +217,28 @@
                       "error": {
                         "message": "failed to send email for account confirmation",
                         "code": "email-service.sendConfirmationEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example4": {
+                    "summary": "failed to create access to new channel service",
+                    "value": {
+                      "error": {
+                        "message": "failed to create access to new channel",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example5": {
+                    "summary": "failed to create access to new channel repository",
+                    "value": {
+                      "error": {
+                        "message": "failed to create access to new channel",
+                        "code": "user-service.createUser",
                         "status": true
                       },
                       "data": {}
