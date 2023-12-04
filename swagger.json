@@ -933,8 +933,45 @@
                     "status": "ACTIVE",
                     "updatedAt": "2023-05-11T12:00:00Z"
                   },
+                  "allowedChannels": ["WOPHI"],
                   "createdAt": "2023-05-10T12:00:00Z",
                   "updatedAt": "2023-05-11T12:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not found",
+                    "code": "user-repository.getUserById",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
