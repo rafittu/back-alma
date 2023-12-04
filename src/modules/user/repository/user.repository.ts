@@ -211,24 +211,32 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async getUserById(userId: string): Promise<User> {
+  async getUserById(userId: string): Promise<PrismaUser> {
     try {
       const user = await this.prisma.user.findFirst({
         where: { id: userId },
         include: {
           personal: true,
           contact: true,
-          security: {
-            select: {
-              status: true,
-              updated_at: true,
-            },
-          },
+          security: true,
         },
       });
 
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
+      const fieldsToDelete = [
+        'user_personal_info_id',
+        'user_contact_info_id',
+        'user_security_info_id',
+        'password',
+        'salt',
+        'confirmation_token',
+        'recover_token',
+        'ip_address_origin',
+        'on_update_ip_address',
+        'origin_channel',
+        'created_at',
+      ];
+
+      return this.fieldsToDelete(user, fieldsToDelete);
     } catch (error) {
       throw new AppError('user-repository.getUserById', 404, 'user not found');
     }
