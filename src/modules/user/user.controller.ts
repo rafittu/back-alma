@@ -52,7 +52,7 @@ export class UserController {
   }
 
   @Get('/:id')
-  getById(@Param('id') userId: string): Promise<TemporaryUser> {
+  getById(@Param('id') userId: string): Promise<IUser> {
     return this.getUserByIdService.execute(userId);
   }
 
