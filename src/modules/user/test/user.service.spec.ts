@@ -118,6 +118,8 @@ describe('User Services', () => {
     MockIUser.personal.updatedAt = MockPrismaUser.updated_at;
     MockIUser.contact.updatedAt = MockPrismaUser.updated_at;
     MockIUser.security.updatedAt = MockPrismaUser.updated_at;
+
+    MockUpdateUserDto.oldPassword = MockCreateUserDto.password;
   });
 
   it('should be defined', () => {
@@ -296,37 +298,74 @@ describe('User Services', () => {
       expect(result).toEqual(MockIUser);
     });
 
-    // it('should send an email confirmation if updating user email', async () => {
-    //   await updateUserService.execute(mockUpdateUserEmail, mockNewUser.id);
+    it(`should throw an error if 'ipAddress' is invalid`, async () => {
+      const invalidIpAddress = 'invalid_ip_address';
 
-    //   expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-    // });
+      try {
+        await updateUserService.execute(
+          MockUpdateUserDto,
+          MockIpAddress,
+          invalidIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid ip address');
+      }
+    });
 
-    // it(`should throw an error if doesn't contain 'oldPassword' field when updating password`, async () => {
-    //   try {
-    //     await updateUserService.execute(
-    //       updatePasswordInvalidBody,
-    //       mockNewUser.id,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(422);
-    //     expect(error.message).toBe(`missing 'oldPassword' field`);
-    //   }
-    // });
+    it(`should throw an error if 'newPassword' and 'passwordConfirmation' doesn't match`, async () => {
+      const invalidPasswordBody = {
+        ...MockUpdateUserDto,
+        newPassword: 'invalid_password',
+      };
 
-    // it(`should throw an error if 'newPassword' and 'passwordConfirmation' doesn't match`, async () => {
-    //   try {
-    //     await updateUserService.execute(
-    //       mockUpdateAccountPassword,
-    //       mockNewUser.id,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(422);
-    //     expect(error.message).toBe('new passwords do not match');
-    //   }
-    // });
+      try {
+        await updateUserService.execute(
+          invalidPasswordBody,
+          MockUser.id,
+          MockIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(422);
+        expect(error.message).toBe('new passwords do not match');
+      }
+    });
+
+    it(`should throw an error if 'oldPassword' is missing`, async () => {
+      delete MockUpdateUserDto.oldPassword;
+
+      try {
+        await updateUserService.execute(
+          MockUpdateUserDto,
+          MockUser.id,
+          MockIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(422);
+        expect(error.message).toBe(`missing 'oldPassword' field`);
+      }
+    });
+
+    it(`should throw an error if internal error happens`, async () => {
+      jest
+        .spyOn(userRepository, 'updateUser')
+        .mockRejectedValueOnce(new Error());
+
+      try {
+        await updateUserService.execute(
+          MockUpdateUserDto,
+          MockUser.id,
+          MockIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to update user data');
+      }
+    });
   });
 
   // describe('delete user', () => {
