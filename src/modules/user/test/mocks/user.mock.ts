@@ -9,12 +9,14 @@ import {
 import {
   ICreateUser,
   IRequestChannelAccess,
+  ISecurityData,
   IUser,
 } from '../../interfaces/user.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { Request } from 'express';
 import { PrismaUser } from '../../interfaces/repository.interface';
+import { UpdateUserDto } from '../../dto/update-user.dto';
 
 export const MockFakeRequest: Request = {
   socket: {
@@ -168,4 +170,20 @@ export const MockIUser: IUser = {
   allowedChannels: MockPrismaUser.allowed_channels,
   createdAt: MockPrismaUser.created_at,
   updatedAt: MockPrismaUser.updated_at,
+};
+
+export const MockUpdateUserDto: UpdateUserDto = {
+  username: faker.internet.userName(),
+  email: faker.internet.email(),
+  oldPassword: MockICreateUser.password,
+  newPassword: 'faker.internet.password()',
+  passwordConfirmation: 'faker.internet.password()',
+};
+
+export const MockUpdateSecurityData: ISecurityData = {
+  password: faker.internet.password(),
+  salt: faker.string.binary(),
+  confirmationToken: faker.string.alphanumeric(),
+  onUpdateIpAddress: MockIpAddress,
+  status: UserStatus.PENDING_CONFIRMATION,
 };
