@@ -981,7 +981,7 @@
     },
     "/user/update/{id}": {
       "patch": {
-        "summary": "Update user info",
+        "summary": "Update user",
         "description": "Route to update user data",
         "tags": ["User"],
         "security": [
@@ -1026,9 +1026,10 @@
                   }
                 },
                 "example2": {
-                  "summary": "Example of updating username",
+                  "summary": "Example of updating username and email",
                   "value": {
-                    "username": "Jd"
+                    "username": "Jd",
+                    "email": "jd@mail.com"
                   }
                 }
               }
@@ -1050,39 +1051,25 @@
                     "firstName": "John",
                     "lastName": "Doe",
                     "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
                     "updatedAt": "2023-05-10T12:00:00Z"
                   },
                   "contact": {
                     "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com",
+                    "username": "jd",
+                    "email": "jd@mail.com",
+                    "phone": "1234567890",
                     "updatedAt": "2023-05-13T12:00:00Z"
                   },
                   "security": {
                     "id": "901234",
                     "status": "ACTIVE",
-                    "updatedAt": "2023-05-11T12:00:00Z"
+                    "updatedAt": "2023-12-11T12:00:00Z"
                   },
+                  "allowedChannels": ["WOPHI"],
                   "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-13T12:00:00Z"
-                }
-              }
-            }
-          },
-          "304": {
-            "description": "Not modified",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "user not updated",
-                    "code": "user-repository.updateUser",
-                    "status": true
-                  },
-                  "data": {}
+                  "updatedAt": "2023-12-11T12:00:00Z"
                 }
               }
             }
@@ -1094,10 +1081,64 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
+                "examples": {
+                  "example1": {
+                    "summary": "invalid user id",
+                    "value": {
+                      "error": {
+                        "message": ["user id not found"],
+                        "code": "bad.request",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "invalid user id",
+                    "value": {
+                      "error": {
+                        "message": [
+                          "One or more fields are missing or invalid"
+                        ],
+                        "code": "bad.request",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "error": {
-                    "message": ["One or more fields are missing or invalid"],
-                    "code": "bad.request",
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "user-service.updateUser",
                     "status": true
                   },
                   "data": {}
@@ -1143,7 +1184,7 @@
                     }
                   },
                   "example2": {
-                    "summary": "new passwords do not match",
+                    "summary": "validate new password",
                     "value": {
                       "error": {
                         "message": "new passwords do not match",
@@ -1154,7 +1195,7 @@
                     }
                   },
                   "example3": {
-                    "summary": "new passwords do not match",
+                    "summary": "validate old password",
                     "value": {
                       "error": {
                         "message": "old passwords do not match",
@@ -1175,13 +1216,29 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "user not updated",
-                    "code": "user-repository.updateUser",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "repository internal error",
+                    "value": {
+                      "error": {
+                        "message": "user not updated",
+                        "code": "user-repository.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "service internal error",
+                    "value": {
+                      "error": {
+                        "message": "failed to update user data",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
