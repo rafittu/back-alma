@@ -58,10 +58,13 @@ export class UserController {
 
   @Patch('/update/:id')
   async updateUser(
+    @Req() req: Request,
     @Param('id') userId: string,
     @Body() body: UpdateUserDto,
-  ): Promise<TemporaryUser> {
-    return await this.updateUserService.execute(body, userId);
+  ): Promise<IUser> {
+    const ipAddress = req.socket.remoteAddress;
+
+    return await this.updateUserService.execute(body, userId, ipAddress);
   }
 
   @Delete('/delete/:id')
