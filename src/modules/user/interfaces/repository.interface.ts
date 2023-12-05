@@ -2,7 +2,7 @@ import {
   ICreateUser,
   IRequestChannelAccess,
   IUserFilter,
-  SecurityData,
+  ISecurityData,
 } from './user.interface';
 import { UserStatus } from './user-status.enum';
 import { Channel } from '@prisma/client';
@@ -130,7 +130,7 @@ export interface IUserRepository<User> {
   updateUser(
     data: UpdateUserDto,
     userId: string,
-    securityData: SecurityData,
+    securityData: ISecurityData,
   ): Promise<PrismaUser>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
 }
