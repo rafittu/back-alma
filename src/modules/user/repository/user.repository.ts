@@ -15,10 +15,12 @@ import {
   IRequestChannelAccess,
   IUpdateUser,
   IUserFilter,
+  SecurityData,
 } from '../interfaces/user.interface';
 import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { Prisma, User } from '@prisma/client';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
@@ -242,8 +244,12 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async updateUser(data: IUpdateUser, userId: string): Promise<User> {
-    let securityInfo;
+  async updateUser(
+    data: UpdateUserDto,
+    userId: string,
+    securityData: SecurityData,
+  ): Promise<PrismaUser> {
+    let securityInfo = {};
 
     if (data.newPassword) {
       const { security } = await this.prisma.user.findFirst({
@@ -263,9 +269,10 @@ export class UserRepository implements IUserRepository<User> {
       );
 
       if (isPasswordMatch) {
-        data.password = data.newPassword;
-        // securityInfo = await this.formatSecurityInfo(data);
-        securityInfo.confirmation_token = null;
+        securityInfo = {
+          password: securityData.password,
+          salt: securityData.salt,
+        };
       } else {
         throw new AppError(
           'user-repository.updateUser',
@@ -278,10 +285,15 @@ export class UserRepository implements IUserRepository<User> {
     if (data.email) {
       securityInfo = {
         ...securityInfo,
-        confirmation_token: crypto.randomBytes(32).toString('hex'),
-        status: UserStatus.PENDING_CONFIRMATION,
+        confirmation_token: securityData.confirmationToken,
+        status: securityData.status,
       };
     }
+
+    securityInfo = {
+      ...securityInfo,
+      on_update_ip_address: securityData.onUpdateIpAddress,
+    };
 
     const userData = {
       personal: {
@@ -302,33 +314,27 @@ export class UserRepository implements IUserRepository<User> {
           id: userId,
         },
         include: {
-          personal: {
-            select: {
-              first_name: true,
-              last_name: true,
-              social_name: true,
-              updated_at: true,
-            },
-          },
-          contact: {
-            select: {
-              username: true,
-              email: true,
-              updated_at: true,
-            },
-          },
-          security: {
-            select: {
-              confirmation_token: true,
-              status: true,
-              updated_at: true,
-            },
-          },
+          personal: true,
+          contact: true,
+          security: true,
         },
       });
 
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
+      const fieldsToDelete = [
+        'user_personal_info_id',
+        'user_contact_info_id',
+        'user_security_info_id',
+        'password',
+        'salt',
+        'confirmation_token',
+        'recover_token',
+        'ip_address_origin',
+        'on_update_ip_address',
+        'origin_channel',
+        'created_at',
+      ];
+
+      return this.fieldsToDelete(user, fieldsToDelete);
     } catch (error) {
       if (error.code === 'P2002') {
         throw new AppError(

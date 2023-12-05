@@ -1,11 +1,12 @@
 import {
   ICreateUser,
   IRequestChannelAccess,
-  IUpdateUser,
   IUserFilter,
+  SecurityData,
 } from './user.interface';
 import { UserStatus } from './user-status.enum';
 import { Channel } from '@prisma/client';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 export interface UserPersonalInfo {
   first_name: string;
@@ -126,6 +127,10 @@ export interface IUserRepository<User> {
   createAccessToAdditionalChannel(data: IRequestChannelAccess): Promise<void>;
   userByFilter(filter: IUserFilter): Promise<PrismaUser | null>;
   getUserById(userId: string): Promise<PrismaUser>;
-  updateUser(data: IUpdateUser, userId: string): Promise<User>;
+  updateUser(
+    data: UpdateUserDto,
+    userId: string,
+    securityData: SecurityData,
+  ): Promise<PrismaUser>;
   deleteUser(userId: string, status: UserStatus): Promise<User>;
 }
