@@ -5,12 +5,13 @@ import {
   IUserRepository,
   PrismaUser,
 } from '../interfaces/repository.interface';
-import { IUser } from '../interfaces/user.interface';
+import { IUser, SecurityData } from '../interfaces/user.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { EmailService } from './email.service';
 import { User } from '@prisma/client';
 import { PasswordService } from './password.service';
 import { mapUserToReturn } from 'src/modules/utils/helpers/helpers-user-module';
+import { UserStatus } from '../interfaces/user-status.enum';
 
 @Injectable()
 export class UpdateUserService {
@@ -37,10 +38,16 @@ export class UpdateUserService {
     return mapUserToReturn(user);
   }
 
-  async execute(data: UpdateUserDto, userId: string): Promise<IUser> {
-    try {
-      let securityInfo;
+  async execute(
+    data: UpdateUserDto,
+    userId: string,
+    ipAddress: string,
+  ): Promise<IUser> {
+    let securityData: SecurityData = {
+      onUpdateIpAddress: ipAddress,
+    };
 
+    try {
       if (data.newPassword) {
         this.validatePassword(data);
 
@@ -48,7 +55,8 @@ export class UpdateUserService {
           data.newPassword,
         );
 
-        securityInfo = {
+        securityData = {
+          ...securityData,
           password,
           salt,
         };
@@ -57,22 +65,23 @@ export class UpdateUserService {
       if (data.email) {
         const confirmationToken = this.passwordService.generateRandomToken();
 
-        securityInfo = {
-          ...securityInfo,
+        securityData = {
+          ...securityData,
           confirmationToken,
+          status: UserStatus.PENDING_CONFIRMATION,
         };
       }
 
       const user = await this.userRepository.updateUser(
         data,
         userId,
-        securityInfo,
+        securityData,
       );
 
-      if (securityInfo.confirmationToken) {
+      if (securityData.confirmationToken) {
         await this.emailService.sendConfirmationEmail(
           user.contact.email,
-          securityInfo.confirmationToken,
+          securityData.confirmationToken,
         );
       }
 
