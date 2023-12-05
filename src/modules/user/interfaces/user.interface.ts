@@ -58,3 +58,11 @@ export interface IUserFilter {
   email?: string;
   phone?: string;
 }
+
+export interface SecurityData {
+  password?: string;
+  salt?: string;
+  confirmationToken?: string;
+  status?: UserStatus;
+  onUpdateIpAddress: string;
+}
