@@ -268,6 +268,26 @@ describe('User Repository', () => {
       }
     });
 
+    it('should throw an error if old passwords do not match', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUserData);
+
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
+
+      try {
+        await userRepository.updateUser(
+          MockUpdateUserDto,
+          MockUser.id,
+          MockUpdateSecurityData,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(422);
+        expect(error.message).toBe('old passwords do not match');
+      }
+    });
+
     it('should throw an error if user id not found', async () => {
       jest
         .spyOn(prismaService.user, 'findFirst')
