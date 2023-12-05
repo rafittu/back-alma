@@ -10,7 +10,11 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { EmailService } from './email.service';
 import { User } from '@prisma/client';
 import { PasswordService } from './password.service';
-import { mapUserToReturn } from 'src/modules/utils/helpers/helpers-user-module';
+import {
+  ipv4Regex,
+  ipv6Regex,
+  mapUserToReturn,
+} from '../../../modules/utils/helpers/helpers-user-module';
 import { UserStatus } from '../interfaces/user-status.enum';
 
 @Injectable()
@@ -21,6 +25,10 @@ export class UpdateUserService {
     private readonly passwordService: PasswordService,
     private readonly emailService: EmailService,
   ) {}
+
+  private validateIpAddress(ip: string): boolean {
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
 
   private validatePassword(data: UpdateUserDto): void {
     if (!data.oldPassword || data.newPassword !== data.passwordConfirmation) {
@@ -43,6 +51,10 @@ export class UpdateUserService {
     userId: string,
     ipAddress: string,
   ): Promise<IUser> {
+    if (!this.validateIpAddress(ipAddress)) {
+      throw new AppError('user-service.updateUser', 403, 'invalid ip address');
+    }
+
     let securityData: SecurityData = {
       onUpdateIpAddress: ipAddress,
     };
