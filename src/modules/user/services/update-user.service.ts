@@ -5,7 +5,7 @@ import {
   IUserRepository,
   PrismaUser,
 } from '../interfaces/repository.interface';
-import { IUser, SecurityData } from '../interfaces/user.interface';
+import { IUser, ISecurityData } from '../interfaces/user.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { EmailService } from './email.service';
 import { User } from '@prisma/client';
@@ -55,7 +55,7 @@ export class UpdateUserService {
       throw new AppError('user-service.updateUser', 403, 'invalid ip address');
     }
 
-    let securityData: SecurityData = {
+    let securityData: ISecurityData = {
       onUpdateIpAddress: ipAddress,
     };
 
