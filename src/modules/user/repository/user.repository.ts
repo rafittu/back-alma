@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 import { PrismaService } from '../../../prisma.service';
 import {
   IUserRepository,
@@ -13,7 +12,6 @@ import {
 import {
   ICreateUser,
   IRequestChannelAccess,
-  IUpdateUser,
   IUserFilter,
   SecurityData,
 } from '../interfaces/user.interface';
@@ -344,7 +342,15 @@ export class UserRepository implements IUserRepository<User> {
         );
       }
 
-      throw new AppError('user-repository.updateUser', 304, 'user not updated');
+      if (error.code === 'P2025') {
+        throw new AppError(
+          'user-repository.updateUser',
+          400,
+          'user id not found',
+        );
+      }
+
+      throw new AppError('user-repository.updateUser', 500, 'user not updated');
     }
   }
 
