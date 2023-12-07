@@ -83,7 +83,7 @@ describe('User Services', () => {
             userByFilter: jest.fn().mockResolvedValue(MockPrismaUser),
             getUserById: jest.fn().mockResolvedValue(MockPrismaUser),
             updateUser: jest.fn().mockResolvedValue(MockPrismaUser),
-            deleteUser: jest.fn().mockResolvedValue(mockDeleteUserResponse),
+            deleteUser: jest.fn().mockResolvedValue(MockPrismaUser),
           },
         },
         {
@@ -368,28 +368,28 @@ describe('User Services', () => {
     });
   });
 
-  // describe('delete user', () => {
-  //   it('should delete an user successfully', async () => {
-  //     const result = await deleteUserService.execute(mockNewUser.id);
+  describe('delete user', () => {
+    it('should delete an user successfully', async () => {
+      const result = await deleteUserService.execute(MockUser.id);
 
-  //     expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(mockDeleteUserResponse);
-  //   });
+      expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockIUser);
+    });
 
-  //   it('should throw an error if user not cancelled', async () => {
-  //     jest
-  //       .spyOn(userRepository, 'deleteUser')
-  //       .mockRejectedValueOnce(
-  //         new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
-  //       );
+    // it('should throw an error if user not cancelled', async () => {
+    //   jest
+    //     .spyOn(userRepository, 'deleteUser')
+    //     .mockRejectedValueOnce(
+    //       new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
+    //     );
 
-  //     try {
-  //       await deleteUserService.execute(invalidUserId);
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(500);
-  //       expect(error.message).toBe('user not cancelled');
-  //     }
-  //   });
-  // });
+    //   try {
+    //     await deleteUserService.execute(invalidUserId);
+    //   } catch (error) {
+    //     expect(error).toBeInstanceOf(AppError);
+    //     expect(error.code).toBe(500);
+    //     expect(error.message).toBe('user not cancelled');
+    //   }
+    // });
+  });
 });
