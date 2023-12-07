@@ -3,19 +3,6 @@ import { PrismaService } from '../../../prisma.service';
 import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { mockCreateUser, mockUpdateUserEmail } from './mocks/services.mock';
-import {
-  FormattedUserResponse,
-  UnformattedUserResponse,
-  UnformattedCreatedUser,
-  FormattedCreatedUser,
-  UnformattedDeletedUser,
-  FormattedDeletedUserResponse,
-  mockUpdateUserPassword,
-  oldPasswordPrismaResponse,
-} from './mocks/repository.mock';
-
-import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import {
   MockICreateUser,

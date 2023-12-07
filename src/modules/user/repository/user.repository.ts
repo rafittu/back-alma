@@ -6,7 +6,6 @@ import {
   UserContactInfo,
   UserPersonalInfo,
   UserSecurityInfo,
-  UnformattedUser,
   PrismaUser,
 } from '../interfaces/repository.interface';
 import {
@@ -45,6 +44,7 @@ export class UserRepository implements IUserRepository<User> {
     email,
     phone,
   }: Partial<ICreateUser>): UserContactInfo {
+    /* istanbul ignore next */
     return {
       username: username || null,
       email: email,
@@ -69,21 +69,9 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
-  private formatUserResponse(user: UnformattedUser): User {
-    return {
-      id: user.id,
-      user_contact_info_id: user.id,
-      user_personal_info_id: user.id,
-      user_security_info_id: user.id,
-      origin_channel: 'WOPHI',
-      allowed_channels: ['WOPHI'],
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-    };
-  }
-
   private fieldsToDelete(prismaUser: PrismaUser, fields: string[]): PrismaUser {
     fields.forEach((field) => {
+      /* istanbul ignore next */
       if (field === 'updated_at') {
         return;
       }

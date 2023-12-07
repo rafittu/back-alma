@@ -18,7 +18,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserService } from './services/create-user.service';
 import { GetUserByIdService } from './services/get-user-by-id.service';
 import { UpdateUserService } from './services/update-user.service';
-import { TemporaryUser } from './interfaces/repository.interface';
 import { DeleteUserService } from './services/delete-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';

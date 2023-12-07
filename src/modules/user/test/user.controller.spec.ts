@@ -4,14 +4,6 @@ import { CreateUserService } from '../services/create-user.service';
 import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
 import { DeleteUserService } from '../services/delete-user.service';
-import {
-  mockFakeRequest,
-  mockCreateUserBody,
-  mockNewUser,
-  mockUpdateUser,
-  mockUpdateUserResponse,
-  mockDeleteUserResponse,
-} from './mocks/controller.mock';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
   MockCreateUserDto,
