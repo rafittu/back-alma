@@ -21,6 +21,7 @@ import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
   MockCreateUserDto,
+  MockICreateUser,
   MockIUser,
   MockIpAddress,
   MockPrismaUser,
@@ -42,6 +43,7 @@ describe('User Services', () => {
   let getUserByFilterService: GetUserByFilterService;
   let passwordService: PasswordService;
   let emailService: EmailService;
+  let mailerService: MailerService;
   let redisCacheService: RedisCacheService;
 
   let userRepository: UserRepository;
@@ -54,6 +56,7 @@ describe('User Services', () => {
         UpdateUserService,
         DeleteUserService,
         GetUserByFilterService,
+        EmailService,
         {
           provide: PasswordService,
           useValue: {
@@ -64,9 +67,9 @@ describe('User Services', () => {
           },
         },
         {
-          provide: EmailService,
+          provide: MailerService,
           useValue: {
-            sendConfirmationEmail: jest.fn(),
+            sendMail: jest.fn(),
           },
         },
         {
@@ -104,6 +107,7 @@ describe('User Services', () => {
     );
     passwordService = module.get<PasswordService>(PasswordService);
     emailService = module.get<EmailService>(EmailService);
+    mailerService = module.get<MailerService>(MailerService);
     redisCacheService = module.get<RedisCacheService>(RedisCacheService);
 
     userRepository = module.get<UserRepository>(UserRepository);
@@ -129,6 +133,7 @@ describe('User Services', () => {
     expect(deleteUserService).toBeDefined();
     expect(getUserByFilterService).toBeDefined();
     expect(emailService).toBeDefined();
+    expect(mailerService).toBeDefined();
     expect(redisCacheService).toBeDefined();
   });
 
@@ -137,6 +142,7 @@ describe('User Services', () => {
       jest.spyOn(createUserService as any, 'validateIpAddress');
       jest.spyOn(createUserService as any, 'formatSecurityInfo');
       jest.spyOn(createUserService as any, 'mapUserToReturn');
+      jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
 
       const result = await createUserService.execute(
         MockCreateUserDto,
@@ -156,6 +162,8 @@ describe('User Services', () => {
     });
 
     it('should create access to new channel successfully', async () => {
+      jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
+
       jest
         .spyOn(userRepository, 'userByFilter')
         .mockResolvedValueOnce(MockUserData);
@@ -284,6 +292,7 @@ describe('User Services', () => {
     it('should update user data successfully', async () => {
       jest.spyOn(updateUserService as any, 'validateIpAddress');
       jest.spyOn(updateUserService as any, 'validatePassword');
+      jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
 
       const result = await updateUserService.execute(
         MockUpdateUserDto,
@@ -389,6 +398,34 @@ describe('User Services', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not cancelled');
+      }
+    });
+  });
+
+  describe('email operations', () => {
+    it('should send an confirmation email', async () => {
+      await emailService.sendConfirmationEmail(
+        MockUserData.contact.email,
+        MockICreateUser.confirmationToken,
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error if email sending fails', async () => {
+      jest.spyOn(mailerService, 'sendMail').mockRejectedValueOnce(new Error());
+
+      try {
+        await emailService.sendConfirmationEmail(
+          MockUserData.contact.email,
+          MockICreateUser.confirmationToken,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe(
+          'failed to send email for account confirmation',
+        );
       }
     });
   });
