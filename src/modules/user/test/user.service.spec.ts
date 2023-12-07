@@ -4,19 +4,6 @@ import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
 import { DeleteUserService } from '../services/delete-user.service';
 import { UserRepository } from '../repository/user.repository';
-import {
-  invalidUserId,
-  mockCreateUser,
-  mockUpdateAccountPassword,
-  mockUpdateUserEmail,
-  updatePasswordInvalidBody,
-} from './mocks/services.mock';
-import {
-  mockDeleteUserResponse,
-  mockNewUser,
-  mockUpdateUser,
-  mockUpdateUserResponse,
-} from './mocks/controller.mock';
 import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
@@ -127,9 +114,9 @@ describe('User Services', () => {
 
   describe('create user', () => {
     it('should create a new user successfully', async () => {
-      jest.spyOn(createUserService as any, 'validateIpAddress');
-      jest.spyOn(createUserService as any, 'formatSecurityInfo');
-      jest.spyOn(createUserService as any, 'mapUserToReturn');
+      jest.spyOn(createUserService as unknown as never, 'validateIpAddress');
+      jest.spyOn(createUserService as unknown as never, 'formatSecurityInfo');
+      jest.spyOn(createUserService as unknown as never, 'mapUserToReturn');
       jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
 
       const result = await createUserService.execute(
@@ -282,8 +269,8 @@ describe('User Services', () => {
 
   describe('update user', () => {
     it('should update user data successfully', async () => {
-      jest.spyOn(updateUserService as any, 'validateIpAddress');
-      jest.spyOn(updateUserService as any, 'validatePassword');
+      jest.spyOn(updateUserService as unknown as never, 'validateIpAddress');
+      jest.spyOn(updateUserService as unknown as never, 'validatePassword');
       jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
 
       const result = await updateUserService.execute(
