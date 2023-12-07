@@ -2,9 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 import {
   IUserRepository,
-  TemporaryUser as User,
+  PrismaUser,
 } from '../interfaces/repository.interface';
 import { UserStatus } from '../interfaces/user-status.enum';
+import { User } from '@prisma/client';
+import { IUser } from '../interfaces/user.interface';
+import { mapUserToReturn } from '../../../modules/utils/helpers/helpers-user-module';
 
 @Injectable()
 export class DeleteUserService {
@@ -13,7 +16,16 @@ export class DeleteUserService {
     private userRepository: IUserRepository<User>,
   ) {}
 
-  async execute(userId: string): Promise<User> {
-    return await this.userRepository.deleteUser(userId, UserStatus.CANCELLED);
+  private formatUserToReturn(user: PrismaUser): IUser {
+    return mapUserToReturn(user);
+  }
+
+  async execute(userId: string): Promise<IUser> {
+    const user = await this.userRepository.deleteUser(
+      userId,
+      UserStatus.CANCELLED,
+    );
+
+    return this.formatUserToReturn(user);
   }
 }

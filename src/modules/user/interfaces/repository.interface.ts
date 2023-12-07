@@ -132,5 +132,5 @@ export interface IUserRepository<User> {
     userId: string,
     securityData: ISecurityData,
   ): Promise<PrismaUser>;
-  deleteUser(userId: string, status: UserStatus): Promise<User>;
+  deleteUser(userId: string, status: UserStatus): Promise<PrismaUser>;
 }

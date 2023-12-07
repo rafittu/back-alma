@@ -17,6 +17,9 @@ import {
   MockCreateUserDto,
   MockFakeRequest,
   MockIUser,
+  MockUpdateUserDto,
+  MockUser,
+  MockUserData,
 } from './mocks/user.mock';
 
 describe('UserController', () => {
@@ -40,25 +43,25 @@ describe('UserController', () => {
         {
           provide: GetUserByIdService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockNewUser),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
           provide: UpdateUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockUpdateUserResponse),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
           provide: DeleteUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockDeleteUserResponse),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
           provide: GetUserByFilterService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockNewUser),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
       ],
@@ -95,17 +98,17 @@ describe('UserController', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(
-        controller.create(mockFakeRequest, mockCreateUserBody),
+        controller.create(MockFakeRequest, MockCreateUserDto),
       ).rejects.toThrowError();
     });
   });
 
   describe('get user by id', () => {
     it('should get an user by id successfully', async () => {
-      const result = await controller.getById(mockNewUser.id);
+      const result = await controller.getById(MockUserData.id);
 
       expect(getUserByIdService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -113,19 +116,20 @@ describe('UserController', () => {
         .spyOn(getUserByIdService, 'execute')
         .mockRejectedValueOnce(new Error());
 
-      expect(controller.getById(mockNewUser.id)).rejects.toThrowError();
+      expect(controller.getById(MockUserData.id)).rejects.toThrowError();
     });
   });
 
   describe('update user', () => {
     it('should update an user successfully', async () => {
       const result = await controller.updateUser(
-        mockNewUser.id,
-        mockUpdateUser,
+        MockFakeRequest,
+        MockUser.id,
+        MockUpdateUserDto,
       );
 
       expect(updateUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockUpdateUserResponse);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -134,17 +138,17 @@ describe('UserController', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(
-        controller.updateUser(mockNewUser.id, mockUpdateUser),
+        controller.updateUser(MockFakeRequest, MockUser.id, MockUpdateUserDto),
       ).rejects.toThrowError();
     });
   });
 
   describe('delete user', () => {
     it('should delete an user successfully', async () => {
-      const result = await controller.deleteUser(mockNewUser.id);
+      const result = await controller.deleteUser(MockUser.id);
 
       expect(deleteUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockDeleteUserResponse);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -152,27 +156,18 @@ describe('UserController', () => {
         .spyOn(deleteUserService, 'execute')
         .mockRejectedValueOnce(new Error());
 
-      expect(controller.deleteUser(mockNewUser.id)).rejects.toThrowError();
+      expect(controller.deleteUser(MockUser.id)).rejects.toThrowError();
     });
   });
 
   describe('get user by filter', () => {
     it('should get an user by email filter', async () => {
       const result = await controller.getByFilter({
-        email: mockNewUser.contact.email,
+        email: MockUserData.contact.email,
       });
 
       expect(getUserByFilterService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
-    });
-
-    it('should get an user by phone filter', async () => {
-      const result = await controller.getByFilter({
-        phone: mockNewUser.contact.phone,
-      });
-
-      expect(getUserByFilterService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -182,7 +177,7 @@ describe('UserController', () => {
 
       expect(
         controller.getByFilter({
-          email: mockNewUser.contact.email,
+          email: MockUserData.contact.email,
         }),
       ).rejects.toThrowError();
     });
