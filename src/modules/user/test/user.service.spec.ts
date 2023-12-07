@@ -442,5 +442,16 @@ describe('User Services', () => {
         salt: 'mocked_salt',
       });
     });
+
+    it('should generate a random token', async () => {
+      const randomBytesMock = jest.spyOn(crypto, 'randomBytes');
+      randomBytesMock.mockImplementationOnce(() => Buffer.from('mocked_token'));
+
+      const result = passwordService.generateRandomToken();
+
+      expect(randomBytesMock).toHaveBeenCalledTimes(1);
+      expect(randomBytesMock).toHaveBeenCalledWith(32);
+      expect(result).toBe('6d6f636b65645f746f6b656e');
+    });
   });
 });
