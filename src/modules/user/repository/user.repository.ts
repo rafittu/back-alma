@@ -6,7 +6,6 @@ import {
   UserContactInfo,
   UserPersonalInfo,
   UserSecurityInfo,
-  UnformattedUser,
   PrismaUser,
 } from '../interfaces/repository.interface';
 import {
@@ -66,19 +65,6 @@ export class UserRepository implements IUserRepository<User> {
       recover_token: null,
       ip_address_origin: ipAddressOrigin,
       status,
-    };
-  }
-
-  private formatUserResponse(user: UnformattedUser): User {
-    return {
-      id: user.id,
-      user_contact_info_id: user.id,
-      user_personal_info_id: user.id,
-      user_security_info_id: user.id,
-      origin_channel: 'WOPHI',
-      allowed_channels: ['WOPHI'],
-      created_at: user.created_at,
-      updated_at: user.updated_at,
     };
   }
 
