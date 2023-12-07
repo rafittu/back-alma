@@ -34,6 +34,8 @@ import { EmailService } from '../services/email.service';
 import { RedisCacheService } from '../../../modules/auth/infra/redis/redis-cache.service';
 import { Channel } from '@prisma/client';
 import { MailerService } from '@nestjs-modules/mailer';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
@@ -57,15 +59,7 @@ describe('User Services', () => {
         DeleteUserService,
         GetUserByFilterService,
         EmailService,
-        {
-          provide: PasswordService,
-          useValue: {
-            hashPassword: jest.fn().mockResolvedValueOnce('hashed_password'),
-            generateRandomToken: jest
-              .fn()
-              .mockResolvedValueOnce('random_token'),
-          },
-        },
+        PasswordService,
         {
           provide: MailerService,
           useValue: {
@@ -87,12 +81,6 @@ describe('User Services', () => {
             getUserById: jest.fn().mockResolvedValue(MockPrismaUser),
             updateUser: jest.fn().mockResolvedValue(MockPrismaUser),
             deleteUser: jest.fn().mockResolvedValue(MockPrismaUser),
-          },
-        },
-        {
-          provide: MailerService,
-          useValue: {
-            sendMail: jest.fn(),
           },
         },
       ],
@@ -162,6 +150,10 @@ describe('User Services', () => {
     });
 
     it('should create access to new channel successfully', async () => {
+      jest
+        .spyOn(passwordService, 'generateRandomToken')
+        .mockResolvedValueOnce('random_token' as never);
+
       jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
 
       jest
@@ -427,6 +419,39 @@ describe('User Services', () => {
           'failed to send email for account confirmation',
         );
       }
+    });
+  });
+
+  describe('password services', () => {
+    it('should hash password successfully', async () => {
+      jest
+        .spyOn(bcrypt, 'genSalt')
+        .mockResolvedValueOnce('mocked_salt' as never);
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockResolvedValueOnce('hashed_password' as never);
+
+      const result = await passwordService.hashPassword(
+        MockCreateUserDto.password,
+      );
+
+      expect(bcrypt.genSalt).toHaveBeenCalledTimes(1);
+      expect(bcrypt.hash).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        password: 'hashed_password',
+        salt: 'mocked_salt',
+      });
+    });
+
+    it('should generate a random token', async () => {
+      const randomBytesMock = jest.spyOn(crypto, 'randomBytes');
+      randomBytesMock.mockImplementationOnce(() => Buffer.from('mocked_token'));
+
+      const result = passwordService.generateRandomToken();
+
+      expect(randomBytesMock).toHaveBeenCalledTimes(1);
+      expect(randomBytesMock).toHaveBeenCalledWith(32);
+      expect(result).toBe('6d6f636b65645f746f6b656e');
     });
   });
 });
