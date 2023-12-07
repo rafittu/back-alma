@@ -376,20 +376,20 @@ describe('User Services', () => {
       expect(result).toEqual(MockIUser);
     });
 
-    // it('should throw an error if user not cancelled', async () => {
-    //   jest
-    //     .spyOn(userRepository, 'deleteUser')
-    //     .mockRejectedValueOnce(
-    //       new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
-    //     );
+    it('should throw an error if user not cancelled', async () => {
+      jest
+        .spyOn(userRepository, 'deleteUser')
+        .mockRejectedValueOnce(
+          new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
+        );
 
-    //   try {
-    //     await deleteUserService.execute(invalidUserId);
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(500);
-    //     expect(error.message).toBe('user not cancelled');
-    //   }
-    // });
+      try {
+        await deleteUserService.execute('invalid_id');
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('user not cancelled');
+      }
+    });
   });
 });
