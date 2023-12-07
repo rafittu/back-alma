@@ -1248,7 +1248,7 @@
     },
     "/user/delete/{id}": {
       "delete": {
-        "summary": "Delete user account",
+        "summary": "Delete account",
         "description": "Route to delete user account",
         "tags": ["User"],
         "security": [
@@ -1289,19 +1289,45 @@
                   "personal": {
                     "id": "789012",
                     "firstName": "John",
-                    "socialName": "JD"
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "updatedAt": "2023-05-10T12:00:00Z"
                   },
                   "contact": {
                     "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com"
+                    "username": "jd",
+                    "email": "jd@mail.com",
+                    "phone": "1234567890",
+                    "updatedAt": "2023-05-13T12:00:00Z"
                   },
                   "security": {
                     "id": "901234",
-                    "status": "CANCELLED"
+                    "status": "CANCELLED",
+                    "updatedAt": "2023-12-11T12:00:00Z"
                   },
+                  "allowedChannels": ["WOPHI"],
                   "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-15T12:00:00Z"
+                  "updatedAt": "2023-12-11T12:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
