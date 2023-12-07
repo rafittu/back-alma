@@ -352,23 +352,20 @@ describe('User Repository', () => {
       expect(result).toEqual(MockPrismaUser);
     });
 
-    // it('should throw an error if user deletion fails', async () => {
-    //   jest
-    //     .spyOn(prismaService.user, 'update')
-    //     .mockRejectedValueOnce(
-    //       new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
-    //     );
+    it('should throw an error if user deletion fails', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockRejectedValueOnce(
+          new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
+        );
 
-    //   try {
-    //     await userRepository.deleteUser(
-    //       FormattedCreatedUser.id,
-    //       UserStatus.CANCELLED,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(500);
-    //     expect(error.message).toBe('user not cancelled');
-    //   }
-    // });
+      try {
+        await userRepository.deleteUser(MockUser.id, UserStatus.CANCELLED);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('user not cancelled');
+      }
+    });
   });
 });
