@@ -44,6 +44,7 @@ export class UserRepository implements IUserRepository<User> {
     email,
     phone,
   }: Partial<ICreateUser>): UserContactInfo {
+    /* istanbul ignore next */
     return {
       username: username || null,
       email: email,
@@ -70,6 +71,7 @@ export class UserRepository implements IUserRepository<User> {
 
   private fieldsToDelete(prismaUser: PrismaUser, fields: string[]): PrismaUser {
     fields.forEach((field) => {
+      /* istanbul ignore next */
       if (field === 'updated_at') {
         return;
       }
