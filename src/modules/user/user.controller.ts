@@ -52,8 +52,8 @@ export class UserController {
   }
 
   @Get('/:id')
-  getById(@Param('id') userId: string): Promise<IUser> {
-    return this.getUserByIdService.execute(userId);
+  async getById(@Param('id') userId: string): Promise<IUser> {
+    return await this.getUserByIdService.execute(userId);
   }
 
   @Patch('/update/:id')
@@ -68,7 +68,7 @@ export class UserController {
   }
 
   @Delete('/delete/:id')
-  async deleteUser(@Param('id') userId: string): Promise<TemporaryUser> {
+  async deleteUser(@Param('id') userId: string): Promise<IUser> {
     return await this.deleteUserService.execute(userId);
   }
 }
