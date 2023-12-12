@@ -61,6 +61,29 @@ export class AuthRepository implements IAuthRepository<User> {
     );
   }
 
+  async validateChannel(id: string, origin: Channel): Promise<void> {
+    try {
+      const userChannels = await this.prisma.user.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          allowed_channels: true,
+        },
+      });
+
+      if (userChannels || !userChannels.allowed_channels.includes(origin)) {
+        throw new AppError(
+          'auth-repository.validateChannel',
+          401,
+          'email or password is invalid',
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async confirmAccountEmail(
     confirmationToken: string,
     status: UserStatus,
