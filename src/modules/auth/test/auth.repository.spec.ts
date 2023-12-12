@@ -72,6 +72,20 @@ describe('Auth Repository', () => {
     });
   });
 
+  describe('validate access to channels', () => {
+    it('should validate user allowed channels successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUserData);
+
+      const signInChannel = 'WOPHI';
+
+      await authRepository.validateChannel(MockUserData.id, signInChannel);
+
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+    });
+  });
+
   // describe('confirm account email', () => {
   //   it('should validate user email account successfully', async () => {
   //     jest
