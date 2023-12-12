@@ -10,7 +10,7 @@ import {
   ResendAccToken,
 } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
-import { UserStatus } from 'src/modules/user/interfaces/user-status.enum';
+import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -72,7 +72,7 @@ export class AuthRepository implements IAuthRepository<User> {
         },
       });
 
-      if (userChannels || !userChannels.allowed_channels.includes(origin)) {
+      if (!userChannels || !userChannels.allowed_channels.includes(origin)) {
         throw new AppError(
           'auth-repository.validateChannel',
           401,
