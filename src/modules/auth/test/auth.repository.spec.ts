@@ -84,6 +84,34 @@ describe('Auth Repository', () => {
 
       expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
     });
+
+    it('should throw an error if user not allowed to access channel', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockReturnValueOnce(null);
+
+      const signInChannel = 'LUMIN';
+
+      try {
+        await authRepository.validateChannel(MockUserData.id, signInChannel);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(401);
+        expect(error.message).toBe('email or password is invalid');
+      }
+    });
+
+    it('should throw an error if user not found', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockReturnValueOnce(null);
+
+      const signInChannel = 'WOPHI';
+
+      try {
+        await authRepository.validateChannel(null, signInChannel);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(401);
+        expect(error.message).toBe('email or password is invalid');
+      }
+    });
   });
 
   // describe('confirm account email', () => {
