@@ -38,12 +38,12 @@ export class AuthController {
   @isPublic()
   @Post('/signin')
   @UseGuards(LocalAuthGuard)
-  signIn(@Request() req: AuthRequest): UserToken {
+  async signIn(@Request() req: AuthRequest): Promise<UserToken> {
     const { user, body } = req;
     const bodyObject = Object(body);
     const { origin } = bodyObject;
 
-    return this.signInService.execute(user, origin);
+    return await this.signInService.execute(user, origin);
   }
 
   @Patch('/account/resend-token')

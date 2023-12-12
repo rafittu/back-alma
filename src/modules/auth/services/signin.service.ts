@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   JtwPayload,
   UserPayload,
@@ -7,12 +7,14 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { IAuthRepository } from '../structure/auth-repository.structure';
 import { Channel, User } from '@prisma/client';
+import { AuthRepository } from '../repository/auth.repository';
 
 @Injectable()
 export class SignInService {
   constructor(
-    private jwtService: JwtService,
+    @Inject(AuthRepository)
     private authRepository: IAuthRepository<User>,
+    private jwtService: JwtService,
   ) {}
 
   async execute(user: UserPayload, origin: string): Promise<UserToken> {
