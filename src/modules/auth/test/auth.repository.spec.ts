@@ -59,17 +59,17 @@ describe('Auth Repository', () => {
       expect(result).toEqual(MockUserPayload);
     });
 
-    // it('should throw an error if email or password is invalid', async () => {
-    //   jest.spyOn(prismaService.user, 'findFirst').mockReturnValueOnce(null);
+    it('should throw an error if email or password is invalid', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockReturnValueOnce(null);
 
-    //   try {
-    //     await authRepository.validateUser(userCredentialsMock);
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(401);
-    //     expect(error.message).toBe('email or password is invalid');
-    //   }
-    // });
+      try {
+        await authRepository.validateUser(MockUserCredentials);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(401);
+        expect(error.message).toBe('email or password is invalid');
+      }
+    });
   });
 
   // describe('confirm account email', () => {
