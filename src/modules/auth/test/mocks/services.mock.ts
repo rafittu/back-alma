@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { JtwPayload, UserPayload } from '../../structure/service.structure';
 import { ResendAccToken } from '../../structure/auth-repository.structure';
-import { TemporaryUser as User } from '../../../user/interfaces/repository.interface';
 import { UserStatus } from '../../../user/interfaces/user-status.enum';
 
 export const signinPayloadMock: UserPayload = {
@@ -24,7 +23,7 @@ export const mockResendAccountTokenResponse: ResendAccToken = {
   confirmationToken: faker.string.alphanumeric(),
 };
 
-export const mockUser: User = {
+export const mockUser = {
   id: signinPayloadMock.id,
   personal: {
     id: faker.string.uuid(),
