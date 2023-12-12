@@ -39,8 +39,11 @@ export class AuthController {
   @Post('/signin')
   @UseGuards(LocalAuthGuard)
   signIn(@Request() req: AuthRequest): UserToken {
-    const { user } = req;
-    return this.signInService.execute(user);
+    const { user, body } = req;
+    const bodyObject = Object(body);
+    const { origin } = bodyObject;
+
+    return this.signInService.execute(user, origin);
   }
 
   @Patch('/account/resend-token')

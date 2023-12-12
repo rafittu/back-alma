@@ -10,7 +10,9 @@ import { JwtService } from '@nestjs/jwt';
 export class SignInService {
   constructor(private jwtService: JwtService) {}
 
-  execute(user: UserPayload): UserToken {
+  execute(user: UserPayload, origin: string): UserToken {
+    console.log(origin);
+
     const payload: JtwPayload = {
       sub: user.id,
       username: user.username,
