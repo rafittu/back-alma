@@ -61,6 +61,6 @@ export const mockPrismaUpdateConfirmationToken = {
 
 export const mockConfirmationToken = faker.string.alphanumeric();
 
-export const mockResendAccountTokenResponse: ResendAccToken = {
+export const mockResendAccountTokenResponse = {
   confirmationToken: mockConfirmationToken,
 };
