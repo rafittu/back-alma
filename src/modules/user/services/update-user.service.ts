@@ -8,7 +8,7 @@ import {
 import { IUser, ISecurityData } from '../interfaces/user.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { EmailService } from './email.service';
-import { User } from '@prisma/client';
+import { Channel, User } from '@prisma/client';
 import { PasswordService } from './password.service';
 import {
   ipv4Regex,
@@ -94,6 +94,7 @@ export class UpdateUserService {
         await this.emailService.sendConfirmationEmail(
           user.contact.email,
           securityData.confirmationToken,
+          Channel.WOPHI,
         );
       }
 
