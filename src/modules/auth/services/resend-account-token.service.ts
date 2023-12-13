@@ -34,18 +34,11 @@ export class ResendAccountTokenEmailService {
         const { confirmationToken, originChannel } =
           await this.authRepository.resendAccountToken(id, email);
 
-        // substituir pelo serviço de email (modulo usuário)
-        const confirmAccountEmail = {
-          to: email,
-          from: 'noreply@application.com',
-          subject: 'ALMA - Email de confirmação',
-          template: 'email-confirmation',
-          context: {
-            token: confirmationToken,
-          },
-        };
-
-        await this.mailerService.sendMail(confirmAccountEmail);
+        await this.emailService.sendConfirmationEmail(
+          email,
+          confirmationToken,
+          originChannel,
+        );
 
         return {
           message: `account confirmation token resent to ${email}`,
@@ -55,7 +48,7 @@ export class ResendAccountTokenEmailService {
       throw new AppError(
         'auth-services.resendAccountToken',
         400,
-        'The new email provided is already in use',
+        'new email provided is already in use',
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -65,7 +58,7 @@ export class ResendAccountTokenEmailService {
       throw new AppError(
         'auth-services.resendAccountToken',
         500,
-        'Failed to resend account confirmation token',
+        'failed to resend account confirmation token',
       );
     }
   }

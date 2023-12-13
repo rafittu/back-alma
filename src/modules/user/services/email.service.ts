@@ -6,7 +6,12 @@ import { AppError } from '../../../common/errors/Error';
 export class EmailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  async sendConfirmationEmail(to: string, token: string): Promise<void> {
+  async sendConfirmationEmail(
+    to: string,
+    token: string,
+    channel: string,
+  ): Promise<void> {
+    console.log('email service', channel);
     try {
       const email = {
         to,
