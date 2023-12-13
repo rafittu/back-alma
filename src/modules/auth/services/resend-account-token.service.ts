@@ -2,9 +2,9 @@ import { User } from '.prisma/client';
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../structure/auth-repository.structure';
-import { MailerService } from '@nestjs-modules/mailer';
 import { UserRepository } from '../../../modules/user/repository/user.repository';
 import { AppError } from '../../../common/errors/Error';
+import { EmailService } from '../../../modules/user/services/email.service';
 
 @Injectable()
 export class ResendAccountTokenEmailService {
@@ -15,7 +15,7 @@ export class ResendAccountTokenEmailService {
     @Inject(UserRepository)
     private userRepository: UserRepository,
 
-    private mailerService: MailerService,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(id: string, email: string): Promise<object> {
@@ -31,8 +31,7 @@ export class ResendAccountTokenEmailService {
       const existingUser = await this.userRepository.userByFilter({ email });
 
       if (!existingUser || existingUser.id === id) {
-        // além do confirmation token, preciso do origin channel para enviar o email com o template correto
-        const { confirmationToken } =
+        const { confirmationToken, originChannel } =
           await this.authRepository.resendAccountToken(id, email);
 
         // substituir pelo serviço de email (modulo usuário)
