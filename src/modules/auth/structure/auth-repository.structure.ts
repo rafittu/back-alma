@@ -18,4 +18,5 @@ export interface IAuthRepository<User> {
 
 export interface ResendAccToken {
   confirmationToken: string;
+  originChannel: string;
 }

@@ -31,9 +31,11 @@ export class ResendAccountTokenEmailService {
       const existingUser = await this.userRepository.userByFilter({ email });
 
       if (!existingUser || existingUser.id === id) {
+        // além do confirmation token, preciso do origin channel para enviar o email com o template correto
         const { confirmationToken } =
           await this.authRepository.resendAccountToken(id, email);
 
+        // substituir pelo serviço de email (modulo usuário)
         const confirmAccountEmail = {
           to: email,
           from: 'noreply@application.com',
