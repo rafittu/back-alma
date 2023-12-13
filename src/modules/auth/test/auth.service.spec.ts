@@ -159,47 +159,49 @@ describe('AuthService', () => {
       expect(result).toEqual(response);
     });
 
-    // it('should throw an error if missing request body parameter', async () => {
-    //   try {
-    //     await resendAccountTokenEmailService.execute(
-    //       signinPayloadMock.id,
-    //       null,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(400);
-    //     expect(error.message).toBe('Missing email parameter in request body');
-    //   }
-    // });
-    // it('should throw an error if new email provided is already in user', async () => {
-    //   try {
-    //     await resendAccountTokenEmailService.execute(
-    //       mockUser.personal.id,
-    //       mockUser.contact.email,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(400);
-    //     expect(error.message).toBe('The new email provided is already in use');
-    //   }
-    // });
-    // it('should throw an error if account confirmation email is not resend', async () => {
-    //   jest
-    //     .spyOn(mailerService, 'sendMail')
-    //     .mockRejectedValueOnce(new Error('Email not sent'));
-    //   try {
-    //     await resendAccountTokenEmailService.execute(
-    //       mockUser.id,
-    //       mockUser.contact.email,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(500);
-    //     expect(error.message).toBe(
-    //       'Failed to resend account confirmation token',
-    //     );
-    //   }
-    // });
+    it('should throw an error if missing request body parameter', async () => {
+      try {
+        await resendAccountTokenEmailService.execute(MockUserData.id, null);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('Missing email parameter in request body');
+      }
+    });
+
+    it('should throw an error if new email provided is already in user', async () => {
+      const anotherUserId = 'user-id';
+
+      try {
+        await resendAccountTokenEmailService.execute(
+          anotherUserId,
+          MockUserData.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('new email provided is already in use');
+      }
+    });
+
+    it('should throw an error if account confirmation email is not resend', async () => {
+      jest
+        .spyOn(emailService, 'sendConfirmationEmail')
+        .mockRejectedValueOnce(new Error('Email not sent'));
+
+      try {
+        await resendAccountTokenEmailService.execute(
+          MockUserData.id,
+          MockUserData.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe(
+          'failed to resend account confirmation token',
+        );
+      }
+    });
   });
 
   // describe('confirm email account', () => {
