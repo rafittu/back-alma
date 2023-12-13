@@ -2,6 +2,9 @@ import { Request } from 'express';
 
 export class AuthRequest extends Request {
   user: UserPayload;
+  body: {
+    origin: string;
+  } & ReadableStream<Uint8Array>;
 }
 
 export interface UserPayload {

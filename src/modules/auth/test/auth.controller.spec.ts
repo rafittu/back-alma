@@ -15,6 +15,7 @@ import {
   userPayloadMock,
 } from './mocks/controller.mock';
 import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
+import { MockAccessToken, MockAuthRequest } from './mocks/auth.mock';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -30,7 +31,7 @@ describe('AuthController', () => {
         {
           provide: SignInService,
           useValue: {
-            execute: jest.fn().mockResolvedValueOnce(accessTokenMock),
+            execute: jest.fn().mockResolvedValueOnce(MockAccessToken),
           },
         },
         {
@@ -78,10 +79,10 @@ describe('AuthController', () => {
 
   describe('user signin', () => {
     it('should return an user access token', async () => {
-      const result = await controller.signIn(authRequestMock);
+      const result = await controller.signIn(MockAuthRequest);
 
       expect(signInService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(accessTokenMock);
+      expect(result).toEqual(MockAccessToken);
     });
   });
 
