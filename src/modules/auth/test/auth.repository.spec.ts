@@ -137,20 +137,20 @@ describe('Auth Repository', () => {
       });
     });
 
-    // it('should throw an error if confirmation token not generated', async () => {
-    //   jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce(null);
+    it('should throw an error if confirmation token not generated', async () => {
+      jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce(null);
 
-    //   try {
-    //     await authRepository.resendAccountToken(
-    //       mockPrismaUpdateConfirmationToken.id,
-    //       mockPrismaUpdateConfirmationToken.contact.email,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(500);
-    //     expect(error.message).toBe('Account token not generated');
-    //   }
-    // });
+      try {
+        await authRepository.resendAccountToken(
+          MockUserData.id,
+          MockUserData.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('Account token not generated');
+      }
+    });
   });
 
   // describe('confirm account email', () => {
