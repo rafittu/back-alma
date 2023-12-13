@@ -202,7 +202,7 @@ export class AuthRepository implements IAuthRepository<User> {
     try {
       const newConfirmationToken = crypto.randomBytes(32).toString('hex');
 
-      await this.prisma.user.update({
+      const { origin_channel } = await this.prisma.user.update({
         data: {
           security: {
             update: {
@@ -222,6 +222,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
       return {
         confirmationToken: newConfirmationToken,
+        originChannel: origin_channel,
       };
     } catch (error) {
       throw new AppError(

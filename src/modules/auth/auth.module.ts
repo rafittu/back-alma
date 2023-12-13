@@ -12,6 +12,7 @@ import { RecoverPasswordService } from './services/recover-password.service';
 import { ResendAccountTokenEmailService } from './services/resend-account-token.service';
 import { UserRepository } from '../user/repository/user.repository';
 import { RedisCacheService } from './infra/redis/redis-cache.service';
+import { EmailService } from '../user/services/email.service';
 
 @Module({
   imports: [
@@ -27,8 +28,9 @@ import { RedisCacheService } from './infra/redis/redis-cache.service';
     JwtStrategy,
     AuthRepository,
     UserRepository,
-    SignInService,
     RedisCacheService,
+    EmailService,
+    SignInService,
     ConfirmAccountEmailService,
     RecoverPasswordService,
     ResendAccountTokenEmailService,

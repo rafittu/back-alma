@@ -19,7 +19,7 @@ export const jwtTokenMock = faker.string.alphanumeric();
 
 export const recoverTokenMock = faker.string.alphanumeric();
 
-export const mockResendAccountTokenResponse: ResendAccToken = {
+export const mockResendAccountTokenResponse = {
   confirmationToken: faker.string.alphanumeric(),
 };
 

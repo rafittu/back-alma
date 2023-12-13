@@ -109,6 +109,7 @@ export class CreateUserService {
         await this.emailService.sendConfirmationEmail(
           data.email,
           confirmationToken,
+          data.originChannel,
         );
 
         throw new AppError(
@@ -155,6 +156,7 @@ export class CreateUserService {
       await this.emailService.sendConfirmationEmail(
         data.email,
         confirmationToken,
+        data.originChannel,
       );
 
       return this.mapUserToReturn(data, user, UserStatus.PENDING_CONFIRMATION);

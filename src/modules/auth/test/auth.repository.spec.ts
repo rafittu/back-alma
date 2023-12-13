@@ -22,6 +22,7 @@ import {
 import { recoverTokenMock } from './mocks/services.mock';
 import * as Crypto from 'crypto';
 import {
+  MockConfirmationToken,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
@@ -110,6 +111,44 @@ describe('Auth Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(401);
         expect(error.message).toBe('email or password is invalid');
+      }
+    });
+  });
+
+  describe('resend confirm account token email', () => {
+    it('should return a confirmation token and channel origin', async () => {
+      jest
+        .spyOn(Crypto, 'randomBytes')
+        .mockReturnValueOnce(MockConfirmationToken as never);
+
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockResolvedValueOnce(MockUserData);
+
+      const result = await authRepository.resendAccountToken(
+        MockUserData.id,
+        MockUserData.contact.email,
+      );
+
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        confirmationToken: MockConfirmationToken,
+        originChannel: MockUserData.origin_channel,
+      });
+    });
+
+    it('should throw an error if confirmation token not generated', async () => {
+      jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce(null);
+
+      try {
+        await authRepository.resendAccountToken(
+          MockUserData.id,
+          MockUserData.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('Account token not generated');
       }
     });
   });
@@ -237,41 +276,6 @@ describe('Auth Repository', () => {
   //       expect(error).toBeInstanceOf(AppError);
   //       expect(error.code).toBe(500);
   //       expect(error.message).toBe('password not reseted');
-  //     }
-  //   });
-  // });
-
-  // describe('resend confirm account token email', () => {
-  //   it('should send an email with confirmation token', async () => {
-  //     jest
-  //       .spyOn(prismaService.user, 'update')
-  //       .mockResolvedValueOnce(mockPrismaUpdateConfirmationToken);
-
-  //     jest
-  //       .spyOn(Crypto, 'randomBytes')
-  //       .mockReturnValueOnce(mockConfirmationToken as never);
-
-  //     const result = await authRepository.resendAccountToken(
-  //       mockPrismaUpdateConfirmationToken.id,
-  //       mockPrismaUpdateConfirmationToken.contact.email,
-  //     );
-
-  //     expect(prismaService.user.update).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(mockResendAccountTokenResponse);
-  //   });
-
-  //   it('should throw an error if confirmation token not generated', async () => {
-  //     jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce(null);
-
-  //     try {
-  //       await authRepository.resendAccountToken(
-  //         mockPrismaUpdateConfirmationToken.id,
-  //         mockPrismaUpdateConfirmationToken.contact.email,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(500);
-  //       expect(error.message).toBe('Account token not generated');
   //     }
   //   });
   // });

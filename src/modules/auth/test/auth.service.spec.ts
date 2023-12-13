@@ -24,8 +24,9 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { AppError } from '../../../common/errors/Error';
 import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
 import { UserRepository } from '../../../modules/user/repository/user.repository';
-import { MockJWT, MockUserPayload } from './mocks/auth.mock';
+import { MockJWT, MockUserData, MockUserPayload } from './mocks/auth.mock';
 import { RedisCacheService } from '../infra/redis/redis-cache.service';
+import { EmailService } from '../../../modules/user/services/email.service';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -35,6 +36,7 @@ describe('AuthService', () => {
   let resendAccountTokenEmailService: ResendAccountTokenEmailService;
 
   let authRepository: AuthRepository;
+  let emailService: EmailService;
   let mailerService: MailerService;
   // let redisService: RedisCacheService;
 
@@ -47,6 +49,7 @@ describe('AuthService', () => {
         RecoverPasswordService,
         ResendAccountTokenEmailService,
         RedisCacheService,
+        EmailService,
         {
           provide: AuthRepository,
           useValue: {
@@ -68,7 +71,7 @@ describe('AuthService', () => {
         {
           provide: UserRepository,
           useValue: {
-            userByFilter: jest.fn().mockResolvedValueOnce(mockUser),
+            userByFilter: jest.fn().mockResolvedValueOnce(MockUserData),
           },
         },
         {
@@ -93,6 +96,7 @@ describe('AuthService', () => {
       ResendAccountTokenEmailService,
     );
     mailerService = module.get<MailerService>(MailerService);
+    emailService = module.get<EmailService>(EmailService);
   });
 
   it('should be defined', () => {
@@ -101,6 +105,7 @@ describe('AuthService', () => {
     expect(confirmAccountEmailService).toBeDefined();
     expect(recoverPasswordService).toBeDefined();
     expect(resendAccountTokenEmailService).toBeDefined();
+    expect(emailService).toBeDefined();
   });
 
   describe('signin', () => {
@@ -134,6 +139,67 @@ describe('AuthService', () => {
         await signInService.execute(MockUserPayload, originChannel);
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
+      }
+    });
+  });
+
+  describe('resend confirm account token email', () => {
+    it('should send an email with confirmation token', async () => {
+      jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
+
+      const result = await resendAccountTokenEmailService.execute(
+        MockUserData.id,
+        MockUserData.contact.email,
+      );
+      const response = {
+        message: `account confirmation token resent to ${MockUserData.contact.email}`,
+      };
+      expect(authRepository.resendAccountToken).toHaveBeenCalledTimes(1);
+      expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(response);
+    });
+
+    it('should throw an error if missing request body parameter', async () => {
+      try {
+        await resendAccountTokenEmailService.execute(MockUserData.id, null);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('Missing email parameter in request body');
+      }
+    });
+
+    it('should throw an error if new email provided is already in user', async () => {
+      const anotherUserId = 'user-id';
+
+      try {
+        await resendAccountTokenEmailService.execute(
+          anotherUserId,
+          MockUserData.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('new email provided is already in use');
+      }
+    });
+
+    it('should throw an error if account confirmation email is not resend', async () => {
+      jest
+        .spyOn(emailService, 'sendConfirmationEmail')
+        .mockRejectedValueOnce(new Error('Email not sent'));
+
+      try {
+        await resendAccountTokenEmailService.execute(
+          MockUserData.id,
+          MockUserData.contact.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe(
+          'failed to resend account confirmation token',
+        );
       }
     });
   });
@@ -184,68 +250,6 @@ describe('AuthService', () => {
   //       expect(error).toBeInstanceOf(AppError);
   //       expect(error.code).toBe(400);
   //       expect(error.message).toBe('passwords do not match');
-  //     }
-  //   });
-  // });
-
-  // describe('resend confirm account token email', () => {
-  //   it('should send an email with confirmation token', async () => {
-  //     const result = await resendAccountTokenEmailService.execute(
-  //       signinPayloadMock.id,
-  //       signinPayloadMock.email,
-  //     );
-
-  //     const response = {
-  //       message: `account confirmation token resent to ${signinPayloadMock.email}`,
-  //     };
-
-  //     expect(authRepository.resendAccountToken).toHaveBeenCalledTimes(1);
-  //     expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(response);
-  //   });
-
-  //   it('should throw an error if missing request body parameter', async () => {
-  //     try {
-  //       await resendAccountTokenEmailService.execute(
-  //         signinPayloadMock.id,
-  //         null,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(400);
-  //       expect(error.message).toBe('Missing email parameter in request body');
-  //     }
-  //   });
-
-  //   it('should throw an error if new email provided is already in user', async () => {
-  //     try {
-  //       await resendAccountTokenEmailService.execute(
-  //         mockUser.personal.id,
-  //         mockUser.contact.email,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(400);
-  //       expect(error.message).toBe('The new email provided is already in use');
-  //     }
-  //   });
-
-  //   it('should throw an error if account confirmation email is not resend', async () => {
-  //     jest
-  //       .spyOn(mailerService, 'sendMail')
-  //       .mockRejectedValueOnce(new Error('Email not sent'));
-
-  //     try {
-  //       await resendAccountTokenEmailService.execute(
-  //         mockUser.id,
-  //         mockUser.contact.email,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(500);
-  //       expect(error.message).toBe(
-  //         'Failed to resend account confirmation token',
-  //       );
   //     }
   //   });
   // });
