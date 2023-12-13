@@ -93,3 +93,5 @@ export const MockAuthRequest: AuthRequest = {
     origin: Channel.WOPHI,
   },
 } as AuthRequest;
+
+export const MockConfirmationToken = faker.string.alphanumeric();
