@@ -5,6 +5,7 @@ import { Channel } from '@prisma/client';
 
 export interface IAuthRepository<User> {
   validateUser(credentialsDto: CredentialsDto): Promise<UserPayload | User>;
+  validateChannel(id: string, origin: Channel): Promise<void>;
   confirmAccountEmail(
     confirmationToken: string,
     status: UserStatus,

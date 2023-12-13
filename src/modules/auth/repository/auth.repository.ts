@@ -10,7 +10,7 @@ import {
   ResendAccToken,
 } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
-import { UserStatus } from 'src/modules/user/interfaces/user-status.enum';
+import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -59,6 +59,29 @@ export class AuthRepository implements IAuthRepository<User> {
       401,
       'email or password is invalid',
     );
+  }
+
+  async validateChannel(id: string, origin: Channel): Promise<void> {
+    try {
+      const userChannels = await this.prisma.user.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          allowed_channels: true,
+        },
+      });
+
+      if (!userChannels || !userChannels.allowed_channels.includes(origin)) {
+        throw new AppError(
+          'auth-repository.validateChannel',
+          401,
+          'email or password is invalid',
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
   }
 
   async confirmAccountEmail(

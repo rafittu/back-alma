@@ -323,7 +323,8 @@
               },
               "example": {
                 "email": "johndoe@example.com",
-                "password": "password123"
+                "password": "password123",
+                "origin": "wophi"
               }
             }
           }
@@ -1539,6 +1540,11 @@
           "password": {
             "type": "string",
             "description": "Password of the user"
+          },
+          "origin": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
           }
         }
       },
