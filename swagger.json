@@ -662,7 +662,7 @@
                   }
                 },
                 "example": {
-                  "message": "account confirmation token resent to user@mail.com"
+                  "message": "account confirmation token resent to johndoe@example.com"
                 }
               }
             }
@@ -690,13 +690,31 @@
                     "summary": "Invalid email",
                     "value": {
                       "error": {
-                        "message": "The new email provided is already in use",
+                        "message": "new email provided is already in use",
                         "code": "auth-services.resendAccountToken",
                         "status": true
                       },
                       "data": {}
                     }
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -724,7 +742,7 @@
                     "summary": "Email confirmation not resend",
                     "value": {
                       "error": {
-                        "message": "Failed to resend account confirmation token",
+                        "message": "failed to resend account confirmation token",
                         "code": "auth-services.resendAccountToken",
                         "status": true
                       },
