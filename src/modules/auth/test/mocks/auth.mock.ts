@@ -8,7 +8,11 @@ import {
   UserStatus,
 } from '@prisma/client';
 import { CredentialsDto } from '../../dto/credentials.dto';
-import { UserPayload } from '../../structure/service.structure';
+import {
+  AuthRequest,
+  UserPayload,
+  UserToken,
+} from '../../structure/service.structure';
 
 export const MockUserCredentials: CredentialsDto = {
   email: faker.internet.email(),
@@ -74,3 +78,18 @@ export const MockUserPayload: UserPayload = {
   email: MockUserData.contact.email,
   username: MockUserData.contact.username,
 };
+
+export const MockAccessToken: UserToken = {
+  accessToken: MockJWT,
+};
+
+export const MockAuthRequest: AuthRequest = {
+  user: {
+    id: MockUserPayload.id,
+    username: MockUserPayload.username,
+    email: MockUserPayload.email,
+  },
+  body: {
+    origin: Channel.WOPHI,
+  },
+} as AuthRequest;
