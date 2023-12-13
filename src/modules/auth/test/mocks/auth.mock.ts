@@ -67,6 +67,8 @@ export const MockUserData = {
   security: MockUserSecurityInfo,
 };
 
+export const MockJWT = faker.string.alphanumeric();
+
 export const MockUserPayload: UserPayload = {
   id: MockUser.id,
   email: MockUserData.contact.email,
