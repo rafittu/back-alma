@@ -9,7 +9,7 @@ import { IUser, ISecurityData } from '../interfaces/user.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { EmailService } from '../../../common/services/email.service';
 import { Channel, User } from '@prisma/client';
-import { PasswordService } from './password.service';
+import { PasswordService } from '../../../common/services/password.service';
 import {
   ipv4Regex,
   ipv6Regex,

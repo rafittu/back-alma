@@ -7,7 +7,7 @@ import { UpdateUserService } from './services/update-user.service';
 import { UserController } from './user.controller';
 import { DeleteUserService } from './services/delete-user.service';
 import { GetUserByFilterService } from './services/user-by-filter.service';
-import { PasswordService } from './services/password.service';
+import { PasswordService } from '../../common/services/password.service';
 import { EmailService } from '../../common/services/email.service';
 import { RedisCacheService } from '../../common/redis/redis-cache.service';
 
