@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { AppError } from '../../../common/errors/Error';
+import { AppError } from '../errors/Error';
 
 @Injectable()
 export class EmailService {

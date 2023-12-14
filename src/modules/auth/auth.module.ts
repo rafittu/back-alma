@@ -11,8 +11,8 @@ import { ConfirmAccountEmailService } from './services/confirm-email.service';
 import { RecoverPasswordService } from './services/recover-password.service';
 import { ResendAccountTokenEmailService } from './services/resend-account-token.service';
 import { UserRepository } from '../user/repository/user.repository';
-import { RedisCacheService } from './infra/redis/redis-cache.service';
-import { EmailService } from '../user/services/email.service';
+import { RedisCacheService } from '../../common/redis/redis-cache.service';
+import { EmailService } from '../../common/services/email.service';
 
 @Module({
   imports: [
