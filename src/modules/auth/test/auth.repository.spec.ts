@@ -191,22 +191,22 @@ describe('Auth Repository', () => {
       expect(result).toEqual(response);
     });
 
-    // it('should throw an error if account not confirmed', async () => {
-    //   jest
-    //     .spyOn(prismaService.userSecurityInfo, 'update')
-    //     .mockRejectedValueOnce('invalid confirmation token');
+    it('should throw an error if account not confirmed', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockRejectedValueOnce('invalid confirmation token');
 
-    //   try {
-    //     await authRepository.confirmAccountEmail(
-    //       confirmationTokenMock,
-    //       UserStatus.ACTIVE,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(500);
-    //     expect(error.message).toBe('Account not confirmed');
-    //   }
-    // });
+      try {
+        await authRepository.confirmAccountEmail(
+          MockConfirmationToken,
+          UserStatus.ACTIVE,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('Account not confirmed');
+      }
+    });
   });
 
   // describe('send recover password email', () => {
