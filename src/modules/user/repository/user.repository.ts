@@ -12,7 +12,7 @@ import {
   ICreateUser,
   IRequestChannelAccess,
   IUserFilter,
-  ISecurityData,
+  IUpdateSecurityData,
 } from '../interfaces/user.interface';
 import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
@@ -233,7 +233,7 @@ export class UserRepository implements IUserRepository<User> {
   async updateUser(
     data: UpdateUserDto,
     userId: string,
-    securityData: ISecurityData,
+    securityData: IUpdateSecurityData,
   ): Promise<PrismaUser> {
     let securityInfo = {};
 

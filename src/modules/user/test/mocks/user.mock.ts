@@ -9,7 +9,7 @@ import {
 import {
   ICreateUser,
   IRequestChannelAccess,
-  ISecurityData,
+  IUpdateSecurityData,
   IUser,
 } from '../../interfaces/user.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
@@ -180,7 +180,7 @@ export const MockUpdateUserDto: UpdateUserDto = {
   passwordConfirmation: 'faker.internet.password()',
 };
 
-export const MockUpdateSecurityData: ISecurityData = {
+export const MockUpdateSecurityData: IUpdateSecurityData = {
   password: faker.internet.password(),
   salt: faker.string.binary(),
   confirmationToken: faker.string.alphanumeric(),

@@ -59,7 +59,7 @@ export interface IUserFilter {
   phone?: string;
 }
 
-export interface ISecurityData {
+export interface IUpdateSecurityData {
   password?: string;
   salt?: string;
   confirmationToken?: string;
