@@ -386,6 +386,7 @@ describe('User Services', () => {
       await emailService.sendConfirmationEmail(
         MockUserData.contact.email,
         MockICreateUser.confirmationToken,
+        'channel',
       );
 
       expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
@@ -398,6 +399,7 @@ describe('User Services', () => {
         await emailService.sendConfirmationEmail(
           MockUserData.contact.email,
           MockICreateUser.confirmationToken,
+          'channel',
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
