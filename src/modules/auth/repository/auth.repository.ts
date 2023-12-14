@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
-import { Channel, User } from '@prisma/client';
+import { Channel, Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { AppError } from '../../../common/errors/Error';
@@ -90,20 +90,13 @@ export class AuthRepository implements IAuthRepository<User> {
     newChannel?: Channel,
   ): Promise<object> {
     try {
-      const userInfo = await this.prisma.userSecurityInfo.update({
+      const { id } = await this.prisma.userSecurityInfo.update({
         data: {
           confirmation_token: null,
           status,
         },
         where: {
           confirmation_token: confirmationToken,
-        },
-        select: {
-          User: {
-            select: {
-              id: true,
-            },
-          },
         },
       });
 
@@ -114,7 +107,9 @@ export class AuthRepository implements IAuthRepository<User> {
               push: newChannel,
             },
           },
-          where: { id: userInfo.User[0].id },
+          where: {
+            user_security_info_id: id,
+          } as Prisma.UserWhereUniqueInput,
         });
       }
 
