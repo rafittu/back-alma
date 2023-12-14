@@ -160,12 +160,14 @@ describe('Auth Repository', () => {
         .mockResolvedValueOnce(MockUserData.security);
 
       const result = await authRepository.confirmAccountEmail(
-        confirmationTokenMock,
+        MockConfirmationToken,
         UserStatus.ACTIVE,
       );
 
+      const response = { message: 'account email successfully confirmed' };
+
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(accountConfirmResponse);
+      expect(result).toEqual(response);
     });
 
     // it('should throw an error if account not confirmed', async () => {
