@@ -27,6 +27,7 @@ import {
   MockUserData,
   MockUserPayload,
 } from './mocks/auth.mock';
+import { Channel } from '@prisma/client';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
@@ -167,6 +168,26 @@ describe('Auth Repository', () => {
       const response = { message: 'account email successfully confirmed' };
 
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(response);
+    });
+
+    it('should add new channel successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(MockUserData.security);
+
+      jest.spyOn(prismaService.user, 'update').mockResolvedValueOnce(null);
+
+      const result = await authRepository.confirmAccountEmail(
+        MockConfirmationToken,
+        UserStatus.ACTIVE,
+        Channel.MIAU,
+      );
+
+      const response = { message: 'account email successfully confirmed' };
+
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
     });
 
