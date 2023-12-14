@@ -24,7 +24,12 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { AppError } from '../../../common/errors/Error';
 import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
 import { UserRepository } from '../../../modules/user/repository/user.repository';
-import { MockJWT, MockUserData, MockUserPayload } from './mocks/auth.mock';
+import {
+  MockConfirmationToken,
+  MockJWT,
+  MockUserData,
+  MockUserPayload,
+} from './mocks/auth.mock';
 import { RedisCacheService } from '../infra/redis/redis-cache.service';
 import { EmailService } from '../../../modules/user/services/email.service';
 
@@ -38,7 +43,7 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let emailService: EmailService;
   let mailerService: MailerService;
-  // let redisService: RedisCacheService;
+  let redisService: RedisCacheService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,9 +58,9 @@ describe('AuthService', () => {
         {
           provide: AuthRepository,
           useValue: {
-            confirmAccountEmail: jest
-              .fn()
-              .mockResolvedValueOnce(accountConfirmResponse),
+            confirmAccountEmail: jest.fn().mockResolvedValueOnce({
+              message: 'account email successfully confirmed',
+            }),
             sendRecoverPasswordEmail: jest
               .fn()
               .mockResolvedValueOnce(recoverTokenMock),
@@ -97,6 +102,7 @@ describe('AuthService', () => {
     );
     mailerService = module.get<MailerService>(MailerService);
     emailService = module.get<EmailService>(EmailService);
+    redisService = module.get<RedisCacheService>(RedisCacheService);
   });
 
   it('should be defined', () => {
@@ -106,6 +112,7 @@ describe('AuthService', () => {
     expect(recoverPasswordService).toBeDefined();
     expect(resendAccountTokenEmailService).toBeDefined();
     expect(emailService).toBeDefined();
+    expect(redisService).toBeDefined();
   });
 
   describe('signin', () => {
@@ -204,16 +211,22 @@ describe('AuthService', () => {
     });
   });
 
-  // describe('confirm email account', () => {
-  //   it('should confirm user account email', async () => {
-  //     const result = await confirmAccountEmailService.execute(
-  //       confirmationTokenMock,
-  //     );
+  describe('confirm email account', () => {
+    it('should confirm user account email', async () => {
+      jest.spyOn(redisService, 'get').mockResolvedValueOnce(null);
 
-  //     expect(authRepository.confirmAccountEmail).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(accountConfirmResponse);
-  //   });
-  // });
+      const result = await confirmAccountEmailService.execute(
+        MockConfirmationToken,
+      );
+
+      expect(authRepository.confirmAccountEmail).toHaveBeenCalledTimes(1);
+      expect(redisService.get).toHaveBeenCalledTimes(1);
+
+      expect(result).toEqual({
+        message: 'account email successfully confirmed',
+      });
+    });
+  });
 
   // describe('send recover password email', () => {
   //   it('should send an email with recover password instructions', async () => {
