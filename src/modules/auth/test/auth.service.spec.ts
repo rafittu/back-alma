@@ -31,7 +31,7 @@ import {
   MockUserPayload,
 } from './mocks/auth.mock';
 import { RedisCacheService } from '../../../common/redis/redis-cache.service';
-import { EmailService } from '../../../modules/user/services/email.service';
+import { EmailService } from '../../../common/services/email.service';
 
 describe('AuthService', () => {
   let signInService: SignInService;

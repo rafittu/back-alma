@@ -4,7 +4,7 @@ import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../structure/auth-repository.structure';
 import { UserRepository } from '../../../modules/user/repository/user.repository';
 import { AppError } from '../../../common/errors/Error';
-import { EmailService } from '../../../modules/user/services/email.service';
+import { EmailService } from '../../../common/services/email.service';
 
 @Injectable()
 export class ResendAccountTokenEmailService {

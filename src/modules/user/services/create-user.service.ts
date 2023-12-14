@@ -7,7 +7,7 @@ import { UserStatus } from '../interfaces/user-status.enum';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { ICreateUser, IUser } from '../interfaces/user.interface';
 import { PasswordService } from './password.service';
-import { EmailService } from './email.service';
+import { EmailService } from '../../../common/services/email.service';
 import { User } from '@prisma/client';
 import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 

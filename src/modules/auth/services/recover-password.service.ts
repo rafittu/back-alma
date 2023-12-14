@@ -4,7 +4,7 @@ import { IAuthRepository } from '../structure/auth-repository.structure';
 import { Channel, User } from '@prisma/client';
 import { ResetPassword } from '../structure/service.structure';
 import { AppError } from '../../../common/errors/Error';
-import { EmailService } from '../../../modules/user/services/email.service';
+import { EmailService } from '../../../common/services/email.service';
 
 @Injectable()
 export class RecoverPasswordService {
