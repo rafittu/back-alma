@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { UserStatus } from '../../user/interfaces/user-status.enum';
 import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../structure/auth-repository.structure';
-import { RedisCacheService } from '../infra/redis/redis-cache.service';
+import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { Channel } from '@prisma/client';
 
 @Injectable()

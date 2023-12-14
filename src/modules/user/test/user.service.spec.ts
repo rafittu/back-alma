@@ -18,7 +18,7 @@ import {
 } from './mocks/user.mock';
 import { PasswordService } from '../services/password.service';
 import { EmailService } from '../services/email.service';
-import { RedisCacheService } from '../../../modules/auth/infra/redis/redis-cache.service';
+import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { Channel } from '@prisma/client';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';

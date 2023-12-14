@@ -30,7 +30,7 @@ import {
   MockUserData,
   MockUserPayload,
 } from './mocks/auth.mock';
-import { RedisCacheService } from '../infra/redis/redis-cache.service';
+import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { EmailService } from '../../../modules/user/services/email.service';
 
 describe('AuthService', () => {

@@ -9,7 +9,7 @@ import { ICreateUser, IUser } from '../interfaces/user.interface';
 import { PasswordService } from './password.service';
 import { EmailService } from './email.service';
 import { User } from '@prisma/client';
-import { RedisCacheService } from '../../../modules/auth/infra/redis/redis-cache.service';
+import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 
 @Injectable()
 export class CreateUserService {
