@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../../prisma.service';
 import {
   IUserRepository,
@@ -18,10 +17,14 @@ import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { Prisma, User } from '@prisma/client';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { PasswordService } from '../../../common/services/password.service';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly passwordService: PasswordService,
+  ) {}
 
   private formatPersonalInfo({
     firstName,
@@ -53,14 +56,14 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   private async formatSecurityInfo({
-    password,
+    hashedPassword,
     salt,
     confirmationToken,
     ipAddressOrigin,
     status,
   }: ICreateUser): Promise<UserSecurityInfo> {
     return {
-      password,
+      password: hashedPassword,
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
@@ -249,14 +252,14 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const isPasswordMatch = await bcrypt.compare(
+      const isPasswordMatch = await this.passwordService.comparePasswords(
         data.oldPassword,
         security.password,
       );
 
       if (isPasswordMatch) {
         securityInfo = {
-          password: securityData.password,
+          password: securityData.hashedPassword,
           salt: securityData.salt,
         };
       } else {

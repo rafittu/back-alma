@@ -63,13 +63,12 @@ export class UpdateUserService {
       if (data.newPassword) {
         this.validatePassword(data);
 
-        const { password, salt } = await this.passwordService.hashPassword(
-          data.newPassword,
-        );
+        const { hashedPassword, salt } =
+          await this.passwordService.hashPassword(data.newPassword);
 
         securityData = {
           ...securityData,
-          password,
+          hashedPassword,
           salt,
         };
       }

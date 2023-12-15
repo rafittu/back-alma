@@ -6,11 +6,18 @@ import * as crypto from 'crypto';
 export class PasswordService {
   async hashPassword(
     password: string,
-  ): Promise<{ password: string; salt: string }> {
+  ): Promise<{ hashedPassword: string; salt: string }> {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    return { password: hashedPassword, salt };
+    return { hashedPassword, salt };
+  }
+
+  async comparePasswords(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
   }
 
   generateRandomToken(): string {

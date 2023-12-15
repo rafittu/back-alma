@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
 import { Channel, Prisma, User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
 import {
@@ -11,11 +9,14 @@ import {
 } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
 import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
-import { randomBytes } from 'crypto';
+import { PasswordService } from '../../../common/services/password.service';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository<User> {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly passwordService: PasswordService,
+  ) {}
 
   async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
     const { email, password } = credentials;
@@ -40,7 +41,7 @@ export class AuthRepository implements IAuthRepository<User> {
     });
 
     if (userData) {
-      const isPasswordValid = await bcrypt.compare(
+      const isPasswordValid = await this.passwordService.comparePasswords(
         password,
         userData.security.password,
       );
@@ -139,7 +140,7 @@ export class AuthRepository implements IAuthRepository<User> {
       );
     }
 
-    const userRecoverToken = randomBytes(32).toString('hex');
+    const userRecoverToken = this.passwordService.generateRandomToken();
 
     await this.prisma.userSecurityInfo.update({
       data: { recover_token: userRecoverToken },
@@ -163,11 +164,12 @@ export class AuthRepository implements IAuthRepository<User> {
     }
 
     try {
-      const salt = await bcrypt.genSalt();
+      const { hashedPassword, salt } =
+        await this.passwordService.hashPassword(password);
 
       await this.prisma.userSecurityInfo.update({
         data: {
-          password: await bcrypt.hash(password, salt),
+          password: hashedPassword,
           salt,
           recover_token: null,
         },
@@ -190,7 +192,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
   async resendAccountToken(id: string, email: string): Promise<ResendAccToken> {
     try {
-      const newConfirmationToken = crypto.randomBytes(32).toString('hex');
+      const newConfirmationToken = this.passwordService.generateRandomToken();
 
       const { origin_channel } = await this.prisma.user.update({
         data: {

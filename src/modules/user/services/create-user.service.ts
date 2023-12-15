@@ -28,12 +28,12 @@ export class CreateUserService {
   private async formatSecurityInfo(
     createUserDto: CreateUserDto,
   ): Promise<Partial<ICreateUser>> {
-    const { password, salt } = await this.passwordService.hashPassword(
+    const { hashedPassword, salt } = await this.passwordService.hashPassword(
       createUserDto.password,
     );
     const confirmationToken = this.passwordService.generateRandomToken();
 
-    return { password, salt, confirmationToken };
+    return { hashedPassword, salt, confirmationToken };
   }
 
   private mapUserToReturn(
@@ -140,13 +140,13 @@ export class CreateUserService {
     delete data.passwordConfirmation;
 
     try {
-      const { password, salt, confirmationToken } =
+      const { hashedPassword, salt, confirmationToken } =
         await this.formatSecurityInfo(data);
 
       const user = await this.userRepository.createUser({
         ...data,
         ipAddressOrigin: ipAddress,
-        password,
+        hashedPassword,
         salt,
         confirmationToken,
         allowedChannels: [data.originChannel],

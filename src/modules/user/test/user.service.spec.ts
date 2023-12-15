@@ -413,12 +413,10 @@ describe('User Services', () => {
 
   describe('password services', () => {
     it('should hash password successfully', async () => {
-      jest
-        .spyOn(bcrypt, 'genSalt')
-        .mockResolvedValueOnce('mocked_salt' as never);
+      jest.spyOn(bcrypt, 'genSalt').mockResolvedValueOnce('mockSalt' as never);
       jest
         .spyOn(bcrypt, 'hash')
-        .mockResolvedValueOnce('hashed_password' as never);
+        .mockResolvedValueOnce('mockHashedPassword' as never);
 
       const result = await passwordService.hashPassword(
         MockCreateUserDto.password,
@@ -427,8 +425,8 @@ describe('User Services', () => {
       expect(bcrypt.genSalt).toHaveBeenCalledTimes(1);
       expect(bcrypt.hash).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        password: 'hashed_password',
-        salt: 'mocked_salt',
+        hashedPassword: 'mockHashedPassword',
+        salt: 'mockSalt',
       });
     });
 

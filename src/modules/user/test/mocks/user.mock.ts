@@ -49,7 +49,7 @@ export const MockICreateUser: ICreateUser = {
   username: MockCreateUserDto.username,
   email: MockCreateUserDto.email,
   phone: MockCreateUserDto.phone,
-  password: faker.internet.password(),
+  hashedPassword: faker.internet.password(),
   salt: faker.string.binary(),
   confirmationToken: faker.string.alphanumeric(),
   ipAddressOrigin: MockIpAddress,
@@ -98,7 +98,7 @@ const MockUserContactInfo: UserContactInfo = {
 
 const MockUserSecurityInfo: UserSecurityInfo = {
   id: MockUser.user_security_info_id,
-  password: MockICreateUser.password,
+  password: MockICreateUser.hashedPassword,
   salt: MockICreateUser.salt,
   confirmation_token: MockICreateUser.confirmationToken,
   recover_token: faker.string.alphanumeric(),
@@ -175,13 +175,13 @@ export const MockIUser: IUser = {
 export const MockUpdateUserDto: UpdateUserDto = {
   username: faker.internet.userName(),
   email: faker.internet.email(),
-  oldPassword: MockICreateUser.password,
+  oldPassword: faker.internet.password(),
   newPassword: 'faker.internet.password()',
   passwordConfirmation: 'faker.internet.password()',
 };
 
 export const MockUpdateSecurityData: IUpdateSecurityData = {
-  password: faker.internet.password(),
+  hashedPassword: faker.internet.password(),
   salt: faker.string.binary(),
   confirmationToken: faker.string.alphanumeric(),
   onUpdateIpAddress: MockIpAddress,
