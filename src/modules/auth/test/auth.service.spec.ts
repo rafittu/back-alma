@@ -27,6 +27,7 @@ import { UserRepository } from '../../../modules/user/repository/user.repository
 import {
   MockConfirmationToken,
   MockJWT,
+  MockResetPassword,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
@@ -249,30 +250,32 @@ describe('AuthService', () => {
     });
   });
 
-  // describe('reset account password', () => {
-  //   it('should reset account password to a new one', async () => {
-  //     const result = await recoverPasswordService.resetPassword(
-  //       recoverTokenMock,
-  //       resetPasswordMock,
-  //     );
+  describe('reset account password', () => {
+    it('should reset account password to a new one', async () => {
+      const result = await recoverPasswordService.resetPassword(
+        MockConfirmationToken,
+        MockResetPassword,
+      );
 
-  //     expect(authRepository.resetPassword).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(resetPasswordResponse);
-  //   });
+      const response = { message: 'password reseted' };
 
-  //   it('should throw an error if passwordConfirmation is incorrect', async () => {
-  //     resetPasswordMock.passwordConfirmation = 'invalidPasswordConfirmation';
+      expect(authRepository.resetPassword).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(response);
+    });
 
-  //     try {
-  //       await recoverPasswordService.resetPassword(
-  //         recoverTokenMock,
-  //         resetPasswordMock,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(400);
-  //       expect(error.message).toBe('passwords do not match');
-  //     }
-  //   });
-  // });
+    // it('should throw an error if passwordConfirmation is incorrect', async () => {
+    //   resetPasswordMock.passwordConfirmation = 'invalidPasswordConfirmation';
+
+    //   try {
+    //     await recoverPasswordService.resetPassword(
+    //       recoverTokenMock,
+    //       resetPasswordMock,
+    //     );
+    //   } catch (error) {
+    //     expect(error).toBeInstanceOf(AppError);
+    //     expect(error.code).toBe(400);
+    //     expect(error.message).toBe('passwords do not match');
+    //   }
+    // });
+  });
 });
