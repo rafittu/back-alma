@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
 import { Channel, Prisma, User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
 import {
@@ -42,7 +41,7 @@ export class AuthRepository implements IAuthRepository<User> {
     });
 
     if (userData) {
-      const isPasswordValid = await bcrypt.compare(
+      const isPasswordValid = await this.passwordService.comparePasswords(
         password,
         userData.security.password,
       );

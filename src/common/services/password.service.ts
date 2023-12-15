@@ -13,6 +13,13 @@ export class PasswordService {
     return { hashedPassword, salt };
   }
 
+  async comparePasswords(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
+  }
+
   generateRandomToken(): string {
     return crypto.randomBytes(32).toString('hex');
   }
