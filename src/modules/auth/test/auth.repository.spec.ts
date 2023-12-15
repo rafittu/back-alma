@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../prisma.service';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
 import { AuthRepository } from '../repository/auth.repository';
 import {
   getUserCredentialsResponse,
@@ -20,7 +20,7 @@ import {
   userEmailMock,
 } from './mocks/controller.mock';
 import { recoverTokenMock } from './mocks/services.mock';
-import * as Crypto from 'crypto';
+// import * as Crypto from 'crypto';
 import {
   MockConfirmationToken,
   MockUserCredentials,
@@ -28,23 +28,27 @@ import {
   MockUserPayload,
 } from './mocks/auth.mock';
 import { Channel } from '@prisma/client';
+import { PasswordService } from '../../../common/services/password.service';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
   let prismaService: PrismaService;
+  let passwordService: PasswordService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthRepository, PrismaService],
+      providers: [AuthRepository, PrismaService, PasswordService],
     }).compile();
 
     authRepository = module.get<AuthRepository>(AuthRepository);
     prismaService = module.get<PrismaService>(PrismaService);
+    passwordService = module.get<PasswordService>(PasswordService);
   });
 
   it('should be defined', () => {
     expect(authRepository).toBeDefined();
     expect(prismaService).toBeDefined();
+    expect(passwordService).toBeDefined();
   });
 
   describe('validate user', () => {
@@ -53,7 +57,9 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+      jest
+        .spyOn(passwordService, 'comparePasswords')
+        .mockResolvedValue(true as never);
 
       const result = await authRepository.validateUser(MockUserCredentials);
 
@@ -119,7 +125,7 @@ describe('Auth Repository', () => {
   describe('resend confirm account token email', () => {
     it('should return a confirmation token and channel origin', async () => {
       jest
-        .spyOn(Crypto, 'randomBytes')
+        .spyOn(passwordService, 'generateRandomToken')
         .mockReturnValueOnce(MockConfirmationToken as never);
 
       jest

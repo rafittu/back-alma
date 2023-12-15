@@ -3,7 +3,6 @@ import { PrismaService } from '../../../prisma.service';
 import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import * as bcrypt from 'bcrypt';
 import {
   MockICreateUser,
   MockPrismaUser,
@@ -18,6 +17,7 @@ import { PasswordService } from '../../../common/services/password.service';
 describe('User Repository', () => {
   let userRepository: UserRepository;
   let prismaService: PrismaService;
+  let passwordService: PasswordService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,6 +26,7 @@ describe('User Repository', () => {
 
     userRepository = module.get<UserRepository>(UserRepository);
     prismaService = module.get<PrismaService>(PrismaService);
+    passwordService = module.get<PasswordService>(PasswordService);
   });
 
   describe('create user', () => {
@@ -215,8 +216,9 @@ describe('User Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-
+      jest
+        .spyOn(passwordService, 'comparePasswords')
+        .mockResolvedValue(true as never);
       jest
         .spyOn(prismaService.user, 'update')
         .mockResolvedValueOnce(MockUserData);
@@ -236,7 +238,9 @@ describe('User Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+      jest
+        .spyOn(passwordService, 'comparePasswords')
+        .mockResolvedValue(true as never);
 
       jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce({
         code: 'P2002',
@@ -261,7 +265,9 @@ describe('User Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
+      jest
+        .spyOn(passwordService, 'comparePasswords')
+        .mockResolvedValue(false as never);
 
       try {
         await userRepository.updateUser(
@@ -281,7 +287,9 @@ describe('User Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+      jest
+        .spyOn(passwordService, 'comparePasswords')
+        .mockResolvedValue(true as never);
 
       jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce({
         code: 'P2025',
@@ -305,7 +313,9 @@ describe('User Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+      jest
+        .spyOn(passwordService, 'comparePasswords')
+        .mockResolvedValue(true as never);
 
       jest
         .spyOn(prismaService.user, 'update')
