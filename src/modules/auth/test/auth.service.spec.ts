@@ -4,22 +4,6 @@ import { RecoverPasswordService } from '../services/recover-password.service';
 import { SignInService } from '../services/signin.service';
 import { AuthRepository } from '../repository/auth.repository';
 import { JwtService } from '@nestjs/jwt';
-import {
-  jwtPayloadMock,
-  jwtTokenMock,
-  mockResendAccountTokenResponse,
-  mockUser,
-  recoverTokenMock,
-  signinPayloadMock,
-} from './mocks/services.mock';
-import {
-  accountConfirmResponse,
-  recoverPasswordEmailResponse,
-  resetPasswordMock,
-  resetPasswordResponse,
-  userEmailMock,
-} from './mocks/controller.mock';
-import { confirmationTokenMock } from './mocks/controller.mock';
 import { MailerService } from '@nestjs-modules/mailer';
 import { AppError } from '../../../common/errors/Error';
 import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
@@ -44,7 +28,6 @@ describe('AuthService', () => {
 
   let authRepository: AuthRepository;
   let emailService: EmailService;
-  // let mailerService: MailerService;
   let redisService: RedisCacheService;
 
   beforeEach(async () => {
@@ -68,10 +51,10 @@ describe('AuthService', () => {
               .mockResolvedValueOnce(MockConfirmationToken),
             resetPassword: jest
               .fn()
-              .mockResolvedValueOnce(resetPasswordResponse),
-            resendAccountToken: jest
-              .fn()
-              .mockResolvedValueOnce(mockResendAccountTokenResponse),
+              .mockResolvedValueOnce({ message: 'password reseted' }),
+            resendAccountToken: jest.fn().mockResolvedValueOnce({
+              message: `account confirmation token resent to ${MockUserData.contact.email}`,
+            }),
             validateChannel: jest.fn().mockResolvedValueOnce(null),
           },
         },
@@ -102,7 +85,6 @@ describe('AuthService', () => {
     resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
       ResendAccountTokenEmailService,
     );
-    // mailerService = module.get<MailerService>(MailerService);
     emailService = module.get<EmailService>(EmailService);
     redisService = module.get<RedisCacheService>(RedisCacheService);
   });
@@ -163,6 +145,7 @@ describe('AuthService', () => {
       const response = {
         message: `account confirmation token resent to ${MockUserData.contact.email}`,
       };
+
       expect(authRepository.resendAccountToken).toHaveBeenCalledTimes(1);
       expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
@@ -221,12 +204,14 @@ describe('AuthService', () => {
         MockConfirmationToken,
       );
 
+      const response = {
+        message: 'account email successfully confirmed',
+      };
+
       expect(authRepository.confirmAccountEmail).toHaveBeenCalledTimes(1);
       expect(redisService.get).toHaveBeenCalledTimes(1);
 
-      expect(result).toEqual({
-        message: 'account email successfully confirmed',
-      });
+      expect(result).toEqual(response);
     });
   });
 

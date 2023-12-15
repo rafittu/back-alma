@@ -14,10 +14,10 @@ import { LocalAuthGuard } from './infra/guards/local-auth.guard';
 import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
 import { AppError } from '../../common/errors/Error';
 import {
-  AuthRequest,
-  UserPayload,
-  UserToken,
-} from './structure/service.structure';
+  IAuthRequest,
+  IUserPayload,
+  IUserToken,
+} from './interfaces/service.interface';
 import { isPublic } from './infra/decorators/is-public.decorator';
 import { CurrentUser } from './infra/decorators/current-user.decorator';
 import { ConfirmAccountEmailService } from './services/confirm-email.service';
@@ -38,7 +38,7 @@ export class AuthController {
   @isPublic()
   @Post('/signin')
   @UseGuards(LocalAuthGuard)
-  async signIn(@Request() req: AuthRequest): Promise<UserToken> {
+  async signIn(@Request() req: IAuthRequest): Promise<IUserToken> {
     const { user, body } = req;
     const bodyObject = Object(body);
     const { origin } = bodyObject;
@@ -48,7 +48,7 @@ export class AuthController {
 
   @Patch('/account/resend-token')
   async resendAccountTokenEmail(
-    @CurrentUser() user: UserPayload,
+    @CurrentUser() user: IUserPayload,
     @Body('email') email: string,
   ): Promise<object> {
     const { id } = user;
@@ -81,7 +81,7 @@ export class AuthController {
   }
 
   @Get('/me')
-  getMe(@CurrentUser() user: UserPayload) {
+  getMe(@CurrentUser() user: IUserPayload) {
     return user;
   }
 }

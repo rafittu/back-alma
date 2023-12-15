@@ -1,26 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../prisma.service';
-// import * as bcrypt from 'bcrypt';
 import { AuthRepository } from '../repository/auth.repository';
-import {
-  getUserCredentialsResponse,
-  getUserSecurityInfoResponse,
-  mockConfirmationToken,
-  mockPrismaUpdateConfirmationToken,
-  mockResendAccountTokenResponse,
-  userCredentialsMock,
-  validatedUserMockResponse,
-} from './mocks/repository.mock';
 import { AppError } from '../../../common/errors/Error';
 import { UserStatus } from '../../user/interfaces/user-status.enum';
-import {
-  accountConfirmResponse,
-  confirmationTokenMock,
-  resetPasswordResponse,
-  userEmailMock,
-} from './mocks/controller.mock';
-import { recoverTokenMock } from './mocks/services.mock';
-// import * as Crypto from 'crypto';
 import {
   MockConfirmationToken,
   MockUser,

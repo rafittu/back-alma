@@ -1,7 +1,7 @@
 import { User } from '.prisma/client';
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
-import { IAuthRepository } from '../structure/auth-repository.structure';
+import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { UserRepository } from '../../../modules/user/repository/user.repository';
 import { AppError } from '../../../common/errors/Error';
 import { EmailService } from '../../../common/services/email.service';
