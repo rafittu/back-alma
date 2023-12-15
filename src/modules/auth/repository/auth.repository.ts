@@ -3,11 +3,8 @@ import { PrismaService } from '../../../prisma.service';
 import { Channel, Prisma, User } from '@prisma/client';
 import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
-import {
-  IAuthRepository,
-  ResendAccToken,
-} from '../interfaces/auth-repository.interface';
-import { UserPayload } from '../interfaces/service.interface';
+import { IAuthRepository } from '../interfaces/auth-repository.interface';
+import { IResendAccToken, IUserPayload } from '../interfaces/service.interface';
 import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
 import { PasswordService } from '../../../common/services/password.service';
 
@@ -18,7 +15,7 @@ export class AuthRepository implements IAuthRepository<User> {
     private readonly passwordService: PasswordService,
   ) {}
 
-  async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
+  async validateUser(credentials: CredentialsDto): Promise<IUserPayload> {
     const { email, password } = credentials;
 
     const userData = await this.prisma.user.findFirst({
@@ -190,7 +187,10 @@ export class AuthRepository implements IAuthRepository<User> {
     }
   }
 
-  async resendAccountToken(id: string, email: string): Promise<ResendAccToken> {
+  async resendAccountToken(
+    id: string,
+    email: string,
+  ): Promise<IResendAccToken> {
     try {
       const newConfirmationToken = this.passwordService.generateRandomToken();
 

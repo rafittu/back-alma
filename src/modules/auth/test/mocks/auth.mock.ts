@@ -9,11 +9,11 @@ import {
 } from '@prisma/client';
 import { CredentialsDto } from '../../dto/credentials.dto';
 import {
-  AuthRequest,
-  UserPayload,
-  UserToken,
+  IAuthRequest,
+  IResetPassword,
+  IUserPayload,
+  IUserToken,
 } from '../../interfaces/service.interface';
-import { ChangePasswordDto } from '../../dto/change-password.dto';
 
 export const MockUserCredentials: CredentialsDto = {
   email: faker.internet.email(),
@@ -74,17 +74,17 @@ export const MockUserData = {
 
 export const MockJWT = faker.string.alphanumeric();
 
-export const MockUserPayload: UserPayload = {
+export const MockUserPayload: IUserPayload = {
   id: MockUser.id,
   email: MockUserData.contact.email,
   username: MockUserData.contact.username,
 };
 
-export const MockAccessToken: UserToken = {
+export const MockAccessToken: IUserToken = {
   accessToken: MockJWT,
 };
 
-export const MockAuthRequest: AuthRequest = {
+export const MockAuthRequest: IAuthRequest = {
   user: {
     id: MockUserPayload.id,
     username: MockUserPayload.username,
@@ -93,11 +93,11 @@ export const MockAuthRequest: AuthRequest = {
   body: {
     origin: Channel.WOPHI,
   },
-} as AuthRequest;
+} as IAuthRequest;
 
 export const MockConfirmationToken = faker.string.alphanumeric();
 
-export const MockResetPassword: ChangePasswordDto = {
+export const MockResetPassword: IResetPassword = {
   password: 'faker.internet.password()',
   passwordConfirmation: 'faker.internet.password()',
 };

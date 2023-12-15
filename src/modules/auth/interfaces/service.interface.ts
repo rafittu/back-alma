@@ -1,19 +1,19 @@
 import { Request } from 'express';
 
-export class AuthRequest extends Request {
-  user: UserPayload;
+export class IAuthRequest extends Request {
+  user: IUserPayload;
   body: {
     origin: string;
   } & ReadableStream<Uint8Array>;
 }
 
-export interface UserPayload {
+export interface IUserPayload {
   id: string;
   username: string;
   email: string;
 }
 
-export interface JtwPayload {
+export interface IJtwPayload {
   sub: string;
   username: string;
   email: string;
@@ -21,11 +21,16 @@ export interface JtwPayload {
   exp?: number;
 }
 
-export interface UserToken {
+export interface IResendAccToken {
+  confirmationToken: string;
+  originChannel: string;
+}
+
+export interface IUserToken {
   accessToken: string;
 }
 
-export interface ResetPassword {
+export interface IResetPassword {
   password: string;
   passwordConfirmation: string;
 }
