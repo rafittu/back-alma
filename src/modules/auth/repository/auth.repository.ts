@@ -127,27 +127,27 @@ export class AuthRepository implements IAuthRepository<User> {
   }
 
   async sendRecoverPasswordEmail(email: string): Promise<string> {
-    const { user_security_info_id } = await this.prisma.user.findFirst({
-      where: { contact: { email } },
-      select: { user_security_info_id: true },
-    });
+    try {
+      const { user_security_info_id } = await this.prisma.user.findFirst({
+        where: { contact: { email } },
+        select: { user_security_info_id: true },
+      });
 
-    if (!user_security_info_id) {
+      const userRecoverToken = this.passwordService.generateRandomToken();
+
+      await this.prisma.userSecurityInfo.update({
+        data: { recover_token: userRecoverToken },
+        where: { id: user_security_info_id },
+      });
+
+      return userRecoverToken;
+    } catch (error) {
       throw new AppError(
         'auth-repository.sendRecoverPasswordEmail',
         404,
         'user with this email not found',
       );
     }
-
-    const userRecoverToken = this.passwordService.generateRandomToken();
-
-    await this.prisma.userSecurityInfo.update({
-      data: { recover_token: userRecoverToken },
-      where: { id: user_security_info_id },
-    });
-
-    return userRecoverToken;
   }
 
   async resetPassword(recoverToken: string, password: string): Promise<object> {
