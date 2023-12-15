@@ -13,6 +13,7 @@ import {
   MockUser,
   MockUserData,
 } from './mocks/user.mock';
+import { PasswordService } from '../../../common/services/password.service';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
@@ -20,7 +21,7 @@ describe('User Repository', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserRepository, PrismaService],
+      providers: [UserRepository, PrismaService, PasswordService],
     }).compile();
 
     userRepository = module.get<UserRepository>(UserRepository);
