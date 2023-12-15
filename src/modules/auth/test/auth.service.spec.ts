@@ -27,6 +27,7 @@ import { UserRepository } from '../../../modules/user/repository/user.repository
 import {
   MockConfirmationToken,
   MockJWT,
+  MockUserCredentials,
   MockUserData,
   MockUserPayload,
 } from './mocks/auth.mock';
@@ -42,7 +43,7 @@ describe('AuthService', () => {
 
   let authRepository: AuthRepository;
   let emailService: EmailService;
-  let mailerService: MailerService;
+  // let mailerService: MailerService;
   let redisService: RedisCacheService;
 
   beforeEach(async () => {
@@ -63,7 +64,7 @@ describe('AuthService', () => {
             }),
             sendRecoverPasswordEmail: jest
               .fn()
-              .mockResolvedValueOnce(recoverTokenMock),
+              .mockResolvedValueOnce(MockConfirmationToken),
             resetPassword: jest
               .fn()
               .mockResolvedValueOnce(resetPasswordResponse),
@@ -100,7 +101,7 @@ describe('AuthService', () => {
     resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
       ResendAccountTokenEmailService,
     );
-    mailerService = module.get<MailerService>(MailerService);
+    // mailerService = module.get<MailerService>(MailerService);
     emailService = module.get<EmailService>(EmailService);
     redisService = module.get<RedisCacheService>(RedisCacheService);
   });
@@ -228,17 +229,25 @@ describe('AuthService', () => {
     });
   });
 
-  // describe('send recover password email', () => {
-  //   it('should send an email with recover password instructions', async () => {
-  //     const result = await recoverPasswordService.sendRecoverPasswordEmail(
-  //       userEmailMock,
-  //     );
+  describe('send recover password email', () => {
+    it('should send an email with recover password instructions', async () => {
+      jest
+        .spyOn(emailService, 'sendConfirmationEmail')
+        .mockResolvedValueOnce(null);
 
-  //     expect(authRepository.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
-  //     expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(recoverPasswordEmailResponse);
-  //   });
-  // });
+      const result = await recoverPasswordService.sendRecoverPasswordEmail(
+        MockUserCredentials.email,
+      );
+
+      const response = {
+        message: `recover password email sent to ${MockUserCredentials.email}`,
+      };
+
+      expect(authRepository.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
+      expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(response);
+    });
+  });
 
   // describe('reset account password', () => {
   //   it('should reset account password to a new one', async () => {

@@ -51,7 +51,7 @@ const MockUserContactInfo: UserContactInfo = {
   updated_at: MockUser.updated_at,
 };
 
-const MockUserSecurityInfo: UserSecurityInfo = {
+export const MockUserSecurityInfo: UserSecurityInfo = {
   id: MockUser.user_security_info_id,
   password: MockUserCredentials.password,
   salt: faker.string.binary(),
