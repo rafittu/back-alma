@@ -11,11 +11,14 @@ import {
 } from '../structure/auth-repository.structure';
 import { UserPayload } from '../structure/service.structure';
 import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
-import { randomBytes } from 'crypto';
+import { PasswordService } from '../../../common/services/password.service';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository<User> {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly passwordService: PasswordService,
+  ) {}
 
   async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
     const { email, password } = credentials;
@@ -139,7 +142,7 @@ export class AuthRepository implements IAuthRepository<User> {
       );
     }
 
-    const userRecoverToken = randomBytes(32).toString('hex');
+    const userRecoverToken = this.passwordService.generateRandomToken();
 
     await this.prisma.userSecurityInfo.update({
       data: { recover_token: userRecoverToken },
