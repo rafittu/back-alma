@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
 import { Channel, Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
 import {
@@ -194,7 +193,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
   async resendAccountToken(id: string, email: string): Promise<ResendAccToken> {
     try {
-      const newConfirmationToken = crypto.randomBytes(32).toString('hex');
+      const newConfirmationToken = this.passwordService.generateRandomToken();
 
       const { origin_channel } = await this.prisma.user.update({
         data: {
