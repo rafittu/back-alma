@@ -23,6 +23,7 @@ import { recoverTokenMock } from './mocks/services.mock';
 // import * as Crypto from 'crypto';
 import {
   MockConfirmationToken,
+  MockUser,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
@@ -215,40 +216,41 @@ describe('Auth Repository', () => {
     });
   });
 
-  // describe('send recover password email', () => {
-  //   it('should return an user recover token successfully', async () => {
-  //     jest
-  //       .spyOn(prismaService.user, 'findFirst')
-  //       .mockResolvedValueOnce(getUserCredentialsResponse);
+  describe('send recover password email', () => {
+    it('should return an user recover token successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUser);
 
-  //     jest
-  //       .spyOn(Crypto, 'randomBytes')
-  //       .mockReturnValueOnce(recoverTokenMock as never);
+      jest
+        .spyOn(passwordService, 'generateRandomToken')
+        .mockReturnValueOnce(MockConfirmationToken as never);
 
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'update')
-  //       .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
 
-  //     const result =
-  //       await authRepository.sendRecoverPasswordEmail(userEmailMock);
+      const result = await authRepository.sendRecoverPasswordEmail(
+        MockUserCredentials.email,
+      );
 
-  //     expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-  //     expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(recoverTokenMock);
-  //   });
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockConfirmationToken);
+    });
 
-  //   it('should throw an error if password recover email is not sent', async () => {
-  //     jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
+    // it('should throw an error if password recover email is not sent', async () => {
+    //   jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
 
-  //     try {
-  //       await authRepository.sendRecoverPasswordEmail(userEmailMock);
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(404);
-  //       expect(error.message).toBe('user with this email not found');
-  //     }
-  //   });
-  // });
+    //   try {
+    //     await authRepository.sendRecoverPasswordEmail(userEmailMock);
+    //   } catch (error) {
+    //     expect(error).toBeInstanceOf(AppError);
+    //     expect(error.code).toBe(404);
+    //     expect(error.message).toBe('user with this email not found');
+    //   }
+    // });
+  });
 
   // describe('reset password', () => {
   //   it('should reset user account password', async () => {
