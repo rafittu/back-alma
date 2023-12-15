@@ -283,42 +283,47 @@ describe('Auth Repository', () => {
       expect(result).toEqual(response);
     });
 
-    // it('should throw an error if recover token is invalid', async () => {
-    //   jest
-    //     .spyOn(prismaService.userSecurityInfo, 'findFirst')
-    //     .mockResolvedValueOnce(null);
+    it('should throw an error if recover token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(null);
 
-    //   try {
-    //     await authRepository.resetPassword(
-    //       recoverTokenMock,
-    //       userCredentialsMock.password,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(404);
-    //     expect(error.message).toBe('invalid recover token');
-    //   }
-    // });
+      try {
+        await authRepository.resetPassword(
+          MockConfirmationToken,
+          MockUserCredentials.password,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('invalid recover token');
+      }
+    });
 
-    // it('should throw an error if password not reseted', async () => {
-    //   jest
-    //     .spyOn(prismaService.userSecurityInfo, 'findFirst')
-    //     .mockResolvedValueOnce(getUserSecurityInfoResponse);
+    it('should throw an error if password not reseted', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(MockUserSecurityInfo);
 
-    //   jest
-    //     .spyOn(prismaService.userSecurityInfo, 'update')
-    //     .mockRejectedValueOnce('user not updated');
+      jest.spyOn(passwordService, 'hashPassword').mockResolvedValueOnce({
+        hashedPassword: 'mockHashedPassword',
+        salt: 'mockSalt',
+      });
 
-    //   try {
-    //     await authRepository.resetPassword(
-    //       recoverTokenMock,
-    //       userCredentialsMock.password,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(500);
-    //     expect(error.message).toBe('password not reseted');
-    //   }
-    // });
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockRejectedValueOnce('user not updated');
+
+      try {
+        await authRepository.resetPassword(
+          MockConfirmationToken,
+          MockUserCredentials.password,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('password not reseted');
+      }
+    });
   });
 });
