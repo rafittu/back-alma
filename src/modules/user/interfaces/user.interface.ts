@@ -10,7 +10,7 @@ export interface ICreateUser {
   username?: string;
   email: string;
   phone: string;
-  password: string;
+  hashedPassword: string;
   salt: string;
   confirmationToken: string;
   ipAddressOrigin: string;
@@ -60,7 +60,7 @@ export interface IUserFilter {
 }
 
 export interface IUpdateSecurityData {
-  password?: string;
+  hashedPassword?: string;
   salt?: string;
   confirmationToken?: string;
   status?: UserStatus;

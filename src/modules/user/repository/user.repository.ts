@@ -53,14 +53,14 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   private async formatSecurityInfo({
-    password,
+    hashedPassword,
     salt,
     confirmationToken,
     ipAddressOrigin,
     status,
   }: ICreateUser): Promise<UserSecurityInfo> {
     return {
-      password,
+      password: hashedPassword,
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
@@ -256,7 +256,7 @@ export class UserRepository implements IUserRepository<User> {
 
       if (isPasswordMatch) {
         securityInfo = {
-          password: securityData.password,
+          password: securityData.hashedPassword,
           salt: securityData.salt,
         };
       } else {
