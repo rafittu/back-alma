@@ -13,6 +13,7 @@ import {
   UserPayload,
   UserToken,
 } from '../../structure/service.structure';
+import { ChangePasswordDto } from '../../dto/change-password.dto';
 
 export const MockUserCredentials: CredentialsDto = {
   email: faker.internet.email(),
@@ -51,7 +52,7 @@ const MockUserContactInfo: UserContactInfo = {
   updated_at: MockUser.updated_at,
 };
 
-const MockUserSecurityInfo: UserSecurityInfo = {
+export const MockUserSecurityInfo: UserSecurityInfo = {
   id: MockUser.user_security_info_id,
   password: MockUserCredentials.password,
   salt: faker.string.binary(),
@@ -95,3 +96,8 @@ export const MockAuthRequest: AuthRequest = {
 } as AuthRequest;
 
 export const MockConfirmationToken = faker.string.alphanumeric();
+
+export const MockResetPassword: ChangePasswordDto = {
+  password: 'faker.internet.password()',
+  passwordConfirmation: 'faker.internet.password()',
+};

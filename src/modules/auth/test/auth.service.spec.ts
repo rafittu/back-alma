@@ -27,6 +27,8 @@ import { UserRepository } from '../../../modules/user/repository/user.repository
 import {
   MockConfirmationToken,
   MockJWT,
+  MockResetPassword,
+  MockUserCredentials,
   MockUserData,
   MockUserPayload,
 } from './mocks/auth.mock';
@@ -42,7 +44,7 @@ describe('AuthService', () => {
 
   let authRepository: AuthRepository;
   let emailService: EmailService;
-  let mailerService: MailerService;
+  // let mailerService: MailerService;
   let redisService: RedisCacheService;
 
   beforeEach(async () => {
@@ -63,7 +65,7 @@ describe('AuthService', () => {
             }),
             sendRecoverPasswordEmail: jest
               .fn()
-              .mockResolvedValueOnce(recoverTokenMock),
+              .mockResolvedValueOnce(MockConfirmationToken),
             resetPassword: jest
               .fn()
               .mockResolvedValueOnce(resetPasswordResponse),
@@ -100,7 +102,7 @@ describe('AuthService', () => {
     resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
       ResendAccountTokenEmailService,
     );
-    mailerService = module.get<MailerService>(MailerService);
+    // mailerService = module.get<MailerService>(MailerService);
     emailService = module.get<EmailService>(EmailService);
     redisService = module.get<RedisCacheService>(RedisCacheService);
   });
@@ -228,42 +230,52 @@ describe('AuthService', () => {
     });
   });
 
-  // describe('send recover password email', () => {
-  //   it('should send an email with recover password instructions', async () => {
-  //     const result = await recoverPasswordService.sendRecoverPasswordEmail(
-  //       userEmailMock,
-  //     );
+  describe('send recover password email', () => {
+    it('should send an email with recover password instructions', async () => {
+      jest
+        .spyOn(emailService, 'sendConfirmationEmail')
+        .mockResolvedValueOnce(null);
 
-  //     expect(authRepository.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
-  //     expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(recoverPasswordEmailResponse);
-  //   });
-  // });
+      const result = await recoverPasswordService.sendRecoverPasswordEmail(
+        MockUserCredentials.email,
+      );
 
-  // describe('reset account password', () => {
-  //   it('should reset account password to a new one', async () => {
-  //     const result = await recoverPasswordService.resetPassword(
-  //       recoverTokenMock,
-  //       resetPasswordMock,
-  //     );
+      const response = {
+        message: `recover password email sent to ${MockUserCredentials.email}`,
+      };
 
-  //     expect(authRepository.resetPassword).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(resetPasswordResponse);
-  //   });
+      expect(authRepository.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
+      expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(response);
+    });
+  });
 
-  //   it('should throw an error if passwordConfirmation is incorrect', async () => {
-  //     resetPasswordMock.passwordConfirmation = 'invalidPasswordConfirmation';
+  describe('reset account password', () => {
+    it('should reset account password to a new one', async () => {
+      const result = await recoverPasswordService.resetPassword(
+        MockConfirmationToken,
+        MockResetPassword,
+      );
 
-  //     try {
-  //       await recoverPasswordService.resetPassword(
-  //         recoverTokenMock,
-  //         resetPasswordMock,
-  //       );
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(400);
-  //       expect(error.message).toBe('passwords do not match');
-  //     }
-  //   });
-  // });
+      const response = { message: 'password reseted' };
+
+      expect(authRepository.resetPassword).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(response);
+    });
+
+    it('should throw an error if passwordConfirmation is incorrect', async () => {
+      MockResetPassword.passwordConfirmation = 'invalidPasswordConfirmation';
+
+      try {
+        await recoverPasswordService.resetPassword(
+          MockConfirmationToken,
+          MockResetPassword,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('passwords do not match');
+      }
+    });
+  });
 });
