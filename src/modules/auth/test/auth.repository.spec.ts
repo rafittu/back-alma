@@ -239,17 +239,19 @@ describe('Auth Repository', () => {
       expect(result).toEqual(MockConfirmationToken);
     });
 
-    // it('should throw an error if password recover email is not sent', async () => {
-    //   jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
+    it('should throw an error if password recover email is not sent', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
 
-    //   try {
-    //     await authRepository.sendRecoverPasswordEmail(userEmailMock);
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(404);
-    //     expect(error.message).toBe('user with this email not found');
-    //   }
-    // });
+      try {
+        await authRepository.sendRecoverPasswordEmail(
+          MockUserCredentials.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user with this email not found');
+      }
+    });
   });
 
   // describe('reset password', () => {
