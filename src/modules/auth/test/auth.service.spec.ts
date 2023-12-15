@@ -263,19 +263,19 @@ describe('AuthService', () => {
       expect(result).toEqual(response);
     });
 
-    // it('should throw an error if passwordConfirmation is incorrect', async () => {
-    //   resetPasswordMock.passwordConfirmation = 'invalidPasswordConfirmation';
+    it('should throw an error if passwordConfirmation is incorrect', async () => {
+      MockResetPassword.passwordConfirmation = 'invalidPasswordConfirmation';
 
-    //   try {
-    //     await recoverPasswordService.resetPassword(
-    //       recoverTokenMock,
-    //       resetPasswordMock,
-    //     );
-    //   } catch (error) {
-    //     expect(error).toBeInstanceOf(AppError);
-    //     expect(error.code).toBe(400);
-    //     expect(error.message).toBe('passwords do not match');
-    //   }
-    // });
+      try {
+        await recoverPasswordService.resetPassword(
+          MockConfirmationToken,
+          MockResetPassword,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('passwords do not match');
+      }
+    });
   });
 });
