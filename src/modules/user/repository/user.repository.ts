@@ -17,7 +17,7 @@ import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { Prisma, User } from '@prisma/client';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { PasswordService } from 'src/common/services/password.service';
+import { PasswordService } from '../../../common/services/password.service';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
