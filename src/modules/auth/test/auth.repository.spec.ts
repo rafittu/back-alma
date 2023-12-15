@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../prisma.service';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
 import { AuthRepository } from '../repository/auth.repository';
 import {
   getUserCredentialsResponse,
@@ -20,31 +20,36 @@ import {
   userEmailMock,
 } from './mocks/controller.mock';
 import { recoverTokenMock } from './mocks/services.mock';
-import * as Crypto from 'crypto';
+// import * as Crypto from 'crypto';
 import {
   MockConfirmationToken,
+  MockUser,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
 } from './mocks/auth.mock';
 import { Channel } from '@prisma/client';
+import { PasswordService } from '../../../common/services/password.service';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
   let prismaService: PrismaService;
+  let passwordService: PasswordService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthRepository, PrismaService],
+      providers: [AuthRepository, PrismaService, PasswordService],
     }).compile();
 
     authRepository = module.get<AuthRepository>(AuthRepository);
     prismaService = module.get<PrismaService>(PrismaService);
+    passwordService = module.get<PasswordService>(PasswordService);
   });
 
   it('should be defined', () => {
     expect(authRepository).toBeDefined();
     expect(prismaService).toBeDefined();
+    expect(passwordService).toBeDefined();
   });
 
   describe('validate user', () => {
@@ -53,7 +58,9 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
+      jest
+        .spyOn(passwordService, 'comparePasswords')
+        .mockResolvedValue(true as never);
 
       const result = await authRepository.validateUser(MockUserCredentials);
 
@@ -119,7 +126,7 @@ describe('Auth Repository', () => {
   describe('resend confirm account token email', () => {
     it('should return a confirmation token and channel origin', async () => {
       jest
-        .spyOn(Crypto, 'randomBytes')
+        .spyOn(passwordService, 'generateRandomToken')
         .mockReturnValueOnce(MockConfirmationToken as never);
 
       jest
@@ -209,40 +216,43 @@ describe('Auth Repository', () => {
     });
   });
 
-  // describe('send recover password email', () => {
-  //   it('should return an user recover token successfully', async () => {
-  //     jest
-  //       .spyOn(prismaService.user, 'findFirst')
-  //       .mockResolvedValueOnce(getUserCredentialsResponse);
+  describe('send recover password email', () => {
+    it('should return an user recover token successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findFirst')
+        .mockResolvedValueOnce(MockUser);
 
-  //     jest
-  //       .spyOn(Crypto, 'randomBytes')
-  //       .mockReturnValueOnce(recoverTokenMock as never);
+      jest
+        .spyOn(passwordService, 'generateRandomToken')
+        .mockReturnValueOnce(MockConfirmationToken as never);
 
-  //     jest
-  //       .spyOn(prismaService.userSecurityInfo, 'update')
-  //       .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'update')
+        .mockResolvedValueOnce(null);
 
-  //     const result =
-  //       await authRepository.sendRecoverPasswordEmail(userEmailMock);
+      const result = await authRepository.sendRecoverPasswordEmail(
+        MockUserCredentials.email,
+      );
 
-  //     expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-  //     expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
-  //     expect(result).toEqual(recoverTokenMock);
-  //   });
+      expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockConfirmationToken);
+    });
 
-  //   it('should throw an error if password recover email is not sent', async () => {
-  //     jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
+    it('should throw an error if password recover email is not sent', async () => {
+      jest.spyOn(prismaService.user, 'findFirst').mockResolvedValueOnce(null);
 
-  //     try {
-  //       await authRepository.sendRecoverPasswordEmail(userEmailMock);
-  //     } catch (error) {
-  //       expect(error).toBeInstanceOf(AppError);
-  //       expect(error.code).toBe(404);
-  //       expect(error.message).toBe('user with this email not found');
-  //     }
-  //   });
-  // });
+      try {
+        await authRepository.sendRecoverPasswordEmail(
+          MockUserCredentials.email,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(404);
+        expect(error.message).toBe('user with this email not found');
+      }
+    });
+  });
 
   // describe('reset password', () => {
   //   it('should reset user account password', async () => {
