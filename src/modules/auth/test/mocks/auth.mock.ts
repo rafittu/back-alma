@@ -12,7 +12,7 @@ import {
   AuthRequest,
   UserPayload,
   UserToken,
-} from '../../structure/service.structure';
+} from '../../interfaces/service.interface';
 import { ChangePasswordDto } from '../../dto/change-password.dto';
 
 export const MockUserCredentials: CredentialsDto = {

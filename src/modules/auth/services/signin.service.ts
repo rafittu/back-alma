@@ -3,9 +3,9 @@ import {
   JtwPayload,
   UserPayload,
   UserToken,
-} from '../structure/service.structure';
+} from '../interfaces/service.interface';
 import { JwtService } from '@nestjs/jwt';
-import { IAuthRepository } from '../structure/auth-repository.structure';
+import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { Channel, User } from '@prisma/client';
 import { AuthRepository } from '../repository/auth.repository';
 

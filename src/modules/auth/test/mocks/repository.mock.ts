@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { CredentialsDto } from '../../dto/credentials.dto';
-import { UserPayload } from '../../structure/service.structure';
+import { UserPayload } from '../../interfaces/service.interface';
 import { UserStatus } from '@prisma/client';
-import { ResendAccToken } from '../../structure/auth-repository.structure';
+import { ResendAccToken } from '../../interfaces/auth-repository.interface';
 
 export const userCredentialsMock: CredentialsDto = {
   email: faker.internet.email(),

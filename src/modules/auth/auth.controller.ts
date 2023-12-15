@@ -17,7 +17,7 @@ import {
   AuthRequest,
   UserPayload,
   UserToken,
-} from './structure/service.structure';
+} from './interfaces/service.interface';
 import { isPublic } from './infra/decorators/is-public.decorator';
 import { CurrentUser } from './infra/decorators/current-user.decorator';
 import { ConfirmAccountEmailService } from './services/confirm-email.service';

@@ -6,8 +6,8 @@ import { CredentialsDto } from '../dto/credentials.dto';
 import {
   IAuthRepository,
   ResendAccToken,
-} from '../structure/auth-repository.structure';
-import { UserPayload } from '../structure/service.structure';
+} from '../interfaces/auth-repository.interface';
+import { UserPayload } from '../interfaces/service.interface';
 import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
 import { PasswordService } from '../../../common/services/password.service';
 

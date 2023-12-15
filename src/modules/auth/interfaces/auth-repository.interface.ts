@@ -1,6 +1,6 @@
 import { UserStatus } from 'src/modules/user/interfaces/user-status.enum';
 import { CredentialsDto } from '../dto/credentials.dto';
-import { UserPayload } from './service.structure';
+import { UserPayload } from './service.interface';
 import { Channel } from '@prisma/client';
 
 export interface IAuthRepository<User> {

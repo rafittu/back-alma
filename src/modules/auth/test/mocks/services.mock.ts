@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { JtwPayload, UserPayload } from '../../structure/service.structure';
-import { ResendAccToken } from '../../structure/auth-repository.structure';
+import { JtwPayload, UserPayload } from '../../interfaces/service.interface';
+import { ResendAccToken } from '../../interfaces/auth-repository.interface';
 import { UserStatus } from '../../../user/interfaces/user-status.enum';
 
 export const signinPayloadMock: UserPayload = {

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
-import { IAuthRepository } from '../structure/auth-repository.structure';
+import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { Channel, User } from '@prisma/client';
-import { ResetPassword } from '../structure/service.structure';
+import { ResetPassword } from '../interfaces/service.interface';
 import { AppError } from '../../../common/errors/Error';
 import { EmailService } from '../../../common/services/email.service';
 
