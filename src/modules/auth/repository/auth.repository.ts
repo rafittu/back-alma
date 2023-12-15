@@ -166,11 +166,12 @@ export class AuthRepository implements IAuthRepository<User> {
     }
 
     try {
-      const salt = await bcrypt.genSalt();
+      const { hashedPassword, salt } =
+        await this.passwordService.hashPassword(password);
 
       await this.prisma.userSecurityInfo.update({
         data: {
-          password: await bcrypt.hash(password, salt),
+          password: hashedPassword,
           salt,
           recover_token: null,
         },
