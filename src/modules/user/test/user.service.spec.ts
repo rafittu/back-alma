@@ -23,6 +23,8 @@ import { Channel } from '@prisma/client';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import * as schedule from 'node-schedule';
+import { ScheduledTaskService } from '../services/scheduled-task.service';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
@@ -32,6 +34,8 @@ describe('User Services', () => {
   let getUserByFilterService: GetUserByFilterService;
   let passwordService: PasswordService;
   let emailService: EmailService;
+  let scheduledTaskService: ScheduledTaskService;
+
   let mailerService: MailerService;
   let redisCacheService: RedisCacheService;
 
@@ -47,6 +51,7 @@ describe('User Services', () => {
         GetUserByFilterService,
         EmailService,
         PasswordService,
+        ScheduledTaskService,
         {
           provide: MailerService,
           useValue: {
@@ -68,6 +73,10 @@ describe('User Services', () => {
             getUserById: jest.fn().mockResolvedValue(MockPrismaUser),
             updateUser: jest.fn().mockResolvedValue(MockPrismaUser),
             cancelUser: jest.fn().mockResolvedValue(MockPrismaUser),
+            findCancelledUsersToDelete: jest
+              .fn()
+              .mockResolvedValue([MockPrismaUser]),
+            deleteUser: jest.fn(),
           },
         },
       ],
@@ -82,6 +91,9 @@ describe('User Services', () => {
     );
     passwordService = module.get<PasswordService>(PasswordService);
     emailService = module.get<EmailService>(EmailService);
+    scheduledTaskService =
+      module.get<ScheduledTaskService>(ScheduledTaskService);
+
     mailerService = module.get<MailerService>(MailerService);
     redisCacheService = module.get<RedisCacheService>(RedisCacheService);
 
@@ -108,6 +120,7 @@ describe('User Services', () => {
     expect(cancelUserService).toBeDefined();
     expect(getUserByFilterService).toBeDefined();
     expect(emailService).toBeDefined();
+    expect(scheduledTaskService).toBeDefined();
     expect(mailerService).toBeDefined();
     expect(redisCacheService).toBeDefined();
   });
@@ -356,8 +369,8 @@ describe('User Services', () => {
     });
   });
 
-  describe('delete user', () => {
-    it('should delete an user successfully', async () => {
+  describe('cancel user', () => {
+    it('should cancel an user successfully', async () => {
       const result = await cancelUserService.execute(MockUser.id);
 
       expect(userRepository.cancelUser).toHaveBeenCalledTimes(1);
@@ -439,6 +452,28 @@ describe('User Services', () => {
       expect(randomBytesMock).toHaveBeenCalledTimes(1);
       expect(randomBytesMock).toHaveBeenCalledWith(32);
       expect(result).toBe('6d6f636b65645f746f6b656e');
+    });
+  });
+
+  describe('Scheduled task service', () => {
+    it('should delete cancelled users', async () => {
+      jest
+        .spyOn(scheduledTaskService, 'deleteCancelledUsers')
+        .mockResolvedValue(null);
+
+      const scheduleJobMock = jest
+        .spyOn(schedule, 'scheduleJob')
+        .mockImplementationOnce((_cronPattern, callback) => {
+          callback(new Date());
+          return {} as schedule.Job;
+        });
+
+      scheduledTaskService.deleteCancelledUsersScheduledTask();
+
+      expect(scheduleJobMock).toHaveBeenCalledTimes(1);
+      expect(scheduledTaskService.deleteCancelledUsers).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
 });
