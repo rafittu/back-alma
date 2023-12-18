@@ -75,4 +75,5 @@ export interface IUserRepository<User> {
   ): Promise<PrismaUser>;
   cancelUser(userId: string, status: UserStatus): Promise<PrismaUser>;
   findCancelledUsersToDelete(dateThreshold: Date): Promise<PrismaUser[]>;
+  deleteUser(userId: string): Promise<void>;
 }
