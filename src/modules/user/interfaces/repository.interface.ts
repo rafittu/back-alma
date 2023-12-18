@@ -74,4 +74,5 @@ export interface IUserRepository<User> {
     securityData: IUpdateSecurityData,
   ): Promise<PrismaUser>;
   cancelUser(userId: string, status: UserStatus): Promise<PrismaUser>;
+  findCancelledUsersToDelete(dateThreshold: Date): Promise<PrismaUser[]>;
 }

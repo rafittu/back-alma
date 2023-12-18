@@ -386,4 +386,26 @@ export class UserRepository implements IUserRepository<User> {
       );
     }
   }
+
+  async findCancelledUsersToDelete(dateThreshold: Date): Promise<PrismaUser[]> {
+    return await this.prisma.user.findMany({
+      where: {
+        security: {
+          status: 'CANCELLED',
+          updated_at: {
+            lte: dateThreshold,
+          },
+        },
+      },
+      select: {
+        id: true,
+        personal: true,
+        contact: true,
+        security: true,
+        allowed_channels: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+  }
 }
