@@ -3,6 +3,7 @@ import * as schedule from 'node-schedule';
 import { UserRepository } from '../repository/user.repository';
 import { IUserRepository } from '../interfaces/repository.interface';
 import { User } from '@prisma/client';
+import { AppError } from '../../../common/errors/Error';
 
 @Injectable()
 export class ScheduledTaskService {
@@ -18,15 +19,23 @@ export class ScheduledTaskService {
   }
 
   async deleteCancelledUsers(): Promise<void> {
-    const dateThreshold = new Date();
-    const days = 21;
-    dateThreshold.setDate(dateThreshold.getDate() - days);
+    try {
+      const dateThreshold = new Date();
+      const days = 21;
+      dateThreshold.setDate(dateThreshold.getDate() - days);
 
-    const usersToDelete =
-      await this.userRepository.findCancelledUsersToDelete(dateThreshold);
+      const usersToDelete =
+        await this.userRepository.findCancelledUsersToDelete(dateThreshold);
 
-    for (const user of usersToDelete) {
-      await this.userRepository.deleteUser(user.id);
+      for (const user of usersToDelete) {
+        await this.userRepository.deleteUser(user.id);
+      }
+    } catch (error) {
+      throw new AppError(
+        'user-repository.scheduledTask',
+        500,
+        'could not delete users',
+      );
     }
   }
 }
