@@ -76,7 +76,7 @@ describe('User Services', () => {
             findCancelledUsersToDelete: jest
               .fn()
               .mockResolvedValue([MockPrismaUser]),
-            deleteUser: jest.fn(),
+            deleteUser: jest.fn().mockResolvedValue(null),
           },
         },
       ],
@@ -456,7 +456,7 @@ describe('User Services', () => {
   });
 
   describe('Scheduled task service', () => {
-    it('should delete cancelled users', async () => {
+    it('should schedule to delete cancelled users', async () => {
       jest
         .spyOn(scheduledTaskService, 'deleteCancelledUsers')
         .mockResolvedValue(null);
@@ -474,6 +474,15 @@ describe('User Services', () => {
       expect(scheduledTaskService.deleteCancelledUsers).toHaveBeenCalledTimes(
         1,
       );
+    });
+
+    it('should delete cancelled users', async () => {
+      await scheduledTaskService.deleteCancelledUsers();
+
+      expect(userRepository.findCancelledUsersToDelete).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
     });
   });
 });
