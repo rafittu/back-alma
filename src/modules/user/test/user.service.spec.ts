@@ -484,5 +484,19 @@ describe('User Services', () => {
       );
       expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
     });
+
+    it('should throw an error if user not deleted', async () => {
+      jest
+        .spyOn(userRepository, 'deleteUser')
+        .mockRejectedValueOnce(new Error());
+
+      try {
+        await scheduledTaskService.deleteCancelledUsers();
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not delete users');
+      }
+    });
   });
 });
