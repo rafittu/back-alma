@@ -78,6 +78,7 @@ export const MockUserPayload: IUserPayload = {
   id: MockUser.id,
   email: MockUserData.contact.email,
   username: MockUserData.contact.username,
+  status: MockUserData.security.status,
 };
 
 export const MockAccessToken: IUserToken = {
