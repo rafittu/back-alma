@@ -27,6 +27,7 @@ export class SignInService {
         sub: user.id,
         username: user.username,
         email: user.email,
+        status: user.status,
       };
 
       const jwtToken = this.jwtService.sign(payload);
