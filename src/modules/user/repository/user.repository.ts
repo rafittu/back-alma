@@ -345,7 +345,7 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async deleteUser(userId: string, status: UserStatus): Promise<PrismaUser> {
+  async cancelUser(userId: string, status: UserStatus): Promise<PrismaUser> {
     try {
       const user = await this.prisma.user.update({
         data: {
@@ -385,5 +385,35 @@ export class UserRepository implements IUserRepository<User> {
         'user not cancelled',
       );
     }
+  }
+
+  async findCancelledUsersToDelete(dateThreshold: Date): Promise<PrismaUser[]> {
+    return await this.prisma.user.findMany({
+      where: {
+        security: {
+          status: 'CANCELLED',
+          updated_at: {
+            lte: dateThreshold,
+          },
+        },
+      },
+      select: {
+        id: true,
+        personal: true,
+        contact: true,
+        security: true,
+        allowed_channels: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    await this.prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
   }
 }

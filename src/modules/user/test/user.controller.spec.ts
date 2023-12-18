@@ -3,7 +3,7 @@ import { UserController } from '../user.controller';
 import { CreateUserService } from '../services/create-user.service';
 import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
-import { DeleteUserService } from '../services/delete-user.service';
+import { CancelUserService } from '../services/cancel-user.service';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
   MockCreateUserDto,
@@ -19,7 +19,7 @@ describe('UserController', () => {
   let createUserService: CreateUserService;
   let getUserByIdService: GetUserByIdService;
   let updateUserService: UpdateUserService;
-  let deleteUserService: DeleteUserService;
+  let cancelUserService: CancelUserService;
   let getUserByFilterService: GetUserByFilterService;
 
   beforeEach(async () => {
@@ -45,7 +45,7 @@ describe('UserController', () => {
           },
         },
         {
-          provide: DeleteUserService,
+          provide: CancelUserService,
           useValue: {
             execute: jest.fn().mockResolvedValue(MockIUser),
           },
@@ -63,7 +63,7 @@ describe('UserController', () => {
     createUserService = module.get<CreateUserService>(CreateUserService);
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
     updateUserService = module.get<UpdateUserService>(UpdateUserService);
-    deleteUserService = module.get<DeleteUserService>(DeleteUserService);
+    cancelUserService = module.get<CancelUserService>(CancelUserService);
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
@@ -139,13 +139,13 @@ describe('UserController', () => {
     it('should delete an user successfully', async () => {
       const result = await controller.deleteUser(MockUser.id);
 
-      expect(deleteUserService.execute).toHaveBeenCalledTimes(1);
+      expect(cancelUserService.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
       jest
-        .spyOn(deleteUserService, 'execute')
+        .spyOn(cancelUserService, 'execute')
         .mockRejectedValueOnce(new Error());
 
       expect(controller.deleteUser(MockUser.id)).rejects.toThrowError();

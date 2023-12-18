@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreateUserService } from '../services/create-user.service';
 import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
-import { DeleteUserService } from '../services/delete-user.service';
+import { CancelUserService } from '../services/cancel-user.service';
 import { UserRepository } from '../repository/user.repository';
 import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
@@ -23,15 +23,19 @@ import { Channel } from '@prisma/client';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import * as schedule from 'node-schedule';
+import { ScheduledTaskService } from '../services/scheduled-task.service';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
   let getUserByIdService: GetUserByIdService;
   let updateUserService: UpdateUserService;
-  let deleteUserService: DeleteUserService;
+  let cancelUserService: CancelUserService;
   let getUserByFilterService: GetUserByFilterService;
   let passwordService: PasswordService;
   let emailService: EmailService;
+  let scheduledTaskService: ScheduledTaskService;
+
   let mailerService: MailerService;
   let redisCacheService: RedisCacheService;
 
@@ -43,10 +47,11 @@ describe('User Services', () => {
         CreateUserService,
         GetUserByIdService,
         UpdateUserService,
-        DeleteUserService,
+        CancelUserService,
         GetUserByFilterService,
         EmailService,
         PasswordService,
+        ScheduledTaskService,
         {
           provide: MailerService,
           useValue: {
@@ -67,7 +72,11 @@ describe('User Services', () => {
             userByFilter: jest.fn().mockResolvedValue(MockPrismaUser),
             getUserById: jest.fn().mockResolvedValue(MockPrismaUser),
             updateUser: jest.fn().mockResolvedValue(MockPrismaUser),
-            deleteUser: jest.fn().mockResolvedValue(MockPrismaUser),
+            cancelUser: jest.fn().mockResolvedValue(MockPrismaUser),
+            findCancelledUsersToDelete: jest
+              .fn()
+              .mockResolvedValue([MockPrismaUser]),
+            deleteUser: jest.fn().mockResolvedValue(null),
           },
         },
       ],
@@ -76,12 +85,15 @@ describe('User Services', () => {
     createUserService = module.get<CreateUserService>(CreateUserService);
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
     updateUserService = module.get<UpdateUserService>(UpdateUserService);
-    deleteUserService = module.get<DeleteUserService>(DeleteUserService);
+    cancelUserService = module.get<CancelUserService>(CancelUserService);
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
     passwordService = module.get<PasswordService>(PasswordService);
     emailService = module.get<EmailService>(EmailService);
+    scheduledTaskService =
+      module.get<ScheduledTaskService>(ScheduledTaskService);
+
     mailerService = module.get<MailerService>(MailerService);
     redisCacheService = module.get<RedisCacheService>(RedisCacheService);
 
@@ -105,9 +117,10 @@ describe('User Services', () => {
     expect(createUserService).toBeDefined();
     expect(getUserByIdService).toBeDefined();
     expect(updateUserService).toBeDefined();
-    expect(deleteUserService).toBeDefined();
+    expect(cancelUserService).toBeDefined();
     expect(getUserByFilterService).toBeDefined();
     expect(emailService).toBeDefined();
+    expect(scheduledTaskService).toBeDefined();
     expect(mailerService).toBeDefined();
     expect(redisCacheService).toBeDefined();
   });
@@ -356,23 +369,23 @@ describe('User Services', () => {
     });
   });
 
-  describe('delete user', () => {
-    it('should delete an user successfully', async () => {
-      const result = await deleteUserService.execute(MockUser.id);
+  describe('cancel user', () => {
+    it('should cancel an user successfully', async () => {
+      const result = await cancelUserService.execute(MockUser.id);
 
-      expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
+      expect(userRepository.cancelUser).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error if user not cancelled', async () => {
       jest
-        .spyOn(userRepository, 'deleteUser')
+        .spyOn(userRepository, 'cancelUser')
         .mockRejectedValueOnce(
           new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
         );
 
       try {
-        await deleteUserService.execute('invalid_id');
+        await cancelUserService.execute('invalid_id');
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
@@ -439,6 +452,51 @@ describe('User Services', () => {
       expect(randomBytesMock).toHaveBeenCalledTimes(1);
       expect(randomBytesMock).toHaveBeenCalledWith(32);
       expect(result).toBe('6d6f636b65645f746f6b656e');
+    });
+  });
+
+  describe('Scheduled task service', () => {
+    it('should schedule to delete cancelled users', async () => {
+      jest
+        .spyOn(scheduledTaskService, 'deleteCancelledUsers')
+        .mockResolvedValue(null);
+
+      const scheduleJobMock = jest
+        .spyOn(schedule, 'scheduleJob')
+        .mockImplementationOnce((_cronPattern, callback) => {
+          callback(new Date());
+          return {} as schedule.Job;
+        });
+
+      scheduledTaskService.deleteCancelledUsersScheduledTask();
+
+      expect(scheduleJobMock).toHaveBeenCalledTimes(1);
+      expect(scheduledTaskService.deleteCancelledUsers).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+
+    it('should delete cancelled users', async () => {
+      await scheduledTaskService.deleteCancelledUsers();
+
+      expect(userRepository.findCancelledUsersToDelete).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error if user not deleted', async () => {
+      jest
+        .spyOn(userRepository, 'deleteUser')
+        .mockRejectedValueOnce(new Error());
+
+      try {
+        await scheduledTaskService.deleteCancelledUsers();
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not delete users');
+      }
     });
   });
 });

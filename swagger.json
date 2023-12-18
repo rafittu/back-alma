@@ -1268,7 +1268,7 @@
     "/user/delete/{id}": {
       "delete": {
         "summary": "Delete account",
-        "description": "Route to delete user account",
+        "description": "Route to delete user account. After this operation, user will receive the 'CANCELLED' status  and after 21 days if not reactivate, the account will be permanently deleted",
         "tags": ["User"],
         "security": [
           {
