@@ -32,6 +32,7 @@ export class AuthRepository implements IAuthRepository<User> {
         security: {
           select: {
             password: true,
+            status: true,
           },
         },
       },
@@ -48,6 +49,7 @@ export class AuthRepository implements IAuthRepository<User> {
           id: userData.id,
           username: userData.contact.username,
           email,
+          status: userData.security.status,
         };
       }
     }
