@@ -11,13 +11,12 @@ export class EmailService {
     token: string,
     channel: string,
   ): Promise<void> {
-    console.log('email service', channel);
     try {
       const email = {
         to,
         from: 'alma@wophi.be',
-        subject: 'ALMA - Email de confirmação',
-        template: 'email-confirmation',
+        subject: `${channel} - Email de confirmação`,
+        template: `${channel.toLowerCase()}-email-confirmation`,
         context: {
           token,
         },
