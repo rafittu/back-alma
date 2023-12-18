@@ -1,3 +1,4 @@
+import { UserStatus } from '@prisma/client';
 import { Request } from 'express';
 
 export class IAuthRequest extends Request {
@@ -11,12 +12,14 @@ export interface IUserPayload {
   id: string;
   username: string;
   email: string;
+  status: UserStatus;
 }
 
 export interface IJtwPayload {
   sub: string;
   username: string;
   email: string;
+  status: UserStatus;
   iat?: number;
   exp?: number;
 }
