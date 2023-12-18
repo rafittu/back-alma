@@ -381,5 +381,13 @@ describe('User Repository', () => {
 
       expect(prismaService.user.findMany).toHaveBeenCalledTimes(1);
     });
+
+    it('should delete users successfully', async () => {
+      jest.spyOn(prismaService.user, 'delete').mockResolvedValueOnce(null);
+
+      await userRepository.deleteUser(MockUser.id);
+
+      expect(prismaService.user.delete).toHaveBeenCalledTimes(1);
+    });
   });
 });
