@@ -345,7 +345,7 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async deleteUser(userId: string, status: UserStatus): Promise<PrismaUser> {
+  async cancelUser(userId: string, status: UserStatus): Promise<PrismaUser> {
     try {
       const user = await this.prisma.user.update({
         data: {

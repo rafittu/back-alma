@@ -7,10 +7,10 @@ import {
 import { UserStatus } from '../interfaces/user-status.enum';
 import { User } from '@prisma/client';
 import { IUser } from '../interfaces/user.interface';
-import { mapUserToReturn } from '../../../modules/utils/helpers/helpers-user-module';
+import { mapUserToReturn } from '../../utils/helpers/helpers-user-module';
 
 @Injectable()
-export class DeleteUserService {
+export class CancelUserService {
   constructor(
     @Inject(UserRepository)
     private userRepository: IUserRepository<User>,
@@ -21,7 +21,7 @@ export class DeleteUserService {
   }
 
   async execute(userId: string): Promise<IUser> {
-    const user = await this.userRepository.deleteUser(
+    const user = await this.userRepository.cancelUser(
       userId,
       UserStatus.CANCELLED,
     );

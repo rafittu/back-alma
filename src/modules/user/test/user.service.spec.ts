@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreateUserService } from '../services/create-user.service';
 import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
-import { DeleteUserService } from '../services/delete-user.service';
+import { CancelUserService } from '../services/cancel-user.service';
 import { UserRepository } from '../repository/user.repository';
 import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
@@ -28,7 +28,7 @@ describe('User Services', () => {
   let createUserService: CreateUserService;
   let getUserByIdService: GetUserByIdService;
   let updateUserService: UpdateUserService;
-  let deleteUserService: DeleteUserService;
+  let cancelUserService: CancelUserService;
   let getUserByFilterService: GetUserByFilterService;
   let passwordService: PasswordService;
   let emailService: EmailService;
@@ -43,7 +43,7 @@ describe('User Services', () => {
         CreateUserService,
         GetUserByIdService,
         UpdateUserService,
-        DeleteUserService,
+        CancelUserService,
         GetUserByFilterService,
         EmailService,
         PasswordService,
@@ -67,7 +67,7 @@ describe('User Services', () => {
             userByFilter: jest.fn().mockResolvedValue(MockPrismaUser),
             getUserById: jest.fn().mockResolvedValue(MockPrismaUser),
             updateUser: jest.fn().mockResolvedValue(MockPrismaUser),
-            deleteUser: jest.fn().mockResolvedValue(MockPrismaUser),
+            cancelUser: jest.fn().mockResolvedValue(MockPrismaUser),
           },
         },
       ],
@@ -76,7 +76,7 @@ describe('User Services', () => {
     createUserService = module.get<CreateUserService>(CreateUserService);
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
     updateUserService = module.get<UpdateUserService>(UpdateUserService);
-    deleteUserService = module.get<DeleteUserService>(DeleteUserService);
+    cancelUserService = module.get<CancelUserService>(CancelUserService);
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
@@ -105,7 +105,7 @@ describe('User Services', () => {
     expect(createUserService).toBeDefined();
     expect(getUserByIdService).toBeDefined();
     expect(updateUserService).toBeDefined();
-    expect(deleteUserService).toBeDefined();
+    expect(cancelUserService).toBeDefined();
     expect(getUserByFilterService).toBeDefined();
     expect(emailService).toBeDefined();
     expect(mailerService).toBeDefined();
@@ -358,21 +358,21 @@ describe('User Services', () => {
 
   describe('delete user', () => {
     it('should delete an user successfully', async () => {
-      const result = await deleteUserService.execute(MockUser.id);
+      const result = await cancelUserService.execute(MockUser.id);
 
-      expect(userRepository.deleteUser).toHaveBeenCalledTimes(1);
+      expect(userRepository.cancelUser).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error if user not cancelled', async () => {
       jest
-        .spyOn(userRepository, 'deleteUser')
+        .spyOn(userRepository, 'cancelUser')
         .mockRejectedValueOnce(
           new AppError('user-repository.deleteUser', 500, 'user not cancelled'),
         );
 
       try {
-        await deleteUserService.execute('invalid_id');
+        await cancelUserService.execute('invalid_id');
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);

@@ -341,7 +341,7 @@ describe('User Repository', () => {
         .spyOn(prismaService.user, 'update')
         .mockResolvedValueOnce(MockUserData);
 
-      const result = await userRepository.deleteUser(
+      const result = await userRepository.cancelUser(
         MockUser.id,
         UserStatus.CANCELLED,
       );
@@ -358,7 +358,7 @@ describe('User Repository', () => {
         );
 
       try {
-        await userRepository.deleteUser(MockUser.id, UserStatus.CANCELLED);
+        await userRepository.cancelUser(MockUser.id, UserStatus.CANCELLED);
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
