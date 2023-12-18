@@ -335,8 +335,8 @@ describe('User Repository', () => {
     });
   });
 
-  describe('delete user', () => {
-    it('should delete a user successfully', async () => {
+  describe('cancel user', () => {
+    it('should cancel a user successfully', async () => {
       jest
         .spyOn(prismaService.user, 'update')
         .mockResolvedValueOnce(MockUserData);
@@ -350,7 +350,7 @@ describe('User Repository', () => {
       expect(result).toEqual(MockPrismaUser);
     });
 
-    it('should throw an error if user deletion fails', async () => {
+    it('should throw an error if user cancelation fails', async () => {
       jest
         .spyOn(prismaService.user, 'update')
         .mockRejectedValueOnce(
@@ -364,6 +364,30 @@ describe('User Repository', () => {
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not cancelled');
       }
+    });
+  });
+
+  describe('find cancelled users to be deleted', () => {
+    it('should get users with cancelled status successfully', async () => {
+      jest
+        .spyOn(prismaService.user, 'findMany')
+        .mockResolvedValueOnce([MockUserData]);
+
+      const dateThreshold = new Date();
+      const days = 21;
+      dateThreshold.setDate(dateThreshold.getDate() - days);
+
+      await userRepository.findCancelledUsersToDelete(dateThreshold);
+
+      expect(prismaService.user.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('should delete users successfully', async () => {
+      jest.spyOn(prismaService.user, 'delete').mockResolvedValueOnce(null);
+
+      await userRepository.deleteUser(MockUser.id);
+
+      expect(prismaService.user.delete).toHaveBeenCalledTimes(1);
     });
   });
 });
