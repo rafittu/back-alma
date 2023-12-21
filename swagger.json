@@ -891,7 +891,7 @@
         }
       }
     },
-    "/user/{id}": {
+    "/user": {
       "get": {
         "summary": "Get user by id",
         "description": "Route to get an user by id",
@@ -907,15 +907,6 @@
             "in": "header",
             "required": true,
             "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "description": "User id",
-            "required": true,
             "schema": {
               "type": "string"
             }
@@ -998,7 +989,7 @@
         }
       }
     },
-    "/user/update/{id}": {
+    "/user/update": {
       "patch": {
         "summary": "Update user",
         "description": "Route to update user data",
@@ -1014,15 +1005,6 @@
             "in": "header",
             "required": true,
             "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "description": "User id",
-            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1265,7 +1247,7 @@
         }
       }
     },
-    "/user/delete/{id}": {
+    "/user/delete": {
       "delete": {
         "summary": "Delete account",
         "description": "Route to delete user account. After this operation, user will receive the 'CANCELLED' status  and after 21 days if not reactivate, the account will be permanently deleted",
@@ -1281,15 +1263,6 @@
             "in": "header",
             "required": true,
             "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "description": "User id",
-            "required": true,
             "schema": {
               "type": "string"
             }

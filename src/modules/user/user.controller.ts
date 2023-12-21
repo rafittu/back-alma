@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   Query,
@@ -22,6 +21,8 @@ import { CancelUserService } from './services/cancel-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';
 import { IUser, IUserFilter } from './interfaces/user.interface';
+import { CurrentUser } from '../auth/infra/decorators/current-user.decorator';
+import { IUserPayload } from '../auth/interfaces/service.interface';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -50,24 +51,24 @@ export class UserController {
     return await this.getUserByFilterService.execute(filter);
   }
 
-  @Get('/:id')
-  async getById(@Param('id') userId: string): Promise<IUser> {
-    return await this.getUserByIdService.execute(userId);
+  @Get('/')
+  async getById(@CurrentUser() user: IUserPayload): Promise<IUser> {
+    return await this.getUserByIdService.execute(user.id);
   }
 
-  @Patch('/update/:id')
+  @Patch('/update')
   async updateUser(
     @Req() req: Request,
-    @Param('id') userId: string,
+    @CurrentUser() user: IUserPayload,
     @Body() body: UpdateUserDto,
   ): Promise<IUser> {
     const ipAddress = req.socket.remoteAddress;
 
-    return await this.updateUserService.execute(body, userId, ipAddress);
+    return await this.updateUserService.execute(body, user.id, ipAddress);
   }
 
-  @Delete('/delete/:id')
-  async deleteUser(@Param('id') userId: string): Promise<IUser> {
-    return await this.deleteUserService.execute(userId);
+  @Delete('/delete')
+  async deleteUser(@CurrentUser() user: IUserPayload): Promise<IUser> {
+    return await this.deleteUserService.execute(user.id);
   }
 }
