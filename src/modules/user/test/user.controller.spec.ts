@@ -10,8 +10,8 @@ import {
   MockFakeRequest,
   MockIUser,
   MockUpdateUserDto,
-  MockUser,
   MockUserData,
+  MockUserFromJwt,
 } from './mocks/user.mock';
 
 describe('UserController', () => {
@@ -97,7 +97,7 @@ describe('UserController', () => {
 
   describe('get user by id', () => {
     it('should get an user by id successfully', async () => {
-      const result = await controller.getById(MockUserData.id);
+      const result = await controller.getById(MockUserFromJwt);
 
       expect(getUserByIdService.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
@@ -108,7 +108,7 @@ describe('UserController', () => {
         .spyOn(getUserByIdService, 'execute')
         .mockRejectedValueOnce(new Error());
 
-      expect(controller.getById(MockUserData.id)).rejects.toThrowError();
+      expect(controller.getById(MockUserFromJwt)).rejects.toThrowError();
     });
   });
 
@@ -116,7 +116,7 @@ describe('UserController', () => {
     it('should update an user successfully', async () => {
       const result = await controller.updateUser(
         MockFakeRequest,
-        MockUser.id,
+        MockUserFromJwt,
         MockUpdateUserDto,
       );
 
@@ -130,14 +130,18 @@ describe('UserController', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(
-        controller.updateUser(MockFakeRequest, MockUser.id, MockUpdateUserDto),
+        controller.updateUser(
+          MockFakeRequest,
+          MockUserFromJwt,
+          MockUpdateUserDto,
+        ),
       ).rejects.toThrowError();
     });
   });
 
   describe('delete user', () => {
     it('should delete an user successfully', async () => {
-      const result = await controller.deleteUser(MockUser.id);
+      const result = await controller.deleteUser(MockUserFromJwt);
 
       expect(cancelUserService.execute).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockIUser);
@@ -148,7 +152,7 @@ describe('UserController', () => {
         .spyOn(cancelUserService, 'execute')
         .mockRejectedValueOnce(new Error());
 
-      expect(controller.deleteUser(MockUser.id)).rejects.toThrowError();
+      expect(controller.deleteUser(MockUserFromJwt)).rejects.toThrowError();
     });
   });
 

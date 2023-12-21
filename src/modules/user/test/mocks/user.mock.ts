@@ -17,6 +17,7 @@ import { CreateUserDto } from '../../dto/create-user.dto';
 import { Request } from 'express';
 import { PrismaUser } from '../../interfaces/repository.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
+import { IUserPayload } from 'src/modules/auth/interfaces/service.interface';
 
 export const MockFakeRequest: Request = {
   socket: {
@@ -186,4 +187,11 @@ export const MockUpdateSecurityData: IUpdateSecurityData = {
   confirmationToken: faker.string.alphanumeric(),
   onUpdateIpAddress: MockIpAddress,
   status: UserStatus.PENDING_CONFIRMATION,
+};
+
+export const MockUserFromJwt: IUserPayload = {
+  id: MockUserData.id,
+  username: MockUserData.contact.username,
+  email: MockUserData.contact.email,
+  status: MockUserData.security.status,
 };
