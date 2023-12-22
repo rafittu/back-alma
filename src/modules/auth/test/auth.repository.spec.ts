@@ -5,6 +5,7 @@ import { AppError } from '../../../common/errors/Error';
 import { UserStatus } from '../../user/interfaces/user-status.enum';
 import {
   MockConfirmationToken,
+  MockExpirationTokenTime,
   MockUser,
   MockUserCredentials,
   MockUserData,
@@ -108,9 +109,10 @@ describe('Auth Repository', () => {
 
   describe('resend confirm account token email', () => {
     it('should return a confirmation token and channel origin', async () => {
-      jest
-        .spyOn(securityService, 'generateRandomToken')
-        .mockReturnValueOnce(MockConfirmationToken as never);
+      jest.spyOn(securityService, 'generateRandomToken').mockReturnValueOnce({
+        token: MockConfirmationToken,
+        expiresAt: MockExpirationTokenTime,
+      });
 
       jest
         .spyOn(prismaService.user, 'update')
@@ -205,9 +207,10 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUser);
 
-      jest
-        .spyOn(securityService, 'generateRandomToken')
-        .mockReturnValueOnce(MockConfirmationToken as never);
+      jest.spyOn(securityService, 'generateRandomToken').mockReturnValueOnce({
+        token: MockConfirmationToken,
+        expiresAt: MockExpirationTokenTime,
+      });
 
       jest
         .spyOn(prismaService.userSecurityInfo, 'update')
@@ -305,6 +308,37 @@ describe('Auth Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('password not reseted');
+      }
+    });
+  });
+
+  describe('find user by token', () => {
+    it('should return a token expiration time successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(MockUserSecurityInfo);
+
+      const result = await authRepository.findUserByToken(
+        MockUserSecurityInfo.confirmation_token,
+      );
+
+      expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockUserSecurityInfo.token_expires_at);
+    });
+
+    it('should throw an error if token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockRejectedValueOnce(null);
+
+      try {
+        await authRepository.findUserByToken(
+          MockUserSecurityInfo.confirmation_token,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not get user');
       }
     });
   });

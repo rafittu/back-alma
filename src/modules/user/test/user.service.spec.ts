@@ -447,11 +447,11 @@ describe('User Services', () => {
       const randomBytesMock = jest.spyOn(crypto, 'randomBytes');
       randomBytesMock.mockImplementationOnce(() => Buffer.from('mocked_token'));
 
-      const result = securityService.generateRandomToken();
+      const { token } = securityService.generateRandomToken();
 
       expect(randomBytesMock).toHaveBeenCalledTimes(1);
       expect(randomBytesMock).toHaveBeenCalledWith(32);
-      expect(result).toBe('6d6f636b65645f746f6b656e');
+      expect(token).toBe('6d6f636b65645f746f6b656e');
     });
   });
 
