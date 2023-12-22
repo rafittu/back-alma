@@ -52,6 +52,7 @@ export interface IRequestChannelAccess {
   id: string;
   ipAddress: string;
   confirmationToken: string;
+  tokenExpiresAt: string;
 }
 
 export interface IUserFilter {
