@@ -225,6 +225,21 @@ describe('AuthService', () => {
       expect(result).toEqual(response);
     });
 
+    it(`should throw an error if 'ipAddress' is invalid`, async () => {
+      const invalidIpAddress = 'invalid_ip_address';
+
+      try {
+        await confirmAccountEmailService.execute(
+          MockConfirmationToken,
+          invalidIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid ip address');
+      }
+    });
+
     it('should throw an error if token is expired or invalid', async () => {
       jest.spyOn(redisService, 'get').mockResolvedValueOnce(null);
 
@@ -275,6 +290,22 @@ describe('AuthService', () => {
 
       expect(authRepository.resetPassword).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
+    });
+
+    it(`should throw an error if 'ipAddress' is invalid`, async () => {
+      const invalidIpAddress = 'invalid_ip_address';
+
+      try {
+        await recoverPasswordService.resetPassword(
+          MockConfirmationToken,
+          MockResetPassword,
+          invalidIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid ip address');
+      }
     });
 
     it('should throw an error if passwordConfirmation is incorrect', async () => {
