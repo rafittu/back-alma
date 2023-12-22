@@ -6,6 +6,10 @@ import { IResetPassword } from '../interfaces/service.interface';
 import { AppError } from '../../../common/errors/Error';
 import { EmailService } from '../../../common/services/email.service';
 import { SecurityService } from '../../../common/services/security.service';
+import {
+  ipv4Regex,
+  ipv6Regex,
+} from '../../../modules/utils/helpers/helpers-user-module';
 
 @Injectable()
 export class RecoverPasswordService {
@@ -15,6 +19,10 @@ export class RecoverPasswordService {
     private readonly emailService: EmailService,
     private readonly securityService: SecurityService,
   ) {}
+
+  private validateIpAddress(ip: string): boolean {
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
 
   async sendRecoverPasswordEmail(email: string): Promise<object> {
     const recoverToken =
@@ -34,8 +42,13 @@ export class RecoverPasswordService {
   async resetPassword(
     recoverToken: string,
     resetPasswordData: IResetPassword,
+    ipAddress: string,
   ): Promise<object> {
     const { password, passwordConfirmation } = resetPasswordData;
+
+    if (!this.validateIpAddress(ipAddress)) {
+      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+    }
 
     if (password !== passwordConfirmation) {
       throw new AppError(
@@ -57,7 +70,11 @@ export class RecoverPasswordService {
         );
       }
 
-      return await this.authRepository.resetPassword(recoverToken, password);
+      return await this.authRepository.resetPassword(
+        recoverToken,
+        password,
+        ipAddress,
+      );
     } catch (error) {
       throw error;
     }
