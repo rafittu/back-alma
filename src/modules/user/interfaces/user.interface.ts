@@ -65,6 +65,7 @@ export interface IUpdateSecurityData {
   hashedPassword?: string;
   salt?: string;
   confirmationToken?: string;
+  tokenExpiresAt?: string;
   status?: UserStatus;
   onUpdateIpAddress: string;
 }
