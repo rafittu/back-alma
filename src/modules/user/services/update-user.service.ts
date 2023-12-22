@@ -9,7 +9,7 @@ import { IUser, IUpdateSecurityData } from '../interfaces/user.interface';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { EmailService } from '../../../common/services/email.service';
 import { Channel, User } from '@prisma/client';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 import {
   ipv4Regex,
   ipv6Regex,
@@ -22,7 +22,7 @@ export class UpdateUserService {
   constructor(
     @Inject(UserRepository)
     private userRepository: IUserRepository<User>,
-    private readonly passwordService: PasswordService,
+    private readonly securityService: SecurityService,
     private readonly emailService: EmailService,
   ) {}
 
@@ -64,7 +64,7 @@ export class UpdateUserService {
         this.validatePassword(data);
 
         const { hashedPassword, salt } =
-          await this.passwordService.hashPassword(data.newPassword);
+          await this.securityService.hashPassword(data.newPassword);
 
         securityData = {
           ...securityData,
@@ -74,7 +74,7 @@ export class UpdateUserService {
       }
 
       if (data.email) {
-        const { token, expiresAt } = this.passwordService.generateRandomToken();
+        const { token, expiresAt } = this.securityService.generateRandomToken();
 
         securityData = {
           ...securityData,

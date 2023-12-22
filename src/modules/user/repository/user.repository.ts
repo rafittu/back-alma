@@ -17,13 +17,13 @@ import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { Prisma, User } from '@prisma/client';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
   constructor(
     private prisma: PrismaService,
-    private readonly passwordService: PasswordService,
+    private readonly securityService: SecurityService,
   ) {}
 
   private formatPersonalInfo({
@@ -257,7 +257,7 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const isPasswordMatch = await this.passwordService.comparePasswords(
+      const isPasswordMatch = await this.securityService.comparePasswords(
         data.oldPassword,
         security.password,
       );

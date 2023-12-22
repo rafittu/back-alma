@@ -16,7 +16,7 @@ import {
   MockUser,
   MockUserData,
 } from './mocks/user.mock';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 import { EmailService } from '../../../common/services/email.service';
 import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { Channel } from '@prisma/client';
@@ -32,7 +32,7 @@ describe('User Services', () => {
   let updateUserService: UpdateUserService;
   let cancelUserService: CancelUserService;
   let getUserByFilterService: GetUserByFilterService;
-  let passwordService: PasswordService;
+  let securityService: SecurityService;
   let emailService: EmailService;
   let scheduledTaskService: ScheduledTaskService;
 
@@ -50,7 +50,7 @@ describe('User Services', () => {
         CancelUserService,
         GetUserByFilterService,
         EmailService,
-        PasswordService,
+        SecurityService,
         ScheduledTaskService,
         {
           provide: MailerService,
@@ -89,7 +89,7 @@ describe('User Services', () => {
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
-    passwordService = module.get<PasswordService>(PasswordService);
+    securityService = module.get<SecurityService>(SecurityService);
     emailService = module.get<EmailService>(EmailService);
     scheduledTaskService =
       module.get<ScheduledTaskService>(ScheduledTaskService);
@@ -151,7 +151,7 @@ describe('User Services', () => {
 
     it('should create access to new channel successfully', async () => {
       jest
-        .spyOn(passwordService, 'generateRandomToken')
+        .spyOn(securityService, 'generateRandomToken')
         .mockResolvedValueOnce('random_token' as never);
 
       jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
@@ -165,7 +165,7 @@ describe('User Services', () => {
       try {
         await createUserService.execute(MockCreateUserDto, MockIpAddress);
       } catch (error) {
-        expect(passwordService.generateRandomToken).toHaveBeenCalledTimes(1);
+        expect(securityService.generateRandomToken).toHaveBeenCalledTimes(1);
         expect(
           userRepository.createAccessToAdditionalChannel,
         ).toHaveBeenCalledTimes(1);
@@ -431,7 +431,7 @@ describe('User Services', () => {
         .spyOn(bcrypt, 'hash')
         .mockResolvedValueOnce('mockHashedPassword' as never);
 
-      const result = await passwordService.hashPassword(
+      const result = await securityService.hashPassword(
         MockCreateUserDto.password,
       );
 
@@ -447,7 +447,7 @@ describe('User Services', () => {
       const randomBytesMock = jest.spyOn(crypto, 'randomBytes');
       randomBytesMock.mockImplementationOnce(() => Buffer.from('mocked_token'));
 
-      const result = passwordService.generateRandomToken();
+      const result = securityService.generateRandomToken();
 
       expect(randomBytesMock).toHaveBeenCalledTimes(1);
       expect(randomBytesMock).toHaveBeenCalledWith(32);

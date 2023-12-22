@@ -13,7 +13,7 @@ import { ResendAccountTokenEmailService } from './services/resend-account-token.
 import { UserRepository } from '../user/repository/user.repository';
 import { RedisCacheService } from '../../common/redis/redis-cache.service';
 import { EmailService } from '../../common/services/email.service';
-import { PasswordService } from 'src/common/services/password.service';
+import { SecurityService } from '../../common/services/security.service';
 
 @Module({
   imports: [
@@ -27,7 +27,7 @@ import { PasswordService } from 'src/common/services/password.service';
     PrismaService,
     LocalStrategy,
     JwtStrategy,
-    PasswordService,
+    SecurityService,
     AuthRepository,
     UserRepository,
     RedisCacheService,

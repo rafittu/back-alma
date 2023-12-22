@@ -6,13 +6,13 @@ import { CredentialsDto } from '../dto/credentials.dto';
 import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { IResendAccToken, IUserPayload } from '../interfaces/service.interface';
 import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository<User> {
   constructor(
     private prisma: PrismaService,
-    private readonly passwordService: PasswordService,
+    private readonly securityService: SecurityService,
   ) {}
 
   async validateUser(credentials: CredentialsDto): Promise<IUserPayload> {
@@ -39,7 +39,7 @@ export class AuthRepository implements IAuthRepository<User> {
     });
 
     if (userData) {
-      const isPasswordValid = await this.passwordService.comparePasswords(
+      const isPasswordValid = await this.securityService.comparePasswords(
         password,
         userData.security.password,
       );
@@ -133,7 +133,7 @@ export class AuthRepository implements IAuthRepository<User> {
         select: { user_security_info_id: true },
       });
 
-      const { token, expiresAt } = this.passwordService.generateRandomToken();
+      const { token, expiresAt } = this.securityService.generateRandomToken();
 
       await this.prisma.userSecurityInfo.update({
         data: { recover_token: token, token_expires_at: expiresAt },
@@ -165,7 +165,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
     try {
       const { hashedPassword, salt } =
-        await this.passwordService.hashPassword(password);
+        await this.securityService.hashPassword(password);
 
       await this.prisma.userSecurityInfo.update({
         data: {
@@ -196,7 +196,7 @@ export class AuthRepository implements IAuthRepository<User> {
     email: string,
   ): Promise<IResendAccToken> {
     try {
-      const { token, expiresAt } = this.passwordService.generateRandomToken();
+      const { token, expiresAt } = this.securityService.generateRandomToken();
 
       const { origin_channel } = await this.prisma.user.update({
         data: {

@@ -5,7 +5,7 @@ import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { Channel } from '@prisma/client';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 import { AppError } from '../../../common/errors/Error';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class ConfirmAccountEmailService {
     @Inject(AuthRepository)
     private authRepository: IAuthRepository<User>,
     private readonly redisCacheService: RedisCacheService,
-    private readonly passwordService: PasswordService,
+    private readonly securityService: SecurityService,
   ) {}
 
   async execute(confirmationToken: string): Promise<object> {
@@ -26,7 +26,7 @@ export class ConfirmAccountEmailService {
       const tokenExpiresAt =
         await this.authRepository.findUserByToken(confirmationToken);
 
-      if (!this.passwordService.isTokenValid(tokenExpiresAt)) {
+      if (!this.securityService.isTokenValid(tokenExpiresAt)) {
         throw new AppError(
           'auth-service.confirmEmail',
           400,

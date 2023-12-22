@@ -7,7 +7,7 @@ import { UpdateUserService } from './services/update-user.service';
 import { UserController } from './user.controller';
 import { CancelUserService } from './services/cancel-user.service';
 import { GetUserByFilterService } from './services/user-by-filter.service';
-import { PasswordService } from '../../common/services/password.service';
+import { SecurityService } from '../../common/services/security.service';
 import { EmailService } from '../../common/services/email.service';
 import { RedisCacheService } from '../../common/redis/redis-cache.service';
 import { ScheduledTaskService } from './services/scheduled-task.service';
@@ -17,7 +17,7 @@ import { ScheduledTaskService } from './services/scheduled-task.service';
   providers: [
     PrismaService,
     UserRepository,
-    PasswordService,
+    SecurityService,
     EmailService,
     RedisCacheService,
     CreateUserService,

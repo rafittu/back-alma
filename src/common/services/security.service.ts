@@ -4,7 +4,7 @@ import * as crypto from 'crypto';
 import { addMinutes } from 'date-fns';
 
 @Injectable()
-export class PasswordService {
+export class SecurityService {
   async hashPassword(
     password: string,
   ): Promise<{ hashedPassword: string; salt: string }> {

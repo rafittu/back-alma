@@ -5,7 +5,7 @@ import { Channel, User } from '@prisma/client';
 import { IResetPassword } from '../interfaces/service.interface';
 import { AppError } from '../../../common/errors/Error';
 import { EmailService } from '../../../common/services/email.service';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 
 @Injectable()
 export class RecoverPasswordService {
@@ -13,7 +13,7 @@ export class RecoverPasswordService {
     @Inject(AuthRepository)
     private authRepository: IAuthRepository<User>,
     private readonly emailService: EmailService,
-    private readonly passwordService: PasswordService,
+    private readonly securityService: SecurityService,
   ) {}
 
   async sendRecoverPasswordEmail(email: string): Promise<object> {
@@ -49,7 +49,7 @@ export class RecoverPasswordService {
       const tokenExpiresAt =
         await this.authRepository.findUserByToken(recoverToken);
 
-      if (!this.passwordService.isTokenValid(tokenExpiresAt)) {
+      if (!this.securityService.isTokenValid(tokenExpiresAt)) {
         throw new AppError(
           'auth-service.resetPassword',
           400,
