@@ -6,6 +6,7 @@ import { UserStatus } from '../../user/interfaces/user-status.enum';
 import {
   MockConfirmationToken,
   MockExpirationTokenTime,
+  MockIpAddress,
   MockUser,
   MockUserCredentials,
   MockUserData,
@@ -155,6 +156,7 @@ describe('Auth Repository', () => {
       const result = await authRepository.confirmAccountEmail(
         MockConfirmationToken,
         UserStatus.ACTIVE,
+        MockIpAddress,
       );
 
       const response = { message: 'account email successfully confirmed' };
@@ -173,6 +175,7 @@ describe('Auth Repository', () => {
       const result = await authRepository.confirmAccountEmail(
         MockConfirmationToken,
         UserStatus.ACTIVE,
+        MockIpAddress,
         Channel.MIAU,
       );
 
@@ -192,6 +195,7 @@ describe('Auth Repository', () => {
         await authRepository.confirmAccountEmail(
           MockConfirmationToken,
           UserStatus.ACTIVE,
+          MockIpAddress,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
@@ -258,6 +262,7 @@ describe('Auth Repository', () => {
       const result = await authRepository.resetPassword(
         MockConfirmationToken,
         MockUserCredentials.password,
+        MockIpAddress,
       );
 
       const response = { message: 'password reseted' };
@@ -277,6 +282,7 @@ describe('Auth Repository', () => {
         await authRepository.resetPassword(
           MockConfirmationToken,
           MockUserCredentials.password,
+          MockIpAddress,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
@@ -303,6 +309,7 @@ describe('Auth Repository', () => {
         await authRepository.resetPassword(
           MockConfirmationToken,
           MockUserCredentials.password,
+          MockIpAddress,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
