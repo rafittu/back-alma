@@ -31,9 +31,14 @@ export class CreateUserService {
     const { hashedPassword, salt } = await this.passwordService.hashPassword(
       createUserDto.password,
     );
-    const confirmationToken = this.passwordService.generateRandomToken();
+    const { token, expiresAt } = this.passwordService.generateRandomToken();
 
-    return { hashedPassword, salt, confirmationToken };
+    return {
+      hashedPassword,
+      salt,
+      confirmationToken: token,
+      tokenExpiresAt: expiresAt,
+    };
   }
 
   private mapUserToReturn(
@@ -91,24 +96,25 @@ export class CreateUserService {
 
     if (user && !user.allowed_channels.includes(data.originChannel)) {
       try {
-        const confirmationToken = this.passwordService.generateRandomToken();
+        const { token, expiresAt } = this.passwordService.generateRandomToken();
 
         await this.userRepository.createAccessToAdditionalChannel({
           id: user.security.id,
           ipAddress,
-          confirmationToken,
+          confirmationToken: token,
+          tokenExpiresAt: expiresAt,
         });
 
         const redisExpirationTime = 1620;
         await this.redisCacheService.set(
-          confirmationToken,
+          token,
           data.originChannel,
           redisExpirationTime,
         );
 
         await this.emailService.sendConfirmationEmail(
           data.email,
-          confirmationToken,
+          token,
           data.originChannel,
         );
 
@@ -140,7 +146,7 @@ export class CreateUserService {
     delete data.passwordConfirmation;
 
     try {
-      const { hashedPassword, salt, confirmationToken } =
+      const { hashedPassword, salt, confirmationToken, tokenExpiresAt } =
         await this.formatSecurityInfo(data);
 
       const user = await this.userRepository.createUser({
@@ -149,6 +155,7 @@ export class CreateUserService {
         hashedPassword,
         salt,
         confirmationToken,
+        tokenExpiresAt,
         allowedChannels: [data.originChannel],
         status: UserStatus.PENDING_CONFIRMATION,
       });
