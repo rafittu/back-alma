@@ -93,6 +93,7 @@ export class AuthRepository implements IAuthRepository<User> {
       const { id } = await this.prisma.userSecurityInfo.update({
         data: {
           confirmation_token: null,
+          token_expires_at: null,
           status,
         },
         where: {
@@ -171,6 +172,7 @@ export class AuthRepository implements IAuthRepository<User> {
           password: hashedPassword,
           salt,
           recover_token: null,
+          token_expires_at: null,
         },
         where: {
           id: user.id,
