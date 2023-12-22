@@ -27,7 +27,11 @@ export class ConfirmAccountEmailService {
 
   async execute(confirmationToken: string, ipAddress: string): Promise<object> {
     if (!this.validateIpAddress(ipAddress)) {
-      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+      throw new AppError(
+        'auth-service.confirmEmail',
+        403,
+        'invalid ip address',
+      );
     }
 
     try {
