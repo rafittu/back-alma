@@ -87,6 +87,7 @@ export class AuthRepository implements IAuthRepository<User> {
   async confirmAccountEmail(
     confirmationToken: string,
     status: UserStatus,
+    ipAddress: string,
     newChannel?: Channel,
   ): Promise<object> {
     try {
@@ -94,6 +95,7 @@ export class AuthRepository implements IAuthRepository<User> {
         data: {
           confirmation_token: null,
           token_expires_at: null,
+          on_update_ip_address: ipAddress,
           status,
         },
         where: {
@@ -150,7 +152,11 @@ export class AuthRepository implements IAuthRepository<User> {
     }
   }
 
-  async resetPassword(recoverToken: string, password: string): Promise<object> {
+  async resetPassword(
+    recoverToken: string,
+    password: string,
+    ipAddress: string,
+  ): Promise<object> {
     const user = await this.prisma.userSecurityInfo.findFirst({
       where: { recover_token: recoverToken },
     });
@@ -173,6 +179,7 @@ export class AuthRepository implements IAuthRepository<User> {
           salt,
           recover_token: null,
           token_expires_at: null,
+          on_update_ip_address: ipAddress,
         },
         where: {
           id: user.id,
