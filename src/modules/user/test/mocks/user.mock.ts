@@ -53,6 +53,7 @@ export const MockICreateUser: ICreateUser = {
   hashedPassword: faker.internet.password(),
   salt: faker.string.binary(),
   confirmationToken: faker.string.alphanumeric(),
+  tokenExpiresAt: faker.date.future().toISOString().split('.')[0],
   ipAddressOrigin: MockIpAddress,
   originChannel: MockCreateUserDto.originChannel,
   allowedChannels: [Channel.WOPHI],
@@ -75,6 +76,7 @@ export const MockRequestChannelAccess: IRequestChannelAccess = {
   id: MockUser.user_security_info_id,
   ipAddress: MockIpAddress,
   confirmationToken: faker.string.alphanumeric(),
+  tokenExpiresAt: faker.date.future().toISOString().split('.')[0],
 };
 
 const MockUserPersonalInfo: UserPersonalInfo = {
@@ -103,6 +105,7 @@ const MockUserSecurityInfo: UserSecurityInfo = {
   salt: MockICreateUser.salt,
   confirmation_token: MockICreateUser.confirmationToken,
   recover_token: faker.string.alphanumeric(),
+  token_expires_at: new Date(MockICreateUser.tokenExpiresAt),
   ip_address_origin: MockIpAddress,
   on_update_ip_address: MockIpAddress,
   status: MockICreateUser.status,
