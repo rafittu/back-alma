@@ -49,8 +49,8 @@ export class ConfirmAccountEmailService {
       return await this.authRepository.confirmAccountEmail(
         confirmationToken,
         UserStatus.ACTIVE,
-        userCacheChannel,
         ipAddress,
+        userCacheChannel,
       );
     } catch (error) {
       throw error;
