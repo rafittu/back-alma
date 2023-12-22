@@ -325,5 +325,21 @@ describe('Auth Repository', () => {
       expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockUserSecurityInfo.token_expires_at);
     });
+
+    it('should throw an error if token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockRejectedValueOnce(null);
+
+      try {
+        await authRepository.findUserByToken(
+          MockUserSecurityInfo.confirmation_token,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not get user');
+      }
+    });
   });
 });
