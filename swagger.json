@@ -15,7 +15,7 @@
     "/user/signup": {
       "post": {
         "summary": "Create user",
-        "description": "Route to register new users",
+        "description": "Route to register new users. A token with 30 minutes expiration time is sent to the provided email",
         "tags": ["User"],
         "requestBody": {
           "content": {
@@ -255,7 +255,7 @@
     "/auth/account/{token}": {
       "patch": {
         "summary": "Confirm user account email",
-        "description": "Route to confirm a user's account email",
+        "description": "Route to confirm user's account email",
         "tags": ["Authentication"],
         "parameters": [
           {
@@ -385,7 +385,7 @@
     "/auth/send-recover-password-email": {
       "post": {
         "summary": "Send recover password email",
-        "description": "Send an email to the user with instructions to recover their password",
+        "description": "Send an email to the user with instructions to recover their password. Recover token has an expiration time of 30 minutes",
         "tags": ["Authentication"],
         "requestBody": {
           "required": true,
@@ -621,7 +621,7 @@
     "/auth/account/resend-token": {
       "patch": {
         "summary": "Resend account confirmation token",
-        "description": "Endpoint to resend new account confirmation token",
+        "description": "Endpoint to resend new account confirmation token. Token has an expiration time of 30 minutes",
         "tags": ["Authentication"],
         "parameters": [
           {
@@ -992,7 +992,7 @@
     "/user/update": {
       "patch": {
         "summary": "Update user",
-        "description": "Route to update user data",
+        "description": "Route to update user data. If updating account email, a token is sent to the provided email and has an expiration time of 30 minutes",
         "tags": ["User"],
         "security": [
           {
