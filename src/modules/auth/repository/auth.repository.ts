@@ -229,4 +229,24 @@ export class AuthRepository implements IAuthRepository<User> {
       );
     }
   }
+
+  async findUserByToken(token: string): Promise<Date> {
+    try {
+      const { token_expires_at } = await this.prisma.userSecurityInfo.findFirst(
+        {
+          where: {
+            OR: [{ confirmation_token: token }, { recover_token: token }],
+          },
+        },
+      );
+
+      return token_expires_at;
+    } catch (error) {
+      throw new AppError(
+        'auth-repository.findUserByToken',
+        500,
+        'could not get user',
+      );
+    }
+  }
 }
