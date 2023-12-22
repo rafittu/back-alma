@@ -272,7 +272,25 @@ describe('AuthService', () => {
     });
 
     it('should throw an error if passwordConfirmation is incorrect', async () => {
-      MockResetPassword.passwordConfirmation = 'invalidPasswordConfirmation';
+      const invalidPasswordConfirmation = {
+        password: MockResetPassword.password,
+        passwordConfirmation: 'invalidPasswordConfirmation',
+      };
+
+      try {
+        await recoverPasswordService.resetPassword(
+          MockConfirmationToken,
+          invalidPasswordConfirmation,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('passwords do not match');
+      }
+    });
+
+    it('should throw an error if token is expired or invalid', async () => {
+      jest.spyOn(securityService, 'isTokenValid').mockReturnValueOnce(false);
 
       try {
         await recoverPasswordService.resetPassword(
@@ -282,7 +300,7 @@ describe('AuthService', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(400);
-        expect(error.message).toBe('passwords do not match');
+        expect(error.message).toBe('invalid or expired token');
       }
     });
   });
