@@ -11,6 +11,7 @@ import { UserRepository } from '../../../modules/user/repository/user.repository
 import {
   MockConfirmationToken,
   MockExpirationTokenTime,
+  MockIpAddress,
   MockJWT,
   MockResetPassword,
   MockUserCredentials,
@@ -211,6 +212,7 @@ describe('AuthService', () => {
 
       const result = await confirmAccountEmailService.execute(
         MockConfirmationToken,
+        MockIpAddress,
       );
 
       const response = {
@@ -229,7 +231,10 @@ describe('AuthService', () => {
       jest.spyOn(securityService, 'isTokenValid').mockReturnValueOnce(false);
 
       try {
-        await confirmAccountEmailService.execute(MockConfirmationToken);
+        await confirmAccountEmailService.execute(
+          MockConfirmationToken,
+          MockIpAddress,
+        );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(400);
@@ -263,6 +268,7 @@ describe('AuthService', () => {
       const result = await recoverPasswordService.resetPassword(
         MockConfirmationToken,
         MockResetPassword,
+        MockIpAddress,
       );
 
       const response = { message: 'password reseted' };
@@ -281,6 +287,7 @@ describe('AuthService', () => {
         await recoverPasswordService.resetPassword(
           MockConfirmationToken,
           invalidPasswordConfirmation,
+          MockIpAddress,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
@@ -296,6 +303,7 @@ describe('AuthService', () => {
         await recoverPasswordService.resetPassword(
           MockConfirmationToken,
           MockResetPassword,
+          MockIpAddress,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);

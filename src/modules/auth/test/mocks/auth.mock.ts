@@ -22,6 +22,8 @@ export const MockFakeRequest: Request = {
   },
 } as Request;
 
+export const MockIpAddress = MockFakeRequest.socket.remoteAddress;
+
 export const MockUserCredentials: CredentialsDto = {
   email: faker.internet.email(),
   password: faker.internet.password(),
