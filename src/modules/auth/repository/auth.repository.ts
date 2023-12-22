@@ -132,14 +132,14 @@ export class AuthRepository implements IAuthRepository<User> {
         select: { user_security_info_id: true },
       });
 
-      const userRecoverToken = this.passwordService.generateRandomToken();
+      const { token, expiresAt } = this.passwordService.generateRandomToken();
 
       await this.prisma.userSecurityInfo.update({
-        data: { recover_token: userRecoverToken },
+        data: { recover_token: token, token_expires_at: expiresAt },
         where: { id: user_security_info_id },
       });
 
-      return userRecoverToken;
+      return token;
     } catch (error) {
       throw new AppError(
         'auth-repository.sendRecoverPasswordEmail',
@@ -194,13 +194,14 @@ export class AuthRepository implements IAuthRepository<User> {
     email: string,
   ): Promise<IResendAccToken> {
     try {
-      const newConfirmationToken = this.passwordService.generateRandomToken();
+      const { token, expiresAt } = this.passwordService.generateRandomToken();
 
       const { origin_channel } = await this.prisma.user.update({
         data: {
           security: {
             update: {
-              confirmation_token: newConfirmationToken,
+              confirmation_token: token,
+              token_expires_at: expiresAt,
             },
           },
           contact: {
@@ -215,7 +216,7 @@ export class AuthRepository implements IAuthRepository<User> {
       });
 
       return {
-        confirmationToken: newConfirmationToken,
+        confirmationToken: token,
         originChannel: origin_channel,
       };
     } catch (error) {
