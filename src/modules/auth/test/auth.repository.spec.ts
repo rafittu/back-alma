@@ -5,6 +5,7 @@ import { AppError } from '../../../common/errors/Error';
 import { UserStatus } from '../../user/interfaces/user-status.enum';
 import {
   MockConfirmationToken,
+  MockExpirationTokenTime,
   MockUser,
   MockUserCredentials,
   MockUserData,
@@ -108,9 +109,10 @@ describe('Auth Repository', () => {
 
   describe('resend confirm account token email', () => {
     it('should return a confirmation token and channel origin', async () => {
-      jest
-        .spyOn(securityService, 'generateRandomToken')
-        .mockReturnValueOnce(MockConfirmationToken as never);
+      jest.spyOn(securityService, 'generateRandomToken').mockReturnValueOnce({
+        token: MockConfirmationToken,
+        expiresAt: MockExpirationTokenTime,
+      });
 
       jest
         .spyOn(prismaService.user, 'update')
@@ -205,9 +207,10 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUser);
 
-      jest
-        .spyOn(securityService, 'generateRandomToken')
-        .mockReturnValueOnce(MockConfirmationToken as never);
+      jest.spyOn(securityService, 'generateRandomToken').mockReturnValueOnce({
+        token: MockConfirmationToken,
+        expiresAt: MockExpirationTokenTime,
+      });
 
       jest
         .spyOn(prismaService.userSecurityInfo, 'update')

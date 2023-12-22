@@ -98,6 +98,7 @@ export const MockAuthRequest: IAuthRequest = {
 } as IAuthRequest;
 
 export const MockConfirmationToken = faker.string.alphanumeric();
+export const MockExpirationTokenTime = faker.date.future();
 
 export const MockResetPassword: IResetPassword = {
   password: 'faker.internet.password()',
