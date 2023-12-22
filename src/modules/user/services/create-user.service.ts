@@ -82,7 +82,6 @@ export class CreateUserService {
   }
 
   async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
-    ipAddress = '201.9.36.45';
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
     }
