@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { addMinutes, format } from 'date-fns';
+import { addMinutes } from 'date-fns';
 
 @Injectable()
 export class PasswordService {
@@ -21,13 +21,13 @@ export class PasswordService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  generateRandomToken(): { token: string; expiresAt: string } {
+  generateRandomToken(): { token: string; expiresAt: Date } {
     const token = crypto.randomBytes(32).toString('hex');
 
     const currentDateTime = new Date();
-    const expiresAt = addMinutes(currentDateTime, 30);
-    const formattedExpiresAt = format(expiresAt, 'yyyy-MM-dd HH:mm:ss');
+    const expirationMinutes = 30;
+    const expiresAt = addMinutes(currentDateTime, expirationMinutes);
 
-    return { token, expiresAt: formattedExpiresAt };
+    return { token, expiresAt };
   }
 }
