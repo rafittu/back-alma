@@ -5,10 +5,12 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   Request,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { SignInService } from './services/signin.service';
 import { LocalAuthGuard } from './infra/guards/local-auth.guard';
 import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
@@ -52,15 +54,22 @@ export class AuthController {
     @Body('email') email: string,
   ): Promise<object> {
     const { id } = user;
+
     return await this.resendAccountTokenEmailService.execute(id, email);
   }
 
   @isPublic()
   @Patch('/account/:token')
   async confirmAccountEmail(
+    @Req() req: ExpressRequest,
     @Param('token') confirmationToken: string,
   ): Promise<object> {
-    return await this.confirmAccountEmailService.execute(confirmationToken);
+    const ipAddress = req.socket.remoteAddress;
+
+    return await this.confirmAccountEmailService.execute(
+      confirmationToken,
+      ipAddress,
+    );
   }
 
   @isPublic()
@@ -74,10 +83,17 @@ export class AuthController {
   @isPublic()
   @Patch('/reset-password/:token')
   async resetPassword(
+    @Req() req: ExpressRequest,
     @Param('token') recoverToken: string,
     @Body() body: ChangePasswordDto,
   ): Promise<object> {
-    return await this.recoverPasswordService.resetPassword(recoverToken, body);
+    const ipAddress = req.socket.remoteAddress;
+
+    return await this.recoverPasswordService.resetPassword(
+      recoverToken,
+      body,
+      ipAddress,
+    );
   }
 
   @Get('/me')
