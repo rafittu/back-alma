@@ -306,6 +306,24 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "auth-service.confirmEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -567,6 +585,24 @@
                       "data": {}
                     }
                   }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "auth-service.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
