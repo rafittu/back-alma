@@ -288,8 +288,8 @@
               }
             }
           },
-          "500": {
-            "description": "Internal server error",
+          "400": {
+            "description": "Invalid or expired token",
             "content": {
               "application/json": {
                 "schema": {
@@ -297,11 +297,45 @@
                 },
                 "example": {
                   "error": {
-                    "message": "Account not confirmed",
-                    "code": "auth-repository.confirmAccountEmail",
+                    "message": "invalid or expired token",
+                    "code": "auth-service.confirmEmail",
                     "status": true
                   },
                   "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "Internal Error",
+                    "value": {
+                      "error": {
+                        "message": "Account not confirmed",
+                        "code": "auth-repository.confirmAccountEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "error": {
+                        "message": "could not get user",
+                        "code": "auth-repository.findUserByToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -510,13 +544,29 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "passwords do not match",
-                    "code": "recover-password-service.resetPassword",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "Invalid password",
+                    "value": {
+                      "error": {
+                        "message": "passwords do not match",
+                        "code": "recover-password-service.resetPassword",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "Invalid or expired token",
+                    "value": {
+                      "error": {
+                        "message": "invalid or expired token",
+                        "code": "auth-service.confirmEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -546,13 +596,29 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "password not reseted",
-                    "code": "auth-repository.resetPassword",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "Internal error",
+                    "value": {
+                      "error": {
+                        "message": "password not reseted",
+                        "code": "auth-repository.resetPassword",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "error": {
+                        "message": "could not get user",
+                        "code": "auth-repository.findUserByToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
