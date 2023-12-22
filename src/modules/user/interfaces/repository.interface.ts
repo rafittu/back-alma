@@ -29,7 +29,7 @@ export interface UserSecurityInfo {
   salt: string;
   confirmation_token: string;
   recover_token: string;
-  token_expires_at: string;
+  token_expires_at: Date;
   ip_address_origin: string;
   on_update_ip_address?: string;
   status: UserStatus;
