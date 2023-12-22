@@ -9,10 +9,15 @@ export interface IAuthRepository<User> {
   confirmAccountEmail(
     confirmationToken: string,
     status: UserStatus,
+    ipAddress: string,
     newChannel?: Channel,
   ): Promise<object>;
   sendRecoverPasswordEmail(email: string): Promise<string>;
-  resetPassword(recoverToken: string, password: string): Promise<object>;
+  resetPassword(
+    recoverToken: string,
+    password: string,
+    ipAddress: string,
+  ): Promise<object>;
   resendAccountToken(id: string, email: string): Promise<IResendAccToken>;
   findUserByToken(token: string): Promise<Date>;
 }

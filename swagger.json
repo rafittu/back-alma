@@ -8,7 +8,7 @@
       "url": "https://www.wophi.be/alma/support",
       "email": "alma@wophi.be"
     },
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
 
   "paths": {
@@ -306,6 +306,24 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "auth-service.confirmEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -567,6 +585,24 @@
                       "data": {}
                     }
                   }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "auth-service.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }

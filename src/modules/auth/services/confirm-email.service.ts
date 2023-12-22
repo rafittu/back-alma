@@ -7,6 +7,10 @@ import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { Channel } from '@prisma/client';
 import { SecurityService } from '../../../common/services/security.service';
 import { AppError } from '../../../common/errors/Error';
+import {
+  ipv4Regex,
+  ipv6Regex,
+} from '../../../modules/utils/helpers/helpers-user-module';
 
 @Injectable()
 export class ConfirmAccountEmailService {
@@ -17,7 +21,19 @@ export class ConfirmAccountEmailService {
     private readonly securityService: SecurityService,
   ) {}
 
-  async execute(confirmationToken: string): Promise<object> {
+  private validateIpAddress(ip: string): boolean {
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  async execute(confirmationToken: string, ipAddress: string): Promise<object> {
+    if (!this.validateIpAddress(ipAddress)) {
+      throw new AppError(
+        'auth-service.confirmEmail',
+        403,
+        'invalid ip address',
+      );
+    }
+
     try {
       const userCacheChannel = (await this.redisCacheService.get(
         confirmationToken,
@@ -37,6 +53,7 @@ export class ConfirmAccountEmailService {
       return await this.authRepository.confirmAccountEmail(
         confirmationToken,
         UserStatus.ACTIVE,
+        ipAddress,
         userCacheChannel,
       );
     } catch (error) {
