@@ -30,4 +30,10 @@ export class PasswordService {
 
     return { token, expiresAt };
   }
+
+  isTokenValid(tokenExpiresAt: Date): boolean {
+    const currentDateTime = new Date();
+
+    return currentDateTime < tokenExpiresAt;
+  }
 }
