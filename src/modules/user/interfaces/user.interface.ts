@@ -13,6 +13,7 @@ export interface ICreateUser {
   hashedPassword: string;
   salt: string;
   confirmationToken: string;
+  tokenExpiresAt: string;
   ipAddressOrigin: string;
   originChannel: Channel;
   allowedChannels: Channel[];
