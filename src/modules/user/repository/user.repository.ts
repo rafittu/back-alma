@@ -59,6 +59,7 @@ export class UserRepository implements IUserRepository<User> {
     hashedPassword,
     salt,
     confirmationToken,
+    tokenExpiresAt,
     ipAddressOrigin,
     status,
   }: ICreateUser): Promise<UserSecurityInfo> {
@@ -67,6 +68,7 @@ export class UserRepository implements IUserRepository<User> {
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
+      token_expires_at: tokenExpiresAt,
       ip_address_origin: ipAddressOrigin,
       status,
     };
@@ -128,12 +130,13 @@ export class UserRepository implements IUserRepository<User> {
   async createAccessToAdditionalChannel(
     data: IRequestChannelAccess,
   ): Promise<void> {
-    const { id, ipAddress, confirmationToken } = data;
+    const { id, ipAddress, confirmationToken, tokenExpiresAt } = data;
 
     try {
       await this.prisma.userSecurityInfo.update({
         data: {
           confirmation_token: confirmationToken,
+          token_expires_at: tokenExpiresAt,
           on_update_ip_address: ipAddress,
         },
         where: {
