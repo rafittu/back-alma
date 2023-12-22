@@ -8,6 +8,7 @@ import {
   MockAccessToken,
   MockAuthRequest,
   MockConfirmationToken,
+  MockFakeRequest,
   MockResetPassword,
   MockUserCredentials,
   MockUserData,
@@ -88,6 +89,7 @@ describe('AuthController', () => {
   describe('confirm account email', () => {
     it('should confirm user account email', async () => {
       const result = await controller.confirmAccountEmail(
+        MockFakeRequest,
         MockConfirmationToken,
       );
 
@@ -120,6 +122,7 @@ describe('AuthController', () => {
   describe('reset account password', () => {
     it('should reset user account password', async () => {
       const result = await controller.resetPassword(
+        MockFakeRequest,
         MockConfirmationToken,
         MockResetPassword,
       );

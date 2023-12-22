@@ -14,6 +14,15 @@ import {
   IUserPayload,
   IUserToken,
 } from '../../interfaces/service.interface';
+import { Request } from 'express';
+
+export const MockFakeRequest: Request = {
+  socket: {
+    remoteAddress: faker.internet.ip(),
+  },
+} as Request;
+
+export const MockIpAddress = MockFakeRequest.socket.remoteAddress;
 
 export const MockUserCredentials: CredentialsDto = {
   email: faker.internet.email(),
