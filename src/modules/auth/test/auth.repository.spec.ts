@@ -311,4 +311,19 @@ describe('Auth Repository', () => {
       }
     });
   });
+
+  describe('find user by token', () => {
+    it('should return a token expiration time successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(MockUserSecurityInfo);
+
+      const result = await authRepository.findUserByToken(
+        MockUserSecurityInfo.confirmation_token,
+      );
+
+      expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockUserSecurityInfo.token_expires_at);
+    });
+  });
 });
