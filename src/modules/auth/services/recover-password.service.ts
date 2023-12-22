@@ -47,7 +47,11 @@ export class RecoverPasswordService {
     const { password, passwordConfirmation } = resetPasswordData;
 
     if (!this.validateIpAddress(ipAddress)) {
-      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+      throw new AppError(
+        'auth-service.resetPassword',
+        403,
+        'invalid ip address',
+      );
     }
 
     if (password !== passwordConfirmation) {
