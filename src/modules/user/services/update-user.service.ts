@@ -74,11 +74,12 @@ export class UpdateUserService {
       }
 
       if (data.email) {
-        const confirmationToken = this.passwordService.generateRandomToken();
+        const { token, expiresAt } = this.passwordService.generateRandomToken();
 
         securityData = {
           ...securityData,
-          confirmationToken,
+          confirmationToken: token,
+          tokenExpiresAt: expiresAt,
           status: UserStatus.PENDING_CONFIRMATION,
         };
       }

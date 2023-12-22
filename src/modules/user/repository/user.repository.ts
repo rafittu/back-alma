@@ -278,6 +278,7 @@ export class UserRepository implements IUserRepository<User> {
       securityInfo = {
         ...securityInfo,
         confirmation_token: securityData.confirmationToken,
+        token_expires_at: securityData.tokenExpiresAt,
         status: securityData.status,
       };
     }
