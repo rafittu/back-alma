@@ -5,6 +5,7 @@ import { AppError } from '../../../common/errors/Error';
 import { UserStatus } from '../../user/interfaces/user-status.enum';
 import {
   MockConfirmationToken,
+  MockExpirationTokenTime,
   MockUser,
   MockUserCredentials,
   MockUserData,
@@ -12,27 +13,27 @@ import {
   MockUserSecurityInfo,
 } from './mocks/auth.mock';
 import { Channel } from '@prisma/client';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 
 describe('Auth Repository', () => {
   let authRepository: AuthRepository;
   let prismaService: PrismaService;
-  let passwordService: PasswordService;
+  let securityService: SecurityService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthRepository, PrismaService, PasswordService],
+      providers: [AuthRepository, PrismaService, SecurityService],
     }).compile();
 
     authRepository = module.get<AuthRepository>(AuthRepository);
     prismaService = module.get<PrismaService>(PrismaService);
-    passwordService = module.get<PasswordService>(PasswordService);
+    securityService = module.get<SecurityService>(SecurityService);
   });
 
   it('should be defined', () => {
     expect(authRepository).toBeDefined();
     expect(prismaService).toBeDefined();
-    expect(passwordService).toBeDefined();
+    expect(securityService).toBeDefined();
   });
 
   describe('validate user', () => {
@@ -42,7 +43,7 @@ describe('Auth Repository', () => {
         .mockResolvedValueOnce(MockUserData);
 
       jest
-        .spyOn(passwordService, 'comparePasswords')
+        .spyOn(securityService, 'comparePasswords')
         .mockResolvedValue(true as never);
 
       const result = await authRepository.validateUser(MockUserCredentials);
@@ -108,9 +109,10 @@ describe('Auth Repository', () => {
 
   describe('resend confirm account token email', () => {
     it('should return a confirmation token and channel origin', async () => {
-      jest
-        .spyOn(passwordService, 'generateRandomToken')
-        .mockReturnValueOnce(MockConfirmationToken as never);
+      jest.spyOn(securityService, 'generateRandomToken').mockReturnValueOnce({
+        token: MockConfirmationToken,
+        expiresAt: MockExpirationTokenTime,
+      });
 
       jest
         .spyOn(prismaService.user, 'update')
@@ -205,9 +207,10 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUser);
 
-      jest
-        .spyOn(passwordService, 'generateRandomToken')
-        .mockReturnValueOnce(MockConfirmationToken as never);
+      jest.spyOn(securityService, 'generateRandomToken').mockReturnValueOnce({
+        token: MockConfirmationToken,
+        expiresAt: MockExpirationTokenTime,
+      });
 
       jest
         .spyOn(prismaService.userSecurityInfo, 'update')
@@ -243,7 +246,7 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.userSecurityInfo, 'findFirst')
         .mockResolvedValueOnce(MockUserSecurityInfo);
 
-      jest.spyOn(passwordService, 'hashPassword').mockResolvedValueOnce({
+      jest.spyOn(securityService, 'hashPassword').mockResolvedValueOnce({
         hashedPassword: 'mockHashedPassword',
         salt: 'mockSalt',
       });
@@ -260,7 +263,7 @@ describe('Auth Repository', () => {
       const response = { message: 'password reseted' };
 
       expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
-      expect(passwordService.hashPassword).toHaveBeenCalledTimes(1);
+      expect(securityService.hashPassword).toHaveBeenCalledTimes(1);
       expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
     });
@@ -287,7 +290,7 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.userSecurityInfo, 'findFirst')
         .mockResolvedValueOnce(MockUserSecurityInfo);
 
-      jest.spyOn(passwordService, 'hashPassword').mockResolvedValueOnce({
+      jest.spyOn(securityService, 'hashPassword').mockResolvedValueOnce({
         hashedPassword: 'mockHashedPassword',
         salt: 'mockSalt',
       });
@@ -305,6 +308,37 @@ describe('Auth Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('password not reseted');
+      }
+    });
+  });
+
+  describe('find user by token', () => {
+    it('should return a token expiration time successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockResolvedValueOnce(MockUserSecurityInfo);
+
+      const result = await authRepository.findUserByToken(
+        MockUserSecurityInfo.confirmation_token,
+      );
+
+      expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockUserSecurityInfo.token_expires_at);
+    });
+
+    it('should throw an error if token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .mockRejectedValueOnce(null);
+
+      try {
+        await authRepository.findUserByToken(
+          MockUserSecurityInfo.confirmation_token,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not get user');
       }
     });
   });

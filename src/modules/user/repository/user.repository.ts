@@ -17,13 +17,13 @@ import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
 import { Prisma, User } from '@prisma/client';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
   constructor(
     private prisma: PrismaService,
-    private readonly passwordService: PasswordService,
+    private readonly securityService: SecurityService,
   ) {}
 
   private formatPersonalInfo({
@@ -59,6 +59,7 @@ export class UserRepository implements IUserRepository<User> {
     hashedPassword,
     salt,
     confirmationToken,
+    tokenExpiresAt,
     ipAddressOrigin,
     status,
   }: ICreateUser): Promise<UserSecurityInfo> {
@@ -67,6 +68,7 @@ export class UserRepository implements IUserRepository<User> {
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
+      token_expires_at: tokenExpiresAt,
       ip_address_origin: ipAddressOrigin,
       status,
     };
@@ -128,12 +130,13 @@ export class UserRepository implements IUserRepository<User> {
   async createAccessToAdditionalChannel(
     data: IRequestChannelAccess,
   ): Promise<void> {
-    const { id, ipAddress, confirmationToken } = data;
+    const { id, ipAddress, confirmationToken, tokenExpiresAt } = data;
 
     try {
       await this.prisma.userSecurityInfo.update({
         data: {
           confirmation_token: confirmationToken,
+          token_expires_at: tokenExpiresAt,
           on_update_ip_address: ipAddress,
         },
         where: {
@@ -186,6 +189,7 @@ export class UserRepository implements IUserRepository<User> {
         'salt',
         'confirmation_token',
         'recover_token',
+        'token_expires_at',
         'ip_address_origin',
         'on_update_ip_address',
         'origin_channel',
@@ -221,6 +225,7 @@ export class UserRepository implements IUserRepository<User> {
         'salt',
         'confirmation_token',
         'recover_token',
+        'token_expires_at',
         'ip_address_origin',
         'on_update_ip_address',
         'origin_channel',
@@ -252,7 +257,7 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const isPasswordMatch = await this.passwordService.comparePasswords(
+      const isPasswordMatch = await this.securityService.comparePasswords(
         data.oldPassword,
         security.password,
       );
@@ -275,6 +280,7 @@ export class UserRepository implements IUserRepository<User> {
       securityInfo = {
         ...securityInfo,
         confirmation_token: securityData.confirmationToken,
+        token_expires_at: securityData.tokenExpiresAt,
         status: securityData.status,
       };
     }
@@ -317,6 +323,7 @@ export class UserRepository implements IUserRepository<User> {
         'salt',
         'confirmation_token',
         'recover_token',
+        'token_expires_at',
         'ip_address_origin',
         'on_update_ip_address',
         'origin_channel',
@@ -371,6 +378,7 @@ export class UserRepository implements IUserRepository<User> {
         'salt',
         'confirmation_token',
         'recover_token',
+        'token_expires_at',
         'ip_address_origin',
         'on_update_ip_address',
         'origin_channel',

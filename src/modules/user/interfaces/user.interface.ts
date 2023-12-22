@@ -13,6 +13,7 @@ export interface ICreateUser {
   hashedPassword: string;
   salt: string;
   confirmationToken: string;
+  tokenExpiresAt: Date;
   ipAddressOrigin: string;
   originChannel: Channel;
   allowedChannels: Channel[];
@@ -51,6 +52,7 @@ export interface IRequestChannelAccess {
   id: string;
   ipAddress: string;
   confirmationToken: string;
+  tokenExpiresAt: Date;
 }
 
 export interface IUserFilter {
@@ -63,6 +65,7 @@ export interface IUpdateSecurityData {
   hashedPassword?: string;
   salt?: string;
   confirmationToken?: string;
+  tokenExpiresAt?: Date;
   status?: UserStatus;
   onUpdateIpAddress: string;
 }

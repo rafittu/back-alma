@@ -58,6 +58,7 @@ export const MockUserSecurityInfo: UserSecurityInfo = {
   salt: faker.string.binary(),
   confirmation_token: faker.string.alphanumeric(),
   recover_token: faker.string.alphanumeric(),
+  token_expires_at: faker.date.future(),
   ip_address_origin: faker.internet.ip(),
   on_update_ip_address: faker.internet.ip(),
   status: UserStatus.PENDING_CONFIRMATION,
@@ -97,6 +98,7 @@ export const MockAuthRequest: IAuthRequest = {
 } as IAuthRequest;
 
 export const MockConfirmationToken = faker.string.alphanumeric();
+export const MockExpirationTokenTime = faker.date.future();
 
 export const MockResetPassword: IResetPassword = {
   password: 'faker.internet.password()',

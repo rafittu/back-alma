@@ -5,6 +5,8 @@ import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { Channel } from '@prisma/client';
+import { SecurityService } from '../../../common/services/security.service';
+import { AppError } from '../../../common/errors/Error';
 
 @Injectable()
 export class ConfirmAccountEmailService {
@@ -12,17 +14,33 @@ export class ConfirmAccountEmailService {
     @Inject(AuthRepository)
     private authRepository: IAuthRepository<User>,
     private readonly redisCacheService: RedisCacheService,
+    private readonly securityService: SecurityService,
   ) {}
 
   async execute(confirmationToken: string): Promise<object> {
-    const userCacheChannel = (await this.redisCacheService.get(
-      confirmationToken,
-    )) as Channel;
+    try {
+      const userCacheChannel = (await this.redisCacheService.get(
+        confirmationToken,
+      )) as Channel;
 
-    return await this.authRepository.confirmAccountEmail(
-      confirmationToken,
-      UserStatus.ACTIVE,
-      userCacheChannel,
-    );
+      const tokenExpiresAt =
+        await this.authRepository.findUserByToken(confirmationToken);
+
+      if (!this.securityService.isTokenValid(tokenExpiresAt)) {
+        throw new AppError(
+          'auth-service.confirmEmail',
+          400,
+          'invalid or expired token',
+        );
+      }
+
+      return await this.authRepository.confirmAccountEmail(
+        confirmationToken,
+        UserStatus.ACTIVE,
+        userCacheChannel,
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 }

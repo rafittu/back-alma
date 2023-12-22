@@ -12,21 +12,21 @@ import {
   MockUser,
   MockUserData,
 } from './mocks/user.mock';
-import { PasswordService } from '../../../common/services/password.service';
+import { SecurityService } from '../../../common/services/security.service';
 
 describe('User Repository', () => {
   let userRepository: UserRepository;
   let prismaService: PrismaService;
-  let passwordService: PasswordService;
+  let securityService: SecurityService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserRepository, PrismaService, PasswordService],
+      providers: [UserRepository, PrismaService, SecurityService],
     }).compile();
 
     userRepository = module.get<UserRepository>(UserRepository);
     prismaService = module.get<PrismaService>(PrismaService);
-    passwordService = module.get<PasswordService>(PasswordService);
+    securityService = module.get<SecurityService>(SecurityService);
   });
 
   describe('create user', () => {
@@ -217,7 +217,7 @@ describe('User Repository', () => {
         .mockResolvedValueOnce(MockUserData);
 
       jest
-        .spyOn(passwordService, 'comparePasswords')
+        .spyOn(securityService, 'comparePasswords')
         .mockResolvedValue(true as never);
       jest
         .spyOn(prismaService.user, 'update')
@@ -239,7 +239,7 @@ describe('User Repository', () => {
         .mockResolvedValueOnce(MockUserData);
 
       jest
-        .spyOn(passwordService, 'comparePasswords')
+        .spyOn(securityService, 'comparePasswords')
         .mockResolvedValue(true as never);
 
       jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce({
@@ -266,7 +266,7 @@ describe('User Repository', () => {
         .mockResolvedValueOnce(MockUserData);
 
       jest
-        .spyOn(passwordService, 'comparePasswords')
+        .spyOn(securityService, 'comparePasswords')
         .mockResolvedValue(false as never);
 
       try {
@@ -288,7 +288,7 @@ describe('User Repository', () => {
         .mockResolvedValueOnce(MockUserData);
 
       jest
-        .spyOn(passwordService, 'comparePasswords')
+        .spyOn(securityService, 'comparePasswords')
         .mockResolvedValue(true as never);
 
       jest.spyOn(prismaService.user, 'update').mockRejectedValueOnce({
@@ -314,7 +314,7 @@ describe('User Repository', () => {
         .mockResolvedValueOnce(MockUserData);
 
       jest
-        .spyOn(passwordService, 'comparePasswords')
+        .spyOn(securityService, 'comparePasswords')
         .mockResolvedValue(true as never);
 
       jest

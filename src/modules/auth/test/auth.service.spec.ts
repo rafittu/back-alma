@@ -10,6 +10,7 @@ import { ResendAccountTokenEmailService } from '../services/resend-account-token
 import { UserRepository } from '../../../modules/user/repository/user.repository';
 import {
   MockConfirmationToken,
+  MockExpirationTokenTime,
   MockJWT,
   MockResetPassword,
   MockUserCredentials,
@@ -18,6 +19,7 @@ import {
 } from './mocks/auth.mock';
 import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { EmailService } from '../../../common/services/email.service';
+import { SecurityService } from '../../../common/services/security.service';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -29,6 +31,7 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let emailService: EmailService;
   let redisService: RedisCacheService;
+  let securityService: SecurityService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,6 +43,7 @@ describe('AuthService', () => {
         ResendAccountTokenEmailService,
         RedisCacheService,
         EmailService,
+        SecurityService,
         {
           provide: AuthRepository,
           useValue: {
@@ -56,6 +60,9 @@ describe('AuthService', () => {
               message: `account confirmation token resent to ${MockUserData.contact.email}`,
             }),
             validateChannel: jest.fn().mockResolvedValueOnce(null),
+            findUserByToken: jest
+              .fn()
+              .mockResolvedValueOnce(MockExpirationTokenTime),
           },
         },
         {
@@ -87,6 +94,7 @@ describe('AuthService', () => {
     );
     emailService = module.get<EmailService>(EmailService);
     redisService = module.get<RedisCacheService>(RedisCacheService);
+    securityService = module.get<SecurityService>(SecurityService);
   });
 
   it('should be defined', () => {
@@ -199,6 +207,7 @@ describe('AuthService', () => {
   describe('confirm email account', () => {
     it('should confirm user account email', async () => {
       jest.spyOn(redisService, 'get').mockResolvedValueOnce(null);
+      jest.spyOn(securityService, 'isTokenValid').mockReturnValueOnce(true);
 
       const result = await confirmAccountEmailService.execute(
         MockConfirmationToken,
@@ -212,6 +221,20 @@ describe('AuthService', () => {
       expect(redisService.get).toHaveBeenCalledTimes(1);
 
       expect(result).toEqual(response);
+    });
+
+    it('should throw an error if token is expired or invalid', async () => {
+      jest.spyOn(redisService, 'get').mockResolvedValueOnce(null);
+
+      jest.spyOn(securityService, 'isTokenValid').mockReturnValueOnce(false);
+
+      try {
+        await confirmAccountEmailService.execute(MockConfirmationToken);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('invalid or expired token');
+      }
     });
   });
 
@@ -249,7 +272,25 @@ describe('AuthService', () => {
     });
 
     it('should throw an error if passwordConfirmation is incorrect', async () => {
-      MockResetPassword.passwordConfirmation = 'invalidPasswordConfirmation';
+      const invalidPasswordConfirmation = {
+        password: MockResetPassword.password,
+        passwordConfirmation: 'invalidPasswordConfirmation',
+      };
+
+      try {
+        await recoverPasswordService.resetPassword(
+          MockConfirmationToken,
+          invalidPasswordConfirmation,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('passwords do not match');
+      }
+    });
+
+    it('should throw an error if token is expired or invalid', async () => {
+      jest.spyOn(securityService, 'isTokenValid').mockReturnValueOnce(false);
 
       try {
         await recoverPasswordService.resetPassword(
@@ -259,7 +300,7 @@ describe('AuthService', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(400);
-        expect(error.message).toBe('passwords do not match');
+        expect(error.message).toBe('invalid or expired token');
       }
     });
   });

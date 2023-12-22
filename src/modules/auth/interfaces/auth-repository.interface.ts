@@ -14,4 +14,5 @@ export interface IAuthRepository<User> {
   sendRecoverPasswordEmail(email: string): Promise<string>;
   resetPassword(recoverToken: string, password: string): Promise<object>;
   resendAccountToken(id: string, email: string): Promise<IResendAccToken>;
+  findUserByToken(token: string): Promise<Date>;
 }
