@@ -207,9 +207,7 @@ describe('AuthService', () => {
   describe('confirm email account', () => {
     it('should confirm user account email', async () => {
       jest.spyOn(redisService, 'get').mockResolvedValueOnce(null);
-      jest
-        .spyOn(securityService, 'isTokenValid')
-        .mockResolvedValueOnce(true as never);
+      jest.spyOn(securityService, 'isTokenValid').mockReturnValueOnce(true);
 
       const result = await confirmAccountEmailService.execute(
         MockConfirmationToken,
@@ -223,6 +221,20 @@ describe('AuthService', () => {
       expect(redisService.get).toHaveBeenCalledTimes(1);
 
       expect(result).toEqual(response);
+    });
+
+    it('should throw an error if token is expired or invalid', async () => {
+      jest.spyOn(redisService, 'get').mockResolvedValueOnce(null);
+
+      jest.spyOn(securityService, 'isTokenValid').mockReturnValueOnce(false);
+
+      try {
+        await confirmAccountEmailService.execute(MockConfirmationToken);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('invalid or expired token');
+      }
     });
   });
 
