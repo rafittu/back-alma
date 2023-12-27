@@ -38,7 +38,7 @@ export class SQSWorkerService {
     const params = {
       QueueUrl: queueUrl,
       MaxNumberOfMessages: 10,
-      WaitTimeSeconds: 0,
+      WaitTimeSeconds: 20,
     };
 
     try {
