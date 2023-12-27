@@ -44,6 +44,7 @@ import { SQSWorkerService } from './common/services/sqs-worker.service';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    SQSWorkerService,
   ],
 })
 export class AppModule {

@@ -5,10 +5,9 @@ import { AppError } from '../errors/Error';
 
 @Injectable()
 export class SQSWorkerService {
-  constructor(
-    private readonly mailerService: MailerService,
-    private readonly sqs = new AWS.SQS(),
-  ) {}
+  private readonly sqs = new AWS.SQS();
+
+  constructor(private readonly mailerService: MailerService) {}
 
   private async processMessage(message: object): Promise<void> {
     await this.mailerService.sendMail(message);
