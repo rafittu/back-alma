@@ -4,8 +4,15 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import * as swaggerUi from 'swagger-ui-express';
 import * as SwaggerDoc from '../swagger.json';
+import * as AWS from 'aws-sdk';
 
 async function bootstrap() {
+  AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+  });
+
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
