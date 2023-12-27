@@ -34,6 +34,8 @@ export class SQSWorkerService {
   }
 
   async processMessages(queueUrl: string): Promise<void> {
+    const maxMessagesPerCycle = 20;
+
     const params = {
       QueueUrl: queueUrl,
       MaxNumberOfMessages: 10,
@@ -44,7 +46,12 @@ export class SQSWorkerService {
       const response = await this.sqs.receiveMessage(params).promise();
 
       if (response.Messages && response.Messages.length > 0) {
-        for (const message of response.Messages) {
+        const messagesToProcess = response.Messages.slice(
+          0,
+          maxMessagesPerCycle,
+        );
+
+        for (const message of messagesToProcess) {
           await this.processMessage(JSON.parse(message.Body));
           await this.deleteMessage(queueUrl, message.ReceiptHandle);
         }
