@@ -7,7 +7,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/infra/guards/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from './modules/utils/configs/mailer.config';
-import { ScheduleModule } from '@nestjs/schedule';
+import { Cron, ScheduleModule } from '@nestjs/schedule';
+import { SQSWorkerService } from './common/services/sqs-worker.service';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         MAILER_EMAIL: Joi.string().required(),
         MAILER_PASSWORD: Joi.string().required(),
         MAILER_DOMAIN: Joi.string().required(),
+        SQS_QUEUE_URL: Joi.string().required(),
       }),
     }),
     MailerModule.forRoot(mailerConfig),
@@ -44,4 +46,12 @@ import { ScheduleModule } from '@nestjs/schedule';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private readonly sqsWorkerService: SQSWorkerService) {}
+
+  @Cron('0 * * * *')
+  async handleCron() {
+    const queueUrl = process.env.SQS_QUEUE_URL;
+    await this.sqsWorkerService.processMessages(queueUrl);
+  }
+}
