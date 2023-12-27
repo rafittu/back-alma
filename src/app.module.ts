@@ -53,7 +53,7 @@ import { SQSWorkerService } from './common/services/sqs-worker.service';
 export class AppModule {
   constructor(private readonly sqsWorkerService: SQSWorkerService) {}
 
-  @Cron('0 * * * *')
+  @Cron('*/1 * * * *')
   async handleCron() {
     const queueUrl = process.env.SQS_QUEUE_URL;
     await this.sqsWorkerService.processMessages(queueUrl);
