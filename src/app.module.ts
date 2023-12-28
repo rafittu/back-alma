@@ -34,6 +34,7 @@ import { SQSWorkerService } from './common/services/sqs-worker.service';
         AWS_SECRET_ACCESS_KEY: Joi.string().required(),
         AWS_REGION: Joi.string().required(),
         SQS_QUEUE_URL: Joi.string().required(),
+        SQS_DLQ_QUEUE_URL: Joi.string().required(),
       }),
     }),
     MailerModule.forRoot(mailerConfig),
