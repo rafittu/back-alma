@@ -7,23 +7,16 @@ import {
   SQSClient,
 } from '@aws-sdk/client-sqs';
 import { configObject } from '../../modules/utils/configs/aws/credentials';
+import { Delay } from '@nestjs/schedule';
 
 @Injectable()
 export class SQSWorkerService {
-  private readonly sqsClient = new SQSClient(configObject);
-
   constructor(private readonly mailerService: MailerService) {}
 
-  private async processMessage(message: object): Promise<void> {
-    try {
-      await this.mailerService.sendMail(message);
-    } catch (error) {
-      throw new AppError(
-        'sqs-worker-service.processMessage',
-        500,
-        `error processing message: ${error.message}`,
-      );
-    }
+  private readonly sqsClient = new SQSClient(configObject);
+
+  private async delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async deleteMessageFromSQS(
@@ -46,6 +39,39 @@ export class SQSWorkerService {
     }
   }
 
+  private async processMessage(
+    message: object,
+    queueUrl: string,
+    receiptHandle: string,
+    retryCount: number = 0,
+  ): Promise<void> {
+    const timeDelayInSeconds = 9000;
+
+    try {
+      await this.mailerService.sendMail(message);
+      await this.deleteMessageFromSQS(queueUrl, receiptHandle);
+    } catch (error) {
+      if (retryCount < 2) {
+        await this.delay(timeDelayInSeconds);
+
+        await this.processMessage(
+          message,
+          queueUrl,
+          receiptHandle,
+          retryCount + 1,
+        );
+      } else {
+        await this.moveMessageToDLQ(queueUrl, receiptHandle);
+
+        throw new AppError(
+          'sqs-worker-service.processMessage',
+          500,
+          `error processing message: ${error.message}`,
+        );
+      }
+    }
+  }
+
   async pollMessagesFromSQS(queueUrl: string): Promise<void> {
     const maxMessagesPerCycle = 20;
 
@@ -65,8 +91,11 @@ export class SQSWorkerService {
         );
 
         for (const message of messagesToProcess) {
-          await this.processMessage(JSON.parse(message.Body));
-          await this.deleteMessageFromSQS(queueUrl, message.ReceiptHandle);
+          await this.processMessage(
+            JSON.parse(message.Body),
+            queueUrl,
+            message.ReceiptHandle,
+          );
         }
       }
     } catch (error) {
