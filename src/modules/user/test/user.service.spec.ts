@@ -399,7 +399,7 @@ describe('User Services', () => {
       await emailService.sendConfirmationEmail(
         MockUserData.contact.email,
         MockICreateUser.confirmationToken,
-        'channel',
+        Channel.WOPHI,
       );
 
       expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
@@ -412,7 +412,7 @@ describe('User Services', () => {
         await emailService.sendConfirmationEmail(
           MockUserData.contact.email,
           MockICreateUser.confirmationToken,
-          'channel',
+          Channel.WOPHI,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
