@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import * as AWS from 'aws-sdk';
 import { AppError } from '../errors/Error';
+import {
+  DeleteMessageCommand,
+  ReceiveMessageCommand,
+  SQSClient,
+} from '@aws-sdk/client-sqs';
+import { configObject } from '../../modules/utils/configs/aws/credentials';
 
 @Injectable()
 export class SQSWorkerService {
-  private readonly sqs = new AWS.SQS();
+  private readonly sqsClient = new SQSClient(configObject);
 
   constructor(private readonly mailerService: MailerService) {}
 
@@ -13,17 +18,17 @@ export class SQSWorkerService {
     await this.mailerService.sendMail(message);
   }
 
-  private async deleteMessage(
+  private async deleteMessageFromSQS(
     queueUrl: string,
     receiptHandle: string,
   ): Promise<void> {
-    const params = {
-      QueueUrl: queueUrl,
-      ReceiptHandle: receiptHandle,
-    };
-
     try {
-      await this.sqs.deleteMessage(params).promise();
+      const params = new DeleteMessageCommand({
+        QueueUrl: queueUrl,
+        ReceiptHandle: receiptHandle,
+      });
+
+      await this.sqsClient.send(params);
     } catch (error) {
       throw new AppError(
         'sqs-worker-service.deleteMessage',
@@ -33,17 +38,17 @@ export class SQSWorkerService {
     }
   }
 
-  async processMessages(queueUrl: string): Promise<void> {
+  async pollMessagesFromSQS(queueUrl: string): Promise<void> {
     const maxMessagesPerCycle = 20;
 
-    const params = {
-      QueueUrl: queueUrl,
-      MaxNumberOfMessages: 10,
-      WaitTimeSeconds: 20,
-    };
-
     try {
-      const response = await this.sqs.receiveMessage(params).promise();
+      const params = new ReceiveMessageCommand({
+        QueueUrl: queueUrl,
+        MaxNumberOfMessages: 10,
+        WaitTimeSeconds: 20,
+      });
+
+      const response = await this.sqsClient.send(params);
 
       if (response.Messages && response.Messages.length > 0) {
         const messagesToProcess = response.Messages.slice(
@@ -53,7 +58,7 @@ export class SQSWorkerService {
 
         for (const message of messagesToProcess) {
           await this.processMessage(JSON.parse(message.Body));
-          await this.deleteMessage(queueUrl, message.ReceiptHandle);
+          await this.deleteMessageFromSQS(queueUrl, message.ReceiptHandle);
         }
       }
     } catch (error) {

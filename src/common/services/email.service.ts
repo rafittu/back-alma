@@ -1,10 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { AppError } from '../errors/Error';
-import * as AWS from 'aws-sdk';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+import { configObject } from '../../modules/utils/configs/aws/credentials';
 
 @Injectable()
 export class EmailService {
-  private readonly sqs = new AWS.SQS();
+  private readonly sqsClient = new SQSClient(configObject);
+
+  private async sendMessageToSQS(message: object): Promise<void> {
+    try {
+      const params = new SendMessageCommand({
+        MessageBody: JSON.stringify(message),
+        QueueUrl: process.env.SQS_QUEUE_URL,
+      });
+
+      await this.sqsClient.send(params);
+    } catch (error) {
+      throw new AppError(
+        'email-service.sendMessageToSQS',
+        500,
+        'failed to send message to SQS',
+      );
+    }
+  }
 
   async sendConfirmationEmail(
     to: string,
@@ -12,7 +30,7 @@ export class EmailService {
     channel: string,
   ): Promise<void> {
     try {
-      const email = {
+      const emailBody = {
         to,
         from: `${channel.toLowerCase()}@wophi.be`,
         subject: `${channel} - Email de confirmação`,
@@ -22,29 +40,12 @@ export class EmailService {
         },
       };
 
-      await this.sendToSQS(email);
+      await this.sendMessageToSQS(emailBody);
     } catch (error) {
       throw new AppError(
         'email-service.sendConfirmationEmail',
         500,
         'failed to send email for account confirmation',
-      );
-    }
-  }
-
-  private async sendToSQS(message: object): Promise<void> {
-    const params = {
-      MessageBody: JSON.stringify(message),
-      QueueUrl: process.env.SQS_QUEUE_URL,
-    };
-
-    try {
-      await this.sqs.sendMessage(params).promise();
-    } catch (error) {
-      throw new AppError(
-        'email-service.sendToSQS',
-        500,
-        'failed to send message to SQS',
       );
     }
   }
