@@ -15,7 +15,15 @@ export class SQSWorkerService {
   constructor(private readonly mailerService: MailerService) {}
 
   private async processMessage(message: object): Promise<void> {
-    await this.mailerService.sendMail(message);
+    try {
+      await this.mailerService.sendMail(message);
+    } catch (error) {
+      throw new AppError(
+        'sqs-worker-service.processMessage',
+        500,
+        `error processing message: ${error.message}`,
+      );
+    }
   }
 
   private async deleteMessageFromSQS(
@@ -33,7 +41,7 @@ export class SQSWorkerService {
       throw new AppError(
         'sqs-worker-service.deleteMessage',
         500,
-        'error deleting message from SQS',
+        `error deleting message from SQS: ${error.message}`,
       );
     }
   }
@@ -63,9 +71,9 @@ export class SQSWorkerService {
       }
     } catch (error) {
       throw new AppError(
-        'sqs-worker-service.deleteMessage',
+        'sqs-worker-service.pollMessagesFromSQS',
         500,
-        'error processing messages from SQS',
+        `error polling messages from SQS: ${error.message}`,
       );
     }
   }
