@@ -4,10 +4,10 @@ import { AppError } from '../errors/Error';
 import {
   DeleteMessageCommand,
   ReceiveMessageCommand,
+  SendMessageCommand,
   SQSClient,
 } from '@aws-sdk/client-sqs';
 import { configObject } from '../../modules/utils/configs/aws/credentials';
-import { Delay } from '@nestjs/schedule';
 
 @Injectable()
 export class SQSWorkerService {
@@ -39,6 +39,25 @@ export class SQSWorkerService {
     }
   }
 
+  private async moveMessageToDLQ(message: object): Promise<void> {
+    const dlqUrl = process.env.SQS_DLQ_QUEUE_URL;
+
+    try {
+      const params = new SendMessageCommand({
+        MessageBody: JSON.stringify(message),
+        QueueUrl: dlqUrl,
+      });
+
+      await this.sqsClient.send(params);
+    } catch (error) {
+      throw new AppError(
+        'sqs-worker-service.moveToDLQ',
+        500,
+        `error moving message to DLQ: ${error.message}`,
+      );
+    }
+  }
+
   private async processMessage(
     message: object,
     queueUrl: string,
@@ -61,7 +80,9 @@ export class SQSWorkerService {
           retryCount + 1,
         );
       } else {
-        await this.moveMessageToDLQ(queueUrl, receiptHandle);
+        await this.moveMessageToDLQ(message);
+
+        await this.deleteMessageFromSQS(queueUrl, receiptHandle);
 
         throw new AppError(
           'sqs-worker-service.processMessage',
