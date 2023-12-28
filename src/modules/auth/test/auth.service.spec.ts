@@ -21,6 +21,7 @@ import {
 import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { EmailService } from '../../../common/services/email.service';
 import { SecurityService } from '../../../common/services/security.service';
+import { Channel } from '@prisma/client';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -112,7 +113,7 @@ describe('AuthService', () => {
     it('should return a user access token', async () => {
       jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockJWT);
 
-      const originChannel = 'WOPHI';
+      const originChannel = Channel.WOPHI;
 
       const result = await signInService.execute(
         MockUserPayload,
@@ -133,7 +134,7 @@ describe('AuthService', () => {
         .spyOn(authRepository, 'validateChannel')
         .mockRejectedValueOnce(new Error());
 
-      const originChannel = 'WOPHI';
+      const originChannel = Channel.WOPHI;
 
       try {
         await signInService.execute(MockUserPayload, originChannel);
