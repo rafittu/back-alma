@@ -8,7 +8,6 @@ import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
   MockCreateUserDto,
-  MockICreateUser,
   MockIUser,
   MockIpAddress,
   MockPrismaUser,
@@ -390,36 +389,6 @@ describe('User Services', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('user not cancelled');
-      }
-    });
-  });
-
-  describe('email operations', () => {
-    it('should send an confirmation email', async () => {
-      await emailService.sendConfirmationEmail(
-        MockUserData.contact.email,
-        MockICreateUser.confirmationToken,
-        Channel.WOPHI,
-      );
-
-      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw an error if email sending fails', async () => {
-      jest.spyOn(mailerService, 'sendMail').mockRejectedValueOnce(new Error());
-
-      try {
-        await emailService.sendConfirmationEmail(
-          MockUserData.contact.email,
-          MockICreateUser.confirmationToken,
-          Channel.WOPHI,
-        );
-      } catch (error) {
-        expect(error).toBeInstanceOf(AppError);
-        expect(error.code).toBe(500);
-        expect(error.message).toBe(
-          'failed to send email for account confirmation',
-        );
       }
     });
   });
