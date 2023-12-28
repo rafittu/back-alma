@@ -72,7 +72,7 @@ describe('Auth Repository', () => {
         .spyOn(prismaService.user, 'findFirst')
         .mockResolvedValueOnce(MockUserData);
 
-      const signInChannel = 'WOPHI';
+      const signInChannel = Channel.WOPHI;
 
       await authRepository.validateChannel(MockUserData.id, signInChannel);
 
@@ -82,7 +82,7 @@ describe('Auth Repository', () => {
     it('should throw an error if user not allowed to access channel', async () => {
       jest.spyOn(prismaService.user, 'findFirst').mockReturnValueOnce(null);
 
-      const signInChannel = 'LUMIN';
+      const signInChannel = Channel.LUMIN;
 
       try {
         await authRepository.validateChannel(MockUserData.id, signInChannel);
@@ -96,7 +96,7 @@ describe('Auth Repository', () => {
     it('should throw an error if user not found', async () => {
       jest.spyOn(prismaService.user, 'findFirst').mockReturnValueOnce(null);
 
-      const signInChannel = 'WOPHI';
+      const signInChannel = Channel.WOPHI;
 
       try {
         await authRepository.validateChannel(null, signInChannel);

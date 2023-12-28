@@ -1,10 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
 import { AppError } from '../errors/Error';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+import { configObject } from '../../modules/utils/configs/aws/credentials';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  private readonly sqsClient = new SQSClient(configObject);
+
+  private async sendMessageToSQS(message: object): Promise<void> {
+    try {
+      const params = new SendMessageCommand({
+        MessageBody: JSON.stringify(message),
+        QueueUrl: process.env.SQS_QUEUE_URL,
+      });
+
+      await this.sqsClient.send(params);
+    } catch (error) {
+      throw new AppError(
+        'email-service.sendMessageToSQS',
+        500,
+        'failed to send message to SQS',
+      );
+    }
+  }
 
   async sendConfirmationEmail(
     to: string,
@@ -12,9 +30,9 @@ export class EmailService {
     channel: string,
   ): Promise<void> {
     try {
-      const email = {
+      const emailBody = {
         to,
-        from: 'alma@wophi.be',
+        from: `${channel.toLowerCase()}@wophi.be`,
         subject: `${channel} - Email de confirmação`,
         template: `${channel.toLowerCase()}-email-confirmation`,
         context: {
@@ -22,7 +40,7 @@ export class EmailService {
         },
       };
 
-      await this.mailerService.sendMail(email);
+      await this.sendMessageToSQS(emailBody);
     } catch (error) {
       throw new AppError(
         'email-service.sendConfirmationEmail',

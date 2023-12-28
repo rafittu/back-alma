@@ -17,6 +17,8 @@ Este projeto utiliza as seguintes tecnologias:
 - **Node.js** com framework **NestJS** e **TypeScript**;
 - **Prisma ORM** para comunicação e manipulação do banco de dados **PostgreSQL**;
 - **Redis** para armazenamento em memória
+- **Amazon Simple Queue Service (SQS)** para comunicação assíncrona entre serviços;
+
 - **Docker** como uma ferramenta de containerização;
 
 - **Bcrypt** e **Crypto** como ferramenta de criptografia;

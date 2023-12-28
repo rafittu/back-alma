@@ -243,6 +243,39 @@
                       },
                       "data": {}
                     }
+                  },
+                  "example6": {
+                    "summary": "failed to send message to amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "failed to send message to SQS",
+                        "code": "email-service.sendMessageToSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example7": {
+                    "summary": "failed to poll messages from amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "error polling messages from SQS: `error message`",
+                        "code": "sqs-worker-service.pollMessagesFromSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example8": {
+                    "summary": "failed to process email",
+                    "value": {
+                      "error": {
+                        "message": "error processing message: `error message`",
+                        "code": "sqs-worker-service.processMessage",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   }
                 }
               }
@@ -1337,6 +1370,39 @@
                       "error": {
                         "message": "failed to update user data",
                         "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "summary": "failed to send message to amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "failed to send message to SQS",
+                        "code": "email-service.sendMessageToSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example4": {
+                    "summary": "failed to poll messages from amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "error polling messages from SQS: `error message`",
+                        "code": "sqs-worker-service.pollMessagesFromSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example5": {
+                    "summary": "failed to process email",
+                    "value": {
+                      "error": {
+                        "message": "error processing message: `error message`",
+                        "code": "sqs-worker-service.processMessage",
                         "status": true
                       },
                       "data": {}
