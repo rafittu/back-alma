@@ -56,6 +56,6 @@ export class AppModule {
   @Cron('*/1 * * * *')
   async handleCron() {
     const queueUrl = process.env.SQS_QUEUE_URL;
-    await this.sqsWorkerService.processMessages(queueUrl);
+    await this.sqsWorkerService.pollMessagesFromSQS(queueUrl);
   }
 }
