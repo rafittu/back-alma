@@ -262,19 +262,20 @@ describe('AuthService', () => {
   describe('send recover password email', () => {
     it('should send an email with recover password instructions', async () => {
       jest
-        .spyOn(emailService, 'sendConfirmationEmail')
+        .spyOn(emailService, 'sendRecoverPasswordEmail')
         .mockResolvedValueOnce(null);
 
-      const result = await recoverPasswordService.sendRecoverPasswordEmail(
-        MockUserCredentials.email,
-      );
+      const result = await recoverPasswordService.sendRecoverPasswordEmail({
+        email: MockUserCredentials.email,
+        originChannel: Channel.WOPHI,
+      });
 
       const response = {
         message: `recover password email sent to ${MockUserCredentials.email}`,
       };
 
       expect(authRepository.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
-      expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
+      expect(emailService.sendRecoverPasswordEmail).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
     });
   });
