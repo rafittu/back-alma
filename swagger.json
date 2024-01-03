@@ -480,7 +480,8 @@
                 "$ref": "#/components/schemas/PasswordRecover"
               },
               "example": {
-                "email": "johndoe@example.com"
+                "email": "johndoe@example.com",
+                "originChannel": "WOPHI"
               }
             }
           }
@@ -532,8 +533,8 @@
                 },
                 "example": {
                   "error": {
-                    "message": "Failed to send recover password email",
-                    "code": "internal.server.error",
+                    "message": "failed to send email for recover password",
+                    "code": "email-service.sendRecoverPasswordEmail",
                     "status": true
                   },
                   "data": {}
@@ -1722,6 +1723,11 @@
           "email": {
             "type": "string",
             "description": "Email address of the user"
+          },
+          "originChannel": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
           }
         }
       },

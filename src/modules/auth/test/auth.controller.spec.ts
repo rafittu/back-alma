@@ -14,6 +14,7 @@ import {
   MockUserData,
   MockUserPayload,
 } from './mocks/auth.mock';
+import { Channel } from '@prisma/client';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -104,9 +105,10 @@ describe('AuthController', () => {
 
   describe('send recover password email', () => {
     it('should send an email to recover password', async () => {
-      const result = await controller.sendRecoverPasswordEmail(
-        MockUserCredentials.email,
-      );
+      const result = await controller.sendRecoverPasswordEmail({
+        email: MockUserCredentials.email,
+        originChannel: Channel.WOPHI,
+      });
 
       const response = {
         message: `recover password email sent to ${MockUserCredentials.email}`,

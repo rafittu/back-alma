@@ -26,6 +26,7 @@ import { ConfirmAccountEmailService } from './services/confirm-email.service';
 import { RecoverPasswordService } from './services/recover-password.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ResendAccountTokenEmailService } from './services/resend-account-token.service';
+import { RecoverPasswordDto } from './dto/recover-password.dto';
 
 @Controller('auth')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -75,9 +76,9 @@ export class AuthController {
   @isPublic()
   @Post('/send-recover-password-email')
   async sendRecoverPasswordEmail(
-    @Body('email') email: string,
+    @Body() body: RecoverPasswordDto,
   ): Promise<object> {
-    return await this.recoverPasswordService.sendRecoverPasswordEmail(email);
+    return await this.recoverPasswordService.sendRecoverPasswordEmail(body);
   }
 
   @isPublic()
