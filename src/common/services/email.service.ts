@@ -49,4 +49,30 @@ export class EmailService {
       );
     }
   }
+
+  async sendRecoverPasswordEmail(
+    to: string,
+    token: string,
+    channel: string,
+  ): Promise<void> {
+    try {
+      const emailBody = {
+        to,
+        from: `${channel.toLowerCase()}@wophi.be`,
+        subject: `${channel} - Recuperação de senha`,
+        template: `${channel.toLowerCase()}-recover-password`,
+        context: {
+          token,
+        },
+      };
+
+      await this.sendMessageToSQS(emailBody);
+    } catch (error) {
+      throw new AppError(
+        'email-service.sendRecoverPasswordEmail',
+        500,
+        'failed to send email for recover password',
+      );
+    }
+  }
 }
