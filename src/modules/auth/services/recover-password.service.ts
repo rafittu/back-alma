@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
 import { IAuthRepository } from '../interfaces/auth-repository.interface';
-import { Channel, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { IResetPassword } from '../interfaces/service.interface';
 import { AppError } from '../../../common/errors/Error';
 import { EmailService } from '../../../common/services/email.service';
@@ -10,6 +10,7 @@ import {
   ipv4Regex,
   ipv6Regex,
 } from '../../../modules/utils/helpers/helpers-user-module';
+import { RecoverPasswordDto } from '../dto/recover-password.dto';
 
 @Injectable()
 export class RecoverPasswordService {
@@ -24,14 +25,16 @@ export class RecoverPasswordService {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
   }
 
-  async sendRecoverPasswordEmail(email: string): Promise<object> {
+  async sendRecoverPasswordEmail(body: RecoverPasswordDto): Promise<object> {
+    const { email, originChannel } = body;
+
     const recoverToken =
       await this.authRepository.sendRecoverPasswordEmail(email);
 
-    await this.emailService.sendConfirmationEmail(
+    await this.emailService.sendRecoverPasswordEmail(
       email,
       recoverToken,
-      Channel.WOPHI,
+      originChannel,
     );
 
     return {
