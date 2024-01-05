@@ -84,7 +84,7 @@ $ npm run test:cov
 A documentação completa da API está disponível através do Swagger. Para acessá-la, siga as etapas abaixo:
 
 - Certifique-se de ter a API em execução localmente ou em um ambiente acessível;
-- Abra um navegador da web e acesse a seguinte URL: `http://localhost:3000/api-doc` (substitua `3000` pelo número da porta inserida no arquivo `.env`);
+- Abra um navegador da web e acesse a seguinte URL: `http://localhost:3000/v2/api-doc` (substitua `3000` pelo número da porta inserida no arquivo `.env`);
 - A documentação interativa da API será exibida no Swagger UI, onde você poderá explorar todos os endpoints, seus parâmetros e exemplos de solicitação.
 
 <br>
