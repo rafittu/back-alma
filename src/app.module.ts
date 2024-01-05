@@ -17,6 +17,7 @@ import { SQSWorkerService } from './common/services/sqs-worker.service';
       validationSchema: Joi.object({
         PORT: Joi.number().default(3000),
         DATABASE_URL: Joi.string().required(),
+        CORS_ORIGINS: Joi.string().required(),
         POSTGRES_DB: Joi.string().required(),
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
