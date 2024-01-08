@@ -1,27 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 import { PrismaService } from '../../../prisma.service';
 import {
   IUserRepository,
   UserContactInfo,
   UserPersonalInfo,
   UserSecurityInfo,
-  UnformattedUser,
-  User,
-} from '../structure/repository.structure';
+  PrismaUser,
+} from '../interfaces/repository.interface';
 import {
   ICreateUser,
-  IUpdateUser,
+  IRequestChannelAccess,
   IUserFilter,
-} from '../structure/service.structure';
-import { UserStatus } from '../structure/user-status.enum';
+  IUpdateSecurityData,
+} from '../interfaces/user.interface';
+import { UserStatus } from '../interfaces/user-status.enum';
 import { AppError } from '../../../common/errors/Error';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { SecurityService } from '../../../common/services/security.service';
 
 @Injectable()
 export class UserRepository implements IUserRepository<User> {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly securityService: SecurityService,
+  ) {}
 
   private formatPersonalInfo({
     firstName,
@@ -29,7 +32,7 @@ export class UserRepository implements IUserRepository<User> {
     socialName,
     bornDate,
     motherName,
-  }: IUpdateUser): UserPersonalInfo {
+  }: Partial<ICreateUser>): UserPersonalInfo {
     return {
       first_name: firstName,
       last_name: lastName,
@@ -43,61 +46,54 @@ export class UserRepository implements IUserRepository<User> {
     username,
     email,
     phone,
-  }: IUpdateUser): UserContactInfo {
+  }: Partial<ICreateUser>): UserContactInfo {
+    /* istanbul ignore next */
     return {
       username: username || null,
       email: email,
-      phone: phone || null,
+      phone: phone,
     };
   }
 
-  private async formatSecurityInfo(
-    { password, ipAddress }: IUpdateUser,
-    status: UserStatus,
-  ): Promise<UserSecurityInfo> {
-    const salt = await bcrypt.genSalt();
-
+  private async formatSecurityInfo({
+    hashedPassword,
+    salt,
+    confirmationToken,
+    tokenExpiresAt,
+    ipAddressOrigin,
+    status,
+  }: ICreateUser): Promise<UserSecurityInfo> {
     return {
-      password: await bcrypt.hash(password, salt),
+      password: hashedPassword,
       salt,
-      confirmation_token: crypto.randomBytes(32).toString('hex'),
+      confirmation_token: confirmationToken,
       recover_token: null,
-      ip_address: ipAddress,
-      status: status,
+      token_expires_at: tokenExpiresAt,
+      ip_address_origin: ipAddressOrigin,
+      status,
     };
   }
 
-  private formatUserResponse(user: UnformattedUser): User {
-    return {
-      id: user.id,
-      personal: {
-        id: user.user_personal_info_id,
-        firstName: user.personal.first_name,
-        lastName: user.personal.last_name,
-        socialName: user.personal.social_name,
-        bornDate: user.personal.born_date,
-        motherName: user.personal.mother_name,
-        updatedAt: user.personal.updated_at,
-      },
-      contact: {
-        id: user.user_contact_info_id,
-        username: user.contact.username,
-        email: user.contact.email,
-        phone: user.contact.phone,
-        updatedAt: user.contact.updated_at,
-      },
-      security: {
-        id: user.user_security_info_id,
-        confirmationToken: user.security.confirmation_token,
-        status: user.security.status,
-        updatedAt: user.security.updated_at,
-      },
-      createdAt: user.created_at,
-      updatedAt: user.updated_at,
-    };
+  private fieldsToDelete(prismaUser: PrismaUser, fields: string[]): PrismaUser {
+    fields.forEach((field) => {
+      /* istanbul ignore next */
+      if (field === 'updated_at') {
+        return;
+      }
+
+      if (field !== 'created_at') {
+        delete prismaUser[field];
+      }
+
+      delete prismaUser.personal[field];
+      delete prismaUser.contact[field];
+      delete prismaUser.security[field];
+    });
+
+    return prismaUser;
   }
 
-  async createUser(data: ICreateUser, status: UserStatus): Promise<User> {
+  async createUser(data: ICreateUser): Promise<User> {
     const userData = {
       personal: {
         create: this.formatPersonalInfo(data),
@@ -106,37 +102,18 @@ export class UserRepository implements IUserRepository<User> {
         create: this.formatContactInfo(data),
       },
       security: {
-        create: await this.formatSecurityInfo(data, status),
+        create: await this.formatSecurityInfo(data),
       },
+      origin_channel: data.originChannel,
+      allowed_channels: data.allowedChannels,
     };
 
     try {
       const user = await this.prisma.user.create({
         data: userData,
-        include: {
-          personal: {
-            select: {
-              first_name: true,
-              social_name: true,
-            },
-          },
-          contact: {
-            select: {
-              username: true,
-              email: true,
-            },
-          },
-          security: {
-            select: {
-              confirmation_token: true,
-              status: true,
-            },
-          },
-        },
       });
 
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
+      return user;
     } catch (error) {
       if (error.code === 'P2002') {
         throw new AppError(
@@ -145,35 +122,128 @@ export class UserRepository implements IUserRepository<User> {
           `${error.meta.target[0]} already in use`,
         );
       }
+
       throw new AppError('user-repository.createUser', 500, 'user not created');
     }
   }
 
-  async getUserById(userId: string): Promise<User> {
+  async createAccessToAdditionalChannel(
+    data: IRequestChannelAccess,
+  ): Promise<void> {
+    const { id, ipAddress, confirmationToken, tokenExpiresAt } = data;
+
+    try {
+      await this.prisma.userSecurityInfo.update({
+        data: {
+          confirmation_token: confirmationToken,
+          token_expires_at: tokenExpiresAt,
+          on_update_ip_address: ipAddress,
+        },
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new AppError(
+        'user-repository.createAccessToAdditionalChannel',
+        500,
+        'failed to create access to the new channel',
+      );
+    }
+  }
+
+  async userByFilter(filter: IUserFilter): Promise<PrismaUser | null> {
+    const { id, email, phone } = filter;
+
+    try {
+      const userQuery: Prisma.UserWhereInput = {
+        ...(id && { id }),
+        ...(email || phone
+          ? {
+              contact: {
+                ...(email && { email }),
+                ...(phone && { phone }),
+              },
+            }
+          : {}),
+      };
+
+      const user = await this.prisma.user.findFirst({
+        where: userQuery,
+        include: {
+          personal: true,
+          contact: true,
+          security: true,
+        },
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      const fieldsToDelete = [
+        'user_personal_info_id',
+        'user_contact_info_id',
+        'user_security_info_id',
+        'password',
+        'salt',
+        'confirmation_token',
+        'recover_token',
+        'token_expires_at',
+        'ip_address_origin',
+        'on_update_ip_address',
+        'origin_channel',
+        'created_at',
+      ];
+
+      return this.fieldsToDelete(user, fieldsToDelete);
+    } catch (error) {
+      throw new AppError(
+        'user-repository.getUserByFilter',
+        500,
+        'could not get user',
+      );
+    }
+  }
+
+  async getUserById(userId: string): Promise<PrismaUser> {
     try {
       const user = await this.prisma.user.findFirst({
         where: { id: userId },
         include: {
           personal: true,
           contact: true,
-          security: {
-            select: {
-              status: true,
-              updated_at: true,
-            },
-          },
+          security: true,
         },
       });
 
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
+      const fieldsToDelete = [
+        'user_personal_info_id',
+        'user_contact_info_id',
+        'user_security_info_id',
+        'password',
+        'salt',
+        'confirmation_token',
+        'recover_token',
+        'token_expires_at',
+        'ip_address_origin',
+        'on_update_ip_address',
+        'origin_channel',
+        'created_at',
+      ];
+
+      return this.fieldsToDelete(user, fieldsToDelete);
     } catch (error) {
       throw new AppError('user-repository.getUserById', 404, 'user not found');
     }
   }
 
-  async updateUser(data: IUpdateUser, userId: string): Promise<User> {
-    let securityInfo;
+  async updateUser(
+    data: UpdateUserDto,
+    userId: string,
+    securityData: IUpdateSecurityData,
+  ): Promise<PrismaUser> {
+    let securityInfo = {};
 
     if (data.newPassword) {
       const { security } = await this.prisma.user.findFirst({
@@ -187,15 +257,16 @@ export class UserRepository implements IUserRepository<User> {
         },
       });
 
-      const isPasswordMatch = await bcrypt.compare(
+      const isPasswordMatch = await this.securityService.comparePasswords(
         data.oldPassword,
         security.password,
       );
 
       if (isPasswordMatch) {
-        data.password = data.newPassword;
-        securityInfo = await this.formatSecurityInfo(data, null);
-        securityInfo.confirmation_token = null;
+        securityInfo = {
+          password: securityData.hashedPassword,
+          salt: securityData.salt,
+        };
       } else {
         throw new AppError(
           'user-repository.updateUser',
@@ -208,10 +279,16 @@ export class UserRepository implements IUserRepository<User> {
     if (data.email) {
       securityInfo = {
         ...securityInfo,
-        confirmation_token: crypto.randomBytes(32).toString('hex'),
-        status: UserStatus.PENDING_CONFIRMATION,
+        confirmation_token: securityData.confirmationToken,
+        token_expires_at: securityData.tokenExpiresAt,
+        status: securityData.status,
       };
     }
+
+    securityInfo = {
+      ...securityInfo,
+      on_update_ip_address: securityData.onUpdateIpAddress,
+    };
 
     const userData = {
       personal: {
@@ -232,33 +309,28 @@ export class UserRepository implements IUserRepository<User> {
           id: userId,
         },
         include: {
-          personal: {
-            select: {
-              first_name: true,
-              last_name: true,
-              social_name: true,
-              updated_at: true,
-            },
-          },
-          contact: {
-            select: {
-              username: true,
-              email: true,
-              updated_at: true,
-            },
-          },
-          security: {
-            select: {
-              confirmation_token: true,
-              status: true,
-              updated_at: true,
-            },
-          },
+          personal: true,
+          contact: true,
+          security: true,
         },
       });
 
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
+      const fieldsToDelete = [
+        'user_personal_info_id',
+        'user_contact_info_id',
+        'user_security_info_id',
+        'password',
+        'salt',
+        'confirmation_token',
+        'recover_token',
+        'token_expires_at',
+        'ip_address_origin',
+        'on_update_ip_address',
+        'origin_channel',
+        'created_at',
+      ];
+
+      return this.fieldsToDelete(user, fieldsToDelete);
     } catch (error) {
       if (error.code === 'P2002') {
         throw new AppError(
@@ -268,11 +340,19 @@ export class UserRepository implements IUserRepository<User> {
         );
       }
 
-      throw new AppError('user-repository.updateUser', 304, 'user not updated');
+      if (error.code === 'P2025') {
+        throw new AppError(
+          'user-repository.updateUser',
+          400,
+          'user id not found',
+        );
+      }
+
+      throw new AppError('user-repository.updateUser', 500, 'user not updated');
     }
   }
 
-  async deleteUser(userId: string, status: UserStatus): Promise<User> {
+  async cancelUser(userId: string, status: UserStatus): Promise<PrismaUser> {
     try {
       const user = await this.prisma.user.update({
         data: {
@@ -284,28 +364,28 @@ export class UserRepository implements IUserRepository<User> {
         },
         where: { id: userId },
         include: {
-          personal: {
-            select: {
-              first_name: true,
-              social_name: true,
-            },
-          },
-          contact: {
-            select: {
-              username: true,
-              email: true,
-            },
-          },
-          security: {
-            select: {
-              status: true,
-            },
-          },
+          personal: true,
+          contact: true,
+          security: true,
         },
       });
 
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
+      const fieldsToDelete = [
+        'user_personal_info_id',
+        'user_contact_info_id',
+        'user_security_info_id',
+        'password',
+        'salt',
+        'confirmation_token',
+        'recover_token',
+        'token_expires_at',
+        'ip_address_origin',
+        'on_update_ip_address',
+        'origin_channel',
+        'created_at',
+      ];
+
+      return this.fieldsToDelete(user, fieldsToDelete);
     } catch (error) {
       throw new AppError(
         'user-repository.deleteUser',
@@ -315,46 +395,33 @@ export class UserRepository implements IUserRepository<User> {
     }
   }
 
-  async userByFilter(filter: IUserFilter): Promise<User | null> {
-    const { id, email, phone } = filter;
-
-    try {
-      const userQuery: Prisma.UserWhereInput = {};
-
-      id ? (userQuery.id = id) : userQuery;
-      if (email || phone) {
-        userQuery.contact = {
-          ...(email && { email }),
-          ...(phone && { phone }),
-        };
-      }
-
-      const user = await this.prisma.user.findFirst({
-        where: userQuery,
-        include: {
-          personal: true,
-          contact: true,
-          security: {
-            select: {
-              status: true,
-              updated_at: true,
-            },
+  async findCancelledUsersToDelete(dateThreshold: Date): Promise<PrismaUser[]> {
+    return await this.prisma.user.findMany({
+      where: {
+        security: {
+          status: 'CANCELLED',
+          updated_at: {
+            lte: dateThreshold,
           },
         },
-      });
+      },
+      select: {
+        id: true,
+        personal: true,
+        contact: true,
+        security: true,
+        allowed_channels: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+  }
 
-      if (!user) {
-        return null;
-      }
-
-      const userResponse = this.formatUserResponse(user);
-      return userResponse;
-    } catch (error) {
-      throw new AppError(
-        'user-repository.getUserByFilter',
-        500,
-        'could not get user',
-      );
-    }
+  async deleteUser(userId: string): Promise<void> {
+    await this.prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
   }
 }

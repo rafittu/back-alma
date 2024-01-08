@@ -1,23 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
-import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
+import { Channel, Prisma, User } from '@prisma/client';
 import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
-import {
-  IAuthRepository,
-  ResendAccToken,
-} from '../structure/auth-repository.structure';
-import { UserPayload } from '../structure/service.structure';
-import { UserStatus } from 'src/modules/user/structure/user-status.enum';
-import { randomBytes } from 'crypto';
+import { IAuthRepository } from '../interfaces/auth-repository.interface';
+import { IResendAccToken, IUserPayload } from '../interfaces/service.interface';
+import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
+import { SecurityService } from '../../../common/services/security.service';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository<User> {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly securityService: SecurityService,
+  ) {}
 
-  async validateUser(credentials: CredentialsDto): Promise<UserPayload> {
+  async validateUser(credentials: CredentialsDto): Promise<IUserPayload> {
     const { email, password } = credentials;
 
     const userData = await this.prisma.user.findFirst({
@@ -34,13 +32,14 @@ export class AuthRepository implements IAuthRepository<User> {
         security: {
           select: {
             password: true,
+            status: true,
           },
         },
       },
     });
 
     if (userData) {
-      const isPasswordValid = await bcrypt.compare(
+      const isPasswordValid = await this.securityService.comparePasswords(
         password,
         userData.security.password,
       );
@@ -50,6 +49,7 @@ export class AuthRepository implements IAuthRepository<User> {
           id: userData.id,
           username: userData.contact.username,
           email,
+          status: userData.security.status,
         };
       }
     }
@@ -61,20 +61,60 @@ export class AuthRepository implements IAuthRepository<User> {
     );
   }
 
+  async validateChannel(id: string, origin: Channel): Promise<void> {
+    try {
+      const userChannels = await this.prisma.user.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          allowed_channels: true,
+        },
+      });
+
+      if (!userChannels || !userChannels.allowed_channels.includes(origin)) {
+        throw new AppError(
+          'auth-repository.validateChannel',
+          401,
+          'email or password is invalid',
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async confirmAccountEmail(
     confirmationToken: string,
     status: UserStatus,
+    ipAddress: string,
+    newChannel?: Channel,
   ): Promise<object> {
     try {
-      await this.prisma.userSecurityInfo.update({
+      const { id } = await this.prisma.userSecurityInfo.update({
         data: {
           confirmation_token: null,
+          token_expires_at: null,
+          on_update_ip_address: ipAddress,
           status,
         },
         where: {
           confirmation_token: confirmationToken,
         },
       });
+
+      if (newChannel) {
+        await this.prisma.user.update({
+          data: {
+            allowed_channels: {
+              push: newChannel,
+            },
+          },
+          where: {
+            user_security_info_id: id,
+          } as Prisma.UserWhereUniqueInput,
+        });
+      }
 
       return {
         message: 'account email successfully confirmed',
@@ -89,35 +129,34 @@ export class AuthRepository implements IAuthRepository<User> {
   }
 
   async sendRecoverPasswordEmail(email: string): Promise<string> {
-    const userSecurityInfo = await this.prisma.user.findFirst({
-      where: { contact: { email } },
-      select: {
-        user_security_info_id: true,
-      },
-    });
+    try {
+      const { user_security_info_id } = await this.prisma.user.findFirst({
+        where: { contact: { email } },
+        select: { user_security_info_id: true },
+      });
 
-    if (!userSecurityInfo) {
+      const { token, expiresAt } = this.securityService.generateRandomToken();
+
+      await this.prisma.userSecurityInfo.update({
+        data: { recover_token: token, token_expires_at: expiresAt },
+        where: { id: user_security_info_id },
+      });
+
+      return token;
+    } catch (error) {
       throw new AppError(
         'auth-repository.sendRecoverPasswordEmail',
         404,
         'user with this email not found',
       );
     }
-
-    const userRecoverToken = randomBytes(32).toString('hex');
-    await this.prisma.userSecurityInfo.update({
-      data: {
-        recover_token: userRecoverToken,
-      },
-      where: {
-        id: userSecurityInfo.user_security_info_id,
-      },
-    });
-
-    return userRecoverToken;
   }
 
-  async resetPassword(recoverToken: string, password: string): Promise<object> {
+  async resetPassword(
+    recoverToken: string,
+    password: string,
+    ipAddress: string,
+  ): Promise<object> {
     const user = await this.prisma.userSecurityInfo.findFirst({
       where: { recover_token: recoverToken },
     });
@@ -131,13 +170,16 @@ export class AuthRepository implements IAuthRepository<User> {
     }
 
     try {
-      const salt = await bcrypt.genSalt();
+      const { hashedPassword, salt } =
+        await this.securityService.hashPassword(password);
 
       await this.prisma.userSecurityInfo.update({
         data: {
-          password: await bcrypt.hash(password, salt),
+          password: hashedPassword,
           salt,
           recover_token: null,
+          token_expires_at: null,
+          on_update_ip_address: ipAddress,
         },
         where: {
           id: user.id,
@@ -156,15 +198,19 @@ export class AuthRepository implements IAuthRepository<User> {
     }
   }
 
-  async resendAccountToken(id: string, email: string): Promise<ResendAccToken> {
+  async resendAccountToken(
+    id: string,
+    email: string,
+  ): Promise<IResendAccToken> {
     try {
-      const newConfirmationToken = crypto.randomBytes(32).toString('hex');
+      const { token, expiresAt } = this.securityService.generateRandomToken();
 
-      await this.prisma.user.update({
+      const { origin_channel } = await this.prisma.user.update({
         data: {
           security: {
             update: {
-              confirmation_token: newConfirmationToken,
+              confirmation_token: token,
+              token_expires_at: expiresAt,
             },
           },
           contact: {
@@ -179,13 +225,34 @@ export class AuthRepository implements IAuthRepository<User> {
       });
 
       return {
-        confirmationToken: newConfirmationToken,
+        confirmationToken: token,
+        originChannel: origin_channel,
       };
     } catch (error) {
       throw new AppError(
         'auth-repository.resendAccountToken',
         500,
         'Account token not generated',
+      );
+    }
+  }
+
+  async findUserByToken(token: string): Promise<Date> {
+    try {
+      const { token_expires_at } = await this.prisma.userSecurityInfo.findFirst(
+        {
+          where: {
+            OR: [{ confirmation_token: token }, { recover_token: token }],
+          },
+        },
+      );
+
+      return token_expires_at;
+    } catch (error) {
+      throw new AppError(
+        'auth-repository.findUserByToken',
+        500,
+        'could not get user',
       );
     }
   }

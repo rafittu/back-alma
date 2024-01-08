@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   Query,
@@ -18,11 +17,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserService } from './services/create-user.service';
 import { GetUserByIdService } from './services/get-user-by-id.service';
 import { UpdateUserService } from './services/update-user.service';
-import { User } from './structure/repository.structure';
-import { DeleteUserService } from './services/delete-user.service';
+import { CancelUserService } from './services/cancel-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';
-import { IUserFilter } from './structure/service.structure';
+import { IUser, IUserFilter } from './interfaces/user.interface';
+import { CurrentUser } from '../auth/infra/decorators/current-user.decorator';
+import { IUserPayload } from '../auth/interfaces/service.interface';
 
 @Controller('user')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -31,39 +31,44 @@ export class UserController {
     private readonly createUserService: CreateUserService,
     private readonly getUserByIdService: GetUserByIdService,
     private readonly updateUserService: UpdateUserService,
-    private readonly deleteUserService: DeleteUserService,
+    private readonly deleteUserService: CancelUserService,
     private readonly getUserByFilterService: GetUserByFilterService,
   ) {}
 
   @isPublic()
   @Post('/signup')
-  create(@Req() req: Request, @Body() body: CreateUserDto): Promise<User> {
-    const createUserDto = body;
+  async create(
+    @Req() req: Request,
+    @Body() body: CreateUserDto,
+  ): Promise<IUser> {
     const ipAddress = req.socket.remoteAddress;
 
-    return this.createUserService.execute({ ...createUserDto, ipAddress });
+    return await this.createUserService.execute(body, ipAddress);
   }
 
   @Get('/filter')
-  getByFilter(@Query() filter: IUserFilter): Promise<User | null> {
-    return this.getUserByFilterService.execute(filter);
+  async getByFilter(@Query() filter: IUserFilter): Promise<IUser | null> {
+    return await this.getUserByFilterService.execute(filter);
   }
 
-  @Get('/:id')
-  getById(@Param('id') userId: string): Promise<User> {
-    return this.getUserByIdService.execute(userId);
+  @Get('/')
+  async getById(@CurrentUser() user: IUserPayload): Promise<IUser> {
+    return await this.getUserByIdService.execute(user.id);
   }
 
-  @Patch('/update/:id')
+  @Patch('/update')
   async updateUser(
-    @Param('id') userId: string,
+    @Req() req: Request,
+    @CurrentUser() user: IUserPayload,
     @Body() body: UpdateUserDto,
-  ): Promise<User> {
-    return await this.updateUserService.execute(body, userId);
+  ): Promise<IUser> {
+    const ipAddress = req.socket.remoteAddress;
+
+    return await this.updateUserService.execute(body, user.id, ipAddress);
   }
 
-  @Delete('/delete/:id')
-  async deleteUser(@Param('id') userId: string): Promise<User> {
-    return await this.deleteUserService.execute(userId);
+  @Delete('/delete')
+  async deleteUser(@CurrentUser() user: IUserPayload): Promise<IUser> {
+    return await this.deleteUserService.execute(user.id);
   }
 }

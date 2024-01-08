@@ -8,13 +8,14 @@
       "url": "https://www.wophi.be/alma/support",
       "email": "alma@wophi.be"
     },
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
+
   "paths": {
     "/user/signup": {
       "post": {
-        "summary": "Create a new user",
-        "description": "Route to register new users",
+        "summary": "Create user",
+        "description": "Route to register new users. A token with 30 minutes expiration time is sent to the provided email",
         "tags": ["User"],
         "requestBody": {
           "content": {
@@ -28,14 +29,15 @@
                   "value": {
                     "firstName": "John",
                     "lastName": "Doe",
-                    "socialName": "JD",
-                    "username": "johndoe",
+                    "socialName": "Joane Eod",
+                    "username": "jd",
                     "bornDate": "1990-01-01",
                     "motherName": "Jane Doe",
                     "email": "johndoe@example.com",
                     "phone": "1234567890",
-                    "password": "password123",
-                    "passwordConfirmation": "password123"
+                    "password": "#Password123",
+                    "passwordConfirmation": "#Password123",
+                    "originChannel": "WOPHI"
                   }
                 },
                 "example2": {
@@ -44,9 +46,11 @@
                     "firstName": "John",
                     "lastName": "Doe",
                     "motherName": "Jane Doe",
+                    "phone": "1234567890",
                     "email": "johndoe@example.com",
-                    "password": "password123",
-                    "passwordConfirmation": "password123"
+                    "password": "#Password123",
+                    "passwordConfirmation": "#Password123",
+                    "originChannel": "WOPHI"
                   }
                 }
               }
@@ -66,17 +70,22 @@
                   "personal": {
                     "id": "789012",
                     "firstName": "John",
-                    "socialName": "JD"
+                    "lastName": "Doe",
+                    "socialName": "Joane Oed",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe"
                   },
                   "contact": {
                     "id": "345678",
-                    "username": "johndoe",
+                    "username": "jd",
+                    "phone": "1234567890",
                     "email": "johndoe@example.com"
                   },
                   "security": {
                     "id": "901234",
                     "status": "PENDING_CONFIRMATION"
                   },
+                  "allowedChannels": ["WOPHI"],
                   "createdAt": "2023-05-10T12:00:00Z",
                   "updatedAt": "2023-05-10T12:00:00Z"
                 }
@@ -94,24 +103,6 @@
                   "error": {
                     "message": ["One or more fields are missing or invalid"],
                     "code": "bad.request",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "email/phone already taken",
-                    "code": "user-repository.createUser",
                     "status": true
                   },
                   "data": {}
@@ -137,8 +128,42 @@
               }
             }
           },
-          "500": {
-            "description": "Internal server error",
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "field already in use by another user",
+                    "value": {
+                      "error": {
+                        "message": "[ 'email', 'phone' ] already in use",
+                        "code": "user-repository.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "accessing new channel",
+                    "value": {
+                      "error": {
+                        "message": "User 'user.id' registered on [ user.allowed_channels ] platform. A confirmation token was sent to 'user.contact.email' and after confirmation, use the same credentials from 'user.allowed_channels' to access [ data.originChannel ].",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -146,11 +171,112 @@
                 },
                 "example": {
                   "error": {
-                    "message": "user not created",
-                    "code": "user-repository.createUser",
+                    "message": "passwords do not match",
+                    "code": "user-service.createUser",
                     "status": true
                   },
                   "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+
+                "examples": {
+                  "example1": {
+                    "summary": "repository error",
+                    "value": {
+                      "error": {
+                        "message": "user not created",
+                        "code": "user-repository.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to create user",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "summary": "email service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to send email for account confirmation",
+                        "code": "email-service.sendConfirmationEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example4": {
+                    "summary": "failed to create access to new channel service",
+                    "value": {
+                      "error": {
+                        "message": "failed to create access to new channel",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example5": {
+                    "summary": "failed to create access to new channel repository",
+                    "value": {
+                      "error": {
+                        "message": "failed to create access to new channel",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example6": {
+                    "summary": "failed to send message to amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "failed to send message to SQS",
+                        "code": "email-service.sendMessageToSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example7": {
+                    "summary": "failed to poll messages from amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "error polling messages from SQS: `error message`",
+                        "code": "sqs-worker-service.pollMessagesFromSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example8": {
+                    "summary": "failed to process email",
+                    "value": {
+                      "error": {
+                        "message": "error processing message: `error message`",
+                        "code": "sqs-worker-service.processMessage",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -158,10 +284,11 @@
         }
       }
     },
+
     "/auth/account/{token}": {
       "patch": {
         "summary": "Confirm user account email",
-        "description": "Route to confirm a user's account email",
+        "description": "Route to confirm user's account email",
         "tags": ["Authentication"],
         "parameters": [
           {
@@ -194,8 +321,8 @@
               }
             }
           },
-          "500": {
-            "description": "Internal server error",
+          "400": {
+            "description": "Invalid or expired token",
             "content": {
               "application/json": {
                 "schema": {
@@ -203,11 +330,63 @@
                 },
                 "example": {
                   "error": {
-                    "message": "Account not confirmed",
-                    "code": "auth-repository.confirmAccountEmail",
+                    "message": "invalid or expired token",
+                    "code": "auth-service.confirmEmail",
                     "status": true
                   },
                   "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "auth-service.confirmEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "Internal Error",
+                    "value": {
+                      "error": {
+                        "message": "Account not confirmed",
+                        "code": "auth-repository.confirmAccountEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "error": {
+                        "message": "could not get user",
+                        "code": "auth-repository.findUserByToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -229,7 +408,8 @@
               },
               "example": {
                 "email": "johndoe@example.com",
-                "password": "password123"
+                "password": "password123",
+                "origin": "wophi"
               }
             }
           }
@@ -290,7 +470,7 @@
     "/auth/send-recover-password-email": {
       "post": {
         "summary": "Send recover password email",
-        "description": "Send an email to the user with instructions to recover their password",
+        "description": "Send an email to the user with instructions to recover their password. Recover token has an expiration time of 30 minutes",
         "tags": ["Authentication"],
         "requestBody": {
           "required": true,
@@ -300,7 +480,8 @@
                 "$ref": "#/components/schemas/PasswordRecover"
               },
               "example": {
-                "email": "johndoe@example.com"
+                "email": "johndoe@example.com",
+                "originChannel": "WOPHI"
               }
             }
           }
@@ -352,8 +533,8 @@
                 },
                 "example": {
                   "error": {
-                    "message": "Failed to send recover password email",
-                    "code": "internal.server.error",
+                    "message": "failed to send email for recover password",
+                    "code": "email-service.sendRecoverPasswordEmail",
                     "status": true
                   },
                   "data": {}
@@ -415,10 +596,44 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
+                "examples": {
+                  "example1": {
+                    "summary": "Invalid password",
+                    "value": {
+                      "error": {
+                        "message": "passwords do not match",
+                        "code": "recover-password-service.resetPassword",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Invalid or expired token",
+                    "value": {
+                      "error": {
+                        "message": "invalid or expired token",
+                        "code": "auth-service.confirmEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "error": {
-                    "message": "passwords do not match",
-                    "code": "recover-password-service.resetPassword",
+                    "message": "invalid ip address",
+                    "code": "auth-service.resetPassword",
                     "status": true
                   },
                   "data": {}
@@ -451,13 +666,29 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "password not reseted",
-                    "code": "auth-repository.resetPassword",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "Internal error",
+                    "value": {
+                      "error": {
+                        "message": "password not reseted",
+                        "code": "auth-repository.resetPassword",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "error": {
+                        "message": "could not get user",
+                        "code": "auth-repository.findUserByToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -526,7 +757,7 @@
     "/auth/account/resend-token": {
       "patch": {
         "summary": "Resend account confirmation token",
-        "description": "Endpoint to resend new account confirmation token",
+        "description": "Endpoint to resend new account confirmation token. Token has an expiration time of 30 minutes",
         "tags": ["Authentication"],
         "parameters": [
           {
@@ -567,7 +798,7 @@
                   }
                 },
                 "example": {
-                  "message": "account confirmation token resent to user@mail.com"
+                  "message": "account confirmation token resent to johndoe@example.com"
                 }
               }
             }
@@ -595,13 +826,31 @@
                     "summary": "Invalid email",
                     "value": {
                       "error": {
-                        "message": "The new email provided is already in use",
+                        "message": "new email provided is already in use",
                         "code": "auth-services.resendAccountToken",
                         "status": true
                       },
                       "data": {}
                     }
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -629,7 +878,7 @@
                     "summary": "Email confirmation not resend",
                     "value": {
                       "error": {
-                        "message": "Failed to resend account confirmation token",
+                        "message": "failed to resend account confirmation token",
                         "code": "auth-services.resendAccountToken",
                         "status": true
                       },
@@ -644,80 +893,10 @@
       }
     },
 
-    "/user/{id}": {
-      "get": {
-        "summary": "Get user by id",
-        "description": "Route to get an user by id",
-        "tags": ["User"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "description": "User id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                },
-                "example": {
-                  "id": "123456",
-                  "personal": {
-                    "id": "789012",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "socialName": "JD",
-                    "bornDate": "1990-01-01",
-                    "motherName": "Jane Doe",
-                    "updatedAt": "2023-05-10T12:00:00Z"
-                  },
-                  "contact": {
-                    "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com",
-                    "phone": "1234567890",
-                    "updatedAt": "2023-05-10T12:00:00Z"
-                  },
-                  "security": {
-                    "id": "901234",
-                    "status": "ACTIVE",
-                    "updatedAt": "2023-05-11T12:00:00Z"
-                  },
-                  "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-11T12:00:00Z"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/user/filter": {
       "get": {
         "summary": "Get user by filter",
-        "description": "Route to get an user by filter (id ||email || phone)",
+        "description": "Route to get users by filter [id | email | phone]",
         "tags": ["User"],
         "security": [
           {
@@ -796,6 +975,7 @@
                         "status": "ACTIVE",
                         "updatedAt": "2023-05-11T12:00:00Z"
                       },
+                      "allowedChannels": ["WOPHI"],
                       "createdAt": "2023-05-10T12:00:00Z",
                       "updatedAt": "2023-05-11T12:00:00Z"
                     }
@@ -804,6 +984,24 @@
                     "summary": "User not found",
                     "value": {}
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -829,10 +1027,10 @@
         }
       }
     },
-    "/user/update/{id}": {
-      "patch": {
-        "summary": "Update user info",
-        "description": "Route to update user data",
+    "/user": {
+      "get": {
+        "summary": "Get user by id",
+        "description": "Route to get an user by id",
         "tags": ["User"],
         "security": [
           {
@@ -848,12 +1046,101 @@
             "schema": {
               "type": "string"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "123456",
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "phone": "1234567890",
+                    "updatedAt": "2023-05-10T12:00:00Z"
+                  },
+                  "security": {
+                    "id": "901234",
+                    "status": "ACTIVE",
+                    "updatedAt": "2023-05-11T12:00:00Z"
+                  },
+                  "allowedChannels": ["WOPHI"],
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-11T12:00:00Z"
+                }
+              }
+            }
           },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user not found",
+                    "code": "user-repository.getUserById",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/update": {
+      "patch": {
+        "summary": "Update user",
+        "description": "Route to update user data. If updating account email, a token is sent to the provided email and has an expiration time of 30 minutes",
+        "tags": ["User"],
+        "security": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "User id",
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
             "required": true,
+            "description": "Bearer {token}",
             "schema": {
               "type": "string"
             }
@@ -876,9 +1163,10 @@
                   }
                 },
                 "example2": {
-                  "summary": "Example of updating username",
+                  "summary": "Example of updating username and email",
                   "value": {
-                    "username": "Jd"
+                    "username": "Jd",
+                    "email": "jd@mail.com"
                   }
                 }
               }
@@ -900,39 +1188,25 @@
                     "firstName": "John",
                     "lastName": "Doe",
                     "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
                     "updatedAt": "2023-05-10T12:00:00Z"
                   },
                   "contact": {
                     "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com",
+                    "username": "jd",
+                    "email": "jd@mail.com",
+                    "phone": "1234567890",
                     "updatedAt": "2023-05-13T12:00:00Z"
                   },
                   "security": {
                     "id": "901234",
                     "status": "ACTIVE",
-                    "updatedAt": "2023-05-11T12:00:00Z"
+                    "updatedAt": "2023-12-11T12:00:00Z"
                   },
+                  "allowedChannels": ["WOPHI"],
                   "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-13T12:00:00Z"
-                }
-              }
-            }
-          },
-          "304": {
-            "description": "Not modified",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "user not updated",
-                    "code": "user-repository.updateUser",
-                    "status": true
-                  },
-                  "data": {}
+                  "updatedAt": "2023-12-11T12:00:00Z"
                 }
               }
             }
@@ -944,10 +1218,64 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
+                "examples": {
+                  "example1": {
+                    "summary": "invalid user id",
+                    "value": {
+                      "error": {
+                        "message": ["user id not found"],
+                        "code": "bad.request",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "invalid user id",
+                    "value": {
+                      "error": {
+                        "message": [
+                          "One or more fields are missing or invalid"
+                        ],
+                        "code": "bad.request",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "example": {
                   "error": {
-                    "message": ["One or more fields are missing or invalid"],
-                    "code": "bad.request",
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "user-service.updateUser",
                     "status": true
                   },
                   "data": {}
@@ -993,7 +1321,7 @@
                     }
                   },
                   "example2": {
-                    "summary": "new passwords do not match",
+                    "summary": "validate new password",
                     "value": {
                       "error": {
                         "message": "new passwords do not match",
@@ -1004,7 +1332,7 @@
                     }
                   },
                   "example3": {
-                    "summary": "new passwords do not match",
+                    "summary": "validate old password",
                     "value": {
                       "error": {
                         "message": "old passwords do not match",
@@ -1025,13 +1353,62 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "user not updated",
-                    "code": "user-repository.updateUser",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "repository internal error",
+                    "value": {
+                      "error": {
+                        "message": "user not updated",
+                        "code": "user-repository.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "service internal error",
+                    "value": {
+                      "error": {
+                        "message": "failed to update user data",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "summary": "failed to send message to amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "failed to send message to SQS",
+                        "code": "email-service.sendMessageToSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example4": {
+                    "summary": "failed to poll messages from amazon simple queue service",
+                    "value": {
+                      "error": {
+                        "message": "error polling messages from SQS: `error message`",
+                        "code": "sqs-worker-service.pollMessagesFromSQS",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example5": {
+                    "summary": "failed to process email",
+                    "value": {
+                      "error": {
+                        "message": "error processing message: `error message`",
+                        "code": "sqs-worker-service.processMessage",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -1039,10 +1416,10 @@
         }
       }
     },
-    "/user/delete/{id}": {
+    "/user/delete": {
       "delete": {
-        "summary": "Delete user account",
-        "description": "Route to delete user account",
+        "summary": "Delete account",
+        "description": "Route to delete user account. After this operation, user will receive the 'CANCELLED' status  and after 21 days if not reactivate, the account will be permanently deleted",
         "tags": ["User"],
         "security": [
           {
@@ -1055,15 +1432,6 @@
             "in": "header",
             "required": true,
             "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "description": "User id",
-            "required": true,
             "schema": {
               "type": "string"
             }
@@ -1082,19 +1450,45 @@
                   "personal": {
                     "id": "789012",
                     "firstName": "John",
-                    "socialName": "JD"
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "updatedAt": "2023-05-10T12:00:00Z"
                   },
                   "contact": {
                     "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com"
+                    "username": "jd",
+                    "email": "jd@mail.com",
+                    "phone": "1234567890",
+                    "updatedAt": "2023-05-13T12:00:00Z"
                   },
                   "security": {
                     "id": "901234",
-                    "status": "CANCELLED"
+                    "status": "CANCELLED",
+                    "updatedAt": "2023-12-11T12:00:00Z"
                   },
+                  "allowedChannels": ["WOPHI"],
                   "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-15T12:00:00Z"
+                  "updatedAt": "2023-12-11T12:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -1121,6 +1515,7 @@
       }
     }
   },
+
   "components": {
     "schemas": {
       "SignUp": {
@@ -1141,20 +1536,20 @@
             "maxLength": 250,
             "description": "Social name of the user"
           },
-          "username": {
-            "type": "string",
-            "maxLength": 45,
-            "description": "Username of the user"
-          },
           "bornDate": {
             "type": "string",
-            "formate": "date",
-            "description": "Date of birth of the user"
+            "formate": "date-time",
+            "description": "Date of birth of the user (yyyy-mm-dd)"
           },
           "motherName": {
             "type": "string",
             "maxLength": 250,
             "description": "Mother's name of the user"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 45,
+            "description": "Username of the user"
           },
           "email": {
             "type": "string",
@@ -1174,17 +1569,26 @@
           "passwordConfirmation": {
             "type": "string",
             "description": "Password confirmation"
+          },
+          "originChannel": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
           }
         },
         "required": [
           "firstName",
           "lastName",
+          "bornDate",
           "motherName",
           "email",
+          "phone",
           "password",
-          "passwordConfirmation"
+          "passwordConfirmation",
+          "originChannel"
         ]
       },
+
       "User": {
         "type": "object",
         "properties": {
@@ -1200,6 +1604,11 @@
           },
           "security": {
             "$ref": "#/components/schemas/Security"
+          },
+          "allowedChannels": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Channels that user can access"
           },
           "createdAt": {
             "type": "string",
@@ -1270,6 +1679,13 @@
           },
           "status": {
             "type": "string",
+            "enum": [
+              "PENDING_CONFIRMATION",
+              "ACTIVE",
+              "BLOCKED",
+              "CANCELLED",
+              "BANNED"
+            ],
             "description": "User status"
           }
         }
@@ -1284,6 +1700,11 @@
           "password": {
             "type": "string",
             "description": "Password of the user"
+          },
+          "origin": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
           }
         }
       },
@@ -1302,6 +1723,11 @@
           "email": {
             "type": "string",
             "description": "Email address of the user"
+          },
+          "originChannel": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
           }
         }
       },

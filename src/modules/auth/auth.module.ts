@@ -11,6 +11,9 @@ import { ConfirmAccountEmailService } from './services/confirm-email.service';
 import { RecoverPasswordService } from './services/recover-password.service';
 import { ResendAccountTokenEmailService } from './services/resend-account-token.service';
 import { UserRepository } from '../user/repository/user.repository';
+import { RedisCacheService } from '../../common/redis/redis-cache.service';
+import { EmailService } from '../../common/services/email.service';
+import { SecurityService } from '../../common/services/security.service';
 
 @Module({
   imports: [
@@ -24,8 +27,11 @@ import { UserRepository } from '../user/repository/user.repository';
     PrismaService,
     LocalStrategy,
     JwtStrategy,
+    SecurityService,
     AuthRepository,
     UserRepository,
+    RedisCacheService,
+    EmailService,
     SignInService,
     ConfirmAccountEmailService,
     RecoverPasswordService,

@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Channel {
+  WOPHI
+  LUMIN
+  MIAU
+}
+
 enum UserStatus {
   PENDING_CONFIRMATION
   ACTIVE
@@ -34,7 +40,7 @@ model UserContactInfo {
   id       String  @id @default(uuid()) @db.Uuid
   username String? @db.VarChar(45)
   email    String  @unique @db.VarChar(250)
-  phone    String? @unique @db.VarChar(15)
+  phone    String  @unique @db.VarChar(15)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
@@ -44,13 +50,15 @@ model UserContactInfo {
 }
 
 model UserSecurityInfo {
-  id                 String     @id @default(uuid()) @db.Uuid
-  password           String
-  salt               String
-  confirmation_token String?    @unique @db.VarChar(64)
-  recover_token      String?    @db.VarChar(64)
-  ip_address         String     @db.Inet()
-  status             UserStatus
+  id                   String     @id @default(uuid()) @db.Uuid
+  password             String
+  salt                 String
+  confirmation_token   String?    @unique @db.VarChar(64)
+  recover_token        String?    @db.VarChar(64)
+  token_expires_at     DateTime?
+  ip_address_origin    String     @db.Inet()
+  on_update_ip_address String?    @db.Inet()
+  status               UserStatus
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
@@ -60,10 +68,12 @@ model UserSecurityInfo {
 }
 
 model User {
-  id                    String @id @unique @default(uuid()) @db.Uuid
-  user_personal_info_id String @db.Uuid
-  user_contact_info_id  String @db.Uuid
-  user_security_info_id String @db.Uuid
+  id                    String    @id @unique @default(uuid()) @db.Uuid
+  user_personal_info_id String    @db.Uuid
+  user_contact_info_id  String    @db.Uuid
+  user_security_info_id String    @db.Uuid
+  origin_channel        Channel
+  allowed_channels      Channel[]
 
   created_at DateTime         @default(now())
   updated_at DateTime         @updatedAt()

@@ -3,23 +3,23 @@ import { UserController } from '../user.controller';
 import { CreateUserService } from '../services/create-user.service';
 import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
-import { DeleteUserService } from '../services/delete-user.service';
-import {
-  mockFakeRequest,
-  mockCreateUserBody,
-  mockNewUser,
-  mockUpdateUser,
-  mockUpdateUserResponse,
-  mockDeleteUserResponse,
-} from './mocks/controller.mock';
+import { CancelUserService } from '../services/cancel-user.service';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
+import {
+  MockCreateUserDto,
+  MockFakeRequest,
+  MockIUser,
+  MockUpdateUserDto,
+  MockUserData,
+  MockUserFromJwt,
+} from './mocks/user.mock';
 
 describe('UserController', () => {
   let controller: UserController;
   let createUserService: CreateUserService;
   let getUserByIdService: GetUserByIdService;
   let updateUserService: UpdateUserService;
-  let deleteUserService: DeleteUserService;
+  let cancelUserService: CancelUserService;
   let getUserByFilterService: GetUserByFilterService;
 
   beforeEach(async () => {
@@ -29,31 +29,31 @@ describe('UserController', () => {
         {
           provide: CreateUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockNewUser),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
           provide: GetUserByIdService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockNewUser),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
           provide: UpdateUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockUpdateUserResponse),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
-          provide: DeleteUserService,
+          provide: CancelUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockDeleteUserResponse),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
         {
           provide: GetUserByFilterService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(mockNewUser),
+            execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
       ],
@@ -63,7 +63,7 @@ describe('UserController', () => {
     createUserService = module.get<CreateUserService>(CreateUserService);
     getUserByIdService = module.get<GetUserByIdService>(GetUserByIdService);
     updateUserService = module.get<UpdateUserService>(UpdateUserService);
-    deleteUserService = module.get<DeleteUserService>(DeleteUserService);
+    cancelUserService = module.get<CancelUserService>(CancelUserService);
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
@@ -76,12 +76,12 @@ describe('UserController', () => {
   describe('create user', () => {
     it('should create a new user successfully', async () => {
       const result = await controller.create(
-        mockFakeRequest,
-        mockCreateUserBody,
+        MockFakeRequest,
+        MockCreateUserDto,
       );
 
       expect(createUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -90,17 +90,17 @@ describe('UserController', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(
-        controller.create(mockFakeRequest, mockCreateUserBody),
+        controller.create(MockFakeRequest, MockCreateUserDto),
       ).rejects.toThrowError();
     });
   });
 
   describe('get user by id', () => {
     it('should get an user by id successfully', async () => {
-      const result = await controller.getById(mockNewUser.id);
+      const result = await controller.getById(MockUserFromJwt);
 
       expect(getUserByIdService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -108,19 +108,20 @@ describe('UserController', () => {
         .spyOn(getUserByIdService, 'execute')
         .mockRejectedValueOnce(new Error());
 
-      expect(controller.getById(mockNewUser.id)).rejects.toThrowError();
+      expect(controller.getById(MockUserFromJwt)).rejects.toThrowError();
     });
   });
 
   describe('update user', () => {
     it('should update an user successfully', async () => {
       const result = await controller.updateUser(
-        mockNewUser.id,
-        mockUpdateUser,
+        MockFakeRequest,
+        MockUserFromJwt,
+        MockUpdateUserDto,
       );
 
       expect(updateUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockUpdateUserResponse);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -129,45 +130,40 @@ describe('UserController', () => {
         .mockRejectedValueOnce(new Error());
 
       expect(
-        controller.updateUser(mockNewUser.id, mockUpdateUser),
+        controller.updateUser(
+          MockFakeRequest,
+          MockUserFromJwt,
+          MockUpdateUserDto,
+        ),
       ).rejects.toThrowError();
     });
   });
 
   describe('delete user', () => {
     it('should delete an user successfully', async () => {
-      const result = await controller.deleteUser(mockNewUser.id);
+      const result = await controller.deleteUser(MockUserFromJwt);
 
-      expect(deleteUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockDeleteUserResponse);
+      expect(cancelUserService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
       jest
-        .spyOn(deleteUserService, 'execute')
+        .spyOn(cancelUserService, 'execute')
         .mockRejectedValueOnce(new Error());
 
-      expect(controller.deleteUser(mockNewUser.id)).rejects.toThrowError();
+      expect(controller.deleteUser(MockUserFromJwt)).rejects.toThrowError();
     });
   });
 
   describe('get user by filter', () => {
     it('should get an user by email filter', async () => {
       const result = await controller.getByFilter({
-        email: mockNewUser.contact.email,
+        email: MockUserData.contact.email,
       });
 
       expect(getUserByFilterService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
-    });
-
-    it('should get an user by phone filter', async () => {
-      const result = await controller.getByFilter({
-        phone: mockNewUser.contact.phone,
-      });
-
-      expect(getUserByFilterService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockNewUser);
+      expect(result).toEqual(MockIUser);
     });
 
     it('should throw an error', () => {
@@ -177,7 +173,7 @@ describe('UserController', () => {
 
       expect(
         controller.getByFilter({
-          email: mockNewUser.contact.email,
+          email: MockUserData.contact.email,
         }),
       ).rejects.toThrowError();
     });

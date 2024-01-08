@@ -1,7 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../structure/repository.structure';
-import { IUserFilter } from '../structure/service.structure';
+import {
+  IUserRepository,
+  PrismaUser,
+} from '../interfaces/repository.interface';
+import { IUser, IUserFilter } from '../interfaces/user.interface';
+import { User } from '@prisma/client';
+import { mapUserToReturn } from '../../../modules/utils/helpers/helpers-user-module';
 
 @Injectable()
 export class GetUserByFilterService {
@@ -10,7 +15,15 @@ export class GetUserByFilterService {
     private userRepository: IUserRepository<User>,
   ) {}
 
-  async execute(filter: IUserFilter): Promise<User | null> {
-    return await this.userRepository.userByFilter(filter);
+  private formatUserToReturn(user: PrismaUser): IUser {
+    return mapUserToReturn(user);
+  }
+
+  async execute(filter: IUserFilter): Promise<IUser | null> {
+    const user = await this.userRepository.userByFilter(filter);
+
+    if (user) {
+      return this.formatUserToReturn(user);
+    }
   }
 }

@@ -1,10 +1,10 @@
 import { User } from '.prisma/client';
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
-import { IAuthRepository } from '../structure/auth-repository.structure';
-import { MailerService } from '@nestjs-modules/mailer';
+import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { UserRepository } from '../../../modules/user/repository/user.repository';
 import { AppError } from '../../../common/errors/Error';
+import { EmailService } from '../../../common/services/email.service';
 
 @Injectable()
 export class ResendAccountTokenEmailService {
@@ -15,7 +15,7 @@ export class ResendAccountTokenEmailService {
     @Inject(UserRepository)
     private userRepository: UserRepository,
 
-    private mailerService: MailerService,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(id: string, email: string): Promise<object> {
@@ -31,20 +31,14 @@ export class ResendAccountTokenEmailService {
       const existingUser = await this.userRepository.userByFilter({ email });
 
       if (!existingUser || existingUser.id === id) {
-        const { confirmationToken } =
+        const { confirmationToken, originChannel } =
           await this.authRepository.resendAccountToken(id, email);
 
-        const confirmAccountEmail = {
-          to: email,
-          from: 'noreply@application.com',
-          subject: 'ALMA - Email de confirmação',
-          template: 'email-confirmation',
-          context: {
-            token: confirmationToken,
-          },
-        };
-
-        await this.mailerService.sendMail(confirmAccountEmail);
+        await this.emailService.sendConfirmationEmail(
+          email,
+          confirmationToken,
+          originChannel,
+        );
 
         return {
           message: `account confirmation token resent to ${email}`,
@@ -54,7 +48,7 @@ export class ResendAccountTokenEmailService {
       throw new AppError(
         'auth-services.resendAccountToken',
         400,
-        'The new email provided is already in use',
+        'new email provided is already in use',
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -64,7 +58,7 @@ export class ResendAccountTokenEmailService {
       throw new AppError(
         'auth-services.resendAccountToken',
         500,
-        'Failed to resend account confirmation token',
+        'failed to resend account confirmation token',
       );
     }
   }

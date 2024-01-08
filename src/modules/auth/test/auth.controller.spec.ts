@@ -3,18 +3,18 @@ import { AuthController } from '../auth.controller';
 import { SignInService } from '../services/signin.service';
 import { ConfirmAccountEmailService } from '../services/confirm-email.service';
 import { RecoverPasswordService } from '../services/recover-password.service';
-import {
-  accessTokenMock,
-  accountConfirmResponse,
-  authRequestMock,
-  confirmationTokenMock,
-  recoverPasswordEmailResponse,
-  resetPasswordMock,
-  resetPasswordResponse,
-  userEmailMock,
-  userPayloadMock,
-} from './mocks/controller.mock';
 import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
+import {
+  MockAccessToken,
+  MockAuthRequest,
+  MockConfirmationToken,
+  MockFakeRequest,
+  MockResetPassword,
+  MockUserCredentials,
+  MockUserData,
+  MockUserPayload,
+} from './mocks/auth.mock';
+import { Channel } from '@prisma/client';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -30,24 +30,26 @@ describe('AuthController', () => {
         {
           provide: SignInService,
           useValue: {
-            execute: jest.fn().mockResolvedValueOnce(accessTokenMock),
+            execute: jest.fn().mockResolvedValueOnce(MockAccessToken),
           },
         },
         {
           provide: ConfirmAccountEmailService,
           useValue: {
-            execute: jest.fn().mockResolvedValueOnce(accountConfirmResponse),
+            execute: jest.fn().mockResolvedValueOnce({
+              message: 'account email successfully confirmed',
+            }),
           },
         },
         {
           provide: RecoverPasswordService,
           useValue: {
-            sendRecoverPasswordEmail: jest
-              .fn()
-              .mockResolvedValueOnce(recoverPasswordEmailResponse),
+            sendRecoverPasswordEmail: jest.fn().mockResolvedValueOnce({
+              message: `recover password email sent to ${MockUserCredentials.email}`,
+            }),
             resetPassword: jest
               .fn()
-              .mockResolvedValueOnce(resetPasswordResponse),
+              .mockResolvedValueOnce({ message: 'password reseted' }),
           },
         },
         {
@@ -78,60 +80,73 @@ describe('AuthController', () => {
 
   describe('user signin', () => {
     it('should return an user access token', async () => {
-      const result = await controller.signIn(authRequestMock);
+      const result = await controller.signIn(MockAuthRequest);
 
       expect(signInService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(accessTokenMock);
+      expect(result).toEqual(MockAccessToken);
     });
   });
 
   describe('confirm account email', () => {
     it('should confirm user account email', async () => {
       const result = await controller.confirmAccountEmail(
-        confirmationTokenMock,
+        MockFakeRequest,
+        MockConfirmationToken,
       );
 
+      const response = {
+        message: 'account email successfully confirmed',
+      };
+
       expect(confirmAccountEmailService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(accountConfirmResponse);
+      expect(result).toEqual(response);
     });
   });
 
   describe('send recover password email', () => {
     it('should send an email to recover password', async () => {
-      const result = await controller.sendRecoverPasswordEmail(userEmailMock);
+      const result = await controller.sendRecoverPasswordEmail({
+        email: MockUserCredentials.email,
+        originChannel: Channel.WOPHI,
+      });
+
+      const response = {
+        message: `recover password email sent to ${MockUserCredentials.email}`,
+      };
 
       expect(
         recoverPasswordService.sendRecoverPasswordEmail,
       ).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(recoverPasswordEmailResponse);
+      expect(result).toEqual(response);
     });
   });
 
   describe('reset account password', () => {
     it('should reset user account password', async () => {
       const result = await controller.resetPassword(
-        confirmationTokenMock,
-        resetPasswordMock,
+        MockFakeRequest,
+        MockConfirmationToken,
+        MockResetPassword,
       );
 
       expect(recoverPasswordService.resetPassword).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(resetPasswordResponse);
+      expect(result).toEqual({ message: 'password reseted' });
     });
   });
 
   describe('getMe', () => {
     it('should return the current user', () => {
-      const result = controller.getMe(userPayloadMock);
+      const result = controller.getMe(MockUserPayload);
 
-      expect(result).toBe(userPayloadMock);
+      expect(result).toBe(MockUserPayload);
     });
   });
 
   describe('resend confirm account token email', () => {
     it('should send an email with confirmation token', async () => {
       const result = await controller.resendAccountTokenEmail(
-        userPayloadMock,
-        userPayloadMock.email,
+        MockUserPayload,
+        MockUserData.contact.email,
       );
 
       expect(resendAccountTokenEmailService.execute).toHaveBeenCalledTimes(1);

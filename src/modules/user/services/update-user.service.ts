@@ -1,23 +1,37 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
-import { IUserRepository, User } from '../structure/repository.structure';
-import { IUpdateUser } from '../structure/service.structure';
-import { MailerService } from '@nestjs-modules/mailer';
+import {
+  IUserRepository,
+  PrismaUser,
+} from '../interfaces/repository.interface';
+import { IUser, IUpdateSecurityData } from '../interfaces/user.interface';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { EmailService } from '../../../common/services/email.service';
+import { Channel, User } from '@prisma/client';
+import { SecurityService } from '../../../common/services/security.service';
+import {
+  ipv4Regex,
+  ipv6Regex,
+  mapUserToReturn,
+} from '../../../modules/utils/helpers/helpers-user-module';
+import { UserStatus } from '../interfaces/user-status.enum';
 
 @Injectable()
 export class UpdateUserService {
   constructor(
     @Inject(UserRepository)
     private userRepository: IUserRepository<User>,
-    private mailerService: MailerService,
+    private readonly securityService: SecurityService,
+    private readonly emailService: EmailService,
   ) {}
 
-  async execute(data: IUpdateUser, userId: string): Promise<User> {
-    if (
-      data.newPassword &&
-      (!data.oldPassword || data.newPassword != data.passwordConfirmation)
-    ) {
+  private validateIpAddress(ip: string): boolean {
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  private validatePassword(data: UpdateUserDto): void {
+    if (!data.oldPassword || data.newPassword !== data.passwordConfirmation) {
       throw new AppError(
         'user-service.updateUser',
         422,
@@ -26,27 +40,75 @@ export class UpdateUserService {
           : 'new passwords do not match',
       );
     }
+  }
 
-    const user = await this.userRepository.updateUser(data, userId);
+  private formatUserToReturn(user: PrismaUser): IUser {
+    return mapUserToReturn(user);
+  }
 
-    if (data.email) {
-      const email = {
-        to: user.contact.email,
-        from: 'noreply@application.com',
-        subject: 'ALMA - Email de confirmação',
-        template: 'email-confirmation',
-        context: {
-          token: user.security.confirmationToken,
-        },
-      };
-
-      await this.mailerService.sendMail(email);
-      delete user.security.confirmationToken;
-
-      return user;
+  async execute(
+    data: UpdateUserDto,
+    userId: string,
+    ipAddress: string,
+  ): Promise<IUser> {
+    if (!this.validateIpAddress(ipAddress)) {
+      throw new AppError('user-service.updateUser', 403, 'invalid ip address');
     }
 
-    delete user.security.confirmationToken;
-    return user;
+    let securityData: IUpdateSecurityData = {
+      onUpdateIpAddress: ipAddress,
+    };
+
+    try {
+      if (data.newPassword) {
+        this.validatePassword(data);
+
+        const { hashedPassword, salt } =
+          await this.securityService.hashPassword(data.newPassword);
+
+        securityData = {
+          ...securityData,
+          hashedPassword,
+          salt,
+        };
+      }
+
+      if (data.email) {
+        const { token, expiresAt } = this.securityService.generateRandomToken();
+
+        securityData = {
+          ...securityData,
+          confirmationToken: token,
+          tokenExpiresAt: expiresAt,
+          status: UserStatus.PENDING_CONFIRMATION,
+        };
+      }
+
+      const user = await this.userRepository.updateUser(
+        data,
+        userId,
+        securityData,
+      );
+
+      if (securityData.confirmationToken) {
+        await this.emailService.sendConfirmationEmail(
+          user.contact.email,
+          securityData.confirmationToken,
+          Channel.WOPHI,
+        );
+      }
+
+      return this.formatUserToReturn(user);
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new AppError(
+        'user-service.updateUser',
+        500,
+        'failed to update user data',
+      );
+    }
   }
 }

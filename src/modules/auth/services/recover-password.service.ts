@@ -1,45 +1,61 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../repository/auth.repository';
-import { IAuthRepository } from '../structure/auth-repository.structure';
+import { IAuthRepository } from '../interfaces/auth-repository.interface';
 import { User } from '@prisma/client';
-import { MailerService } from '@nestjs-modules/mailer';
-import { ResetPassword } from '../structure/service.structure';
+import { IResetPassword } from '../interfaces/service.interface';
 import { AppError } from '../../../common/errors/Error';
+import { EmailService } from '../../../common/services/email.service';
+import { SecurityService } from '../../../common/services/security.service';
+import {
+  ipv4Regex,
+  ipv6Regex,
+} from '../../../modules/utils/helpers/helpers-user-module';
+import { RecoverPasswordDto } from '../dto/recover-password.dto';
 
 @Injectable()
 export class RecoverPasswordService {
   constructor(
     @Inject(AuthRepository)
     private authRepository: IAuthRepository<User>,
-    private mailerService: MailerService,
+    private readonly emailService: EmailService,
+    private readonly securityService: SecurityService,
   ) {}
 
-  async sendRecoverPasswordEmail(email: string): Promise<object> {
-    const recoverToken = await this.authRepository.sendRecoverPasswordEmail(
+  private validateIpAddress(ip: string): boolean {
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  async sendRecoverPasswordEmail(body: RecoverPasswordDto): Promise<object> {
+    const { email, originChannel } = body;
+
+    const recoverToken =
+      await this.authRepository.sendRecoverPasswordEmail(email);
+
+    await this.emailService.sendRecoverPasswordEmail(
       email,
+      recoverToken,
+      originChannel,
     );
 
-    const mail = {
-      to: email,
-      from: 'noreply@application.com',
-      subject: 'ALMA - Recuperação de senha',
-      template: 'recover-password',
-      context: {
-        token: recoverToken,
-      },
-    };
-    await this.mailerService.sendMail(mail);
-
     return {
-      message: 'recover password email sent',
+      message: `recover password email sent to ${email}`,
     };
   }
 
   async resetPassword(
     recoverToken: string,
-    resetPasswordData: ResetPassword,
+    resetPasswordData: IResetPassword,
+    ipAddress: string,
   ): Promise<object> {
     const { password, passwordConfirmation } = resetPasswordData;
+
+    if (!this.validateIpAddress(ipAddress)) {
+      throw new AppError(
+        'auth-service.resetPassword',
+        403,
+        'invalid ip address',
+      );
+    }
 
     if (password !== passwordConfirmation) {
       throw new AppError(
@@ -49,6 +65,25 @@ export class RecoverPasswordService {
       );
     }
 
-    return await this.authRepository.resetPassword(recoverToken, password);
+    try {
+      const tokenExpiresAt =
+        await this.authRepository.findUserByToken(recoverToken);
+
+      if (!this.securityService.isTokenValid(tokenExpiresAt)) {
+        throw new AppError(
+          'auth-service.resetPassword',
+          400,
+          'invalid or expired token',
+        );
+      }
+
+      return await this.authRepository.resetPassword(
+        recoverToken,
+        password,
+        ipAddress,
+      );
+    } catch (error) {
+      throw error;
+    }
   }
 }
