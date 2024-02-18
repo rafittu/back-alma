@@ -49,6 +49,18 @@ $ npm install
 
 Crie um arquivo `.env` na raiz do projeto e preencha as informações de acordo com o arquivo `.env.example` disponível.
 
+Execute o banco de dados PostgreSQL usando Docker:
+
+```bash
+$ docker-compose up -d
+```
+
+Para garantir que o banco de dados esteja atualizado com as ultimas alterações, rode o comando:
+
+```bash
+$ npx prisma migrate dev
+```
+
 Iniciando o servidor:
 
 ```bash
