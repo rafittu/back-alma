@@ -14,6 +14,7 @@ import { UserRepository } from '../user/repository/user.repository';
 import { RedisCacheService } from '../../common/redis/redis-cache.service';
 import { EmailService } from '../../common/services/email.service';
 import { SecurityService } from '../../common/services/security.service';
+import { RefreshJwtStrategy } from './infra/strategies/refresh-jwt.strategy';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SecurityService } from '../../common/services/security.service';
     PrismaService,
     LocalStrategy,
     JwtStrategy,
+    RefreshJwtStrategy,
     SecurityService,
     AuthRepository,
     UserRepository,
