@@ -28,6 +28,7 @@ import { SQSWorkerService } from './common/services/sqs-worker.service';
         REDIS_CONFIG_PORT: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.string().required(),
+        REFRESH_JWT_SECRET: Joi.string().required(),
         REFRESH_JWT_EXPIRATION_TIME: Joi.string().required(),
         MAILER_EMAIL: Joi.string().required(),
         MAILER_PASSWORD: Joi.string().required(),
