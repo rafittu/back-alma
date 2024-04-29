@@ -32,7 +32,7 @@ export class SignInService {
 
       const accessToken = this.jwtService.sign(payload);
       const refreshToken = this.jwtService.sign(payload, {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME,
+        expiresIn: process.env.REFRESH_JWT_EXPIRATION_TIME,
       });
 
       return {
