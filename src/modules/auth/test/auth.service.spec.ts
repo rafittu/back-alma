@@ -355,4 +355,43 @@ describe('AuthService', () => {
       }
     });
   });
+
+  describe('refresh token', () => {
+    it('should refresh accessToken and return it', async () => {
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockJWT);
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockRefreshJWT);
+
+      const originChannel = Channel.WOPHI;
+
+      const result = await refreshJwtService.execute(
+        MockUserPayload,
+        originChannel,
+      );
+
+      expect(authRepository.validateChannel).toHaveBeenCalledTimes(1);
+      expect(authRepository.validateChannel).toHaveBeenCalledWith(
+        MockUserPayload.id,
+        originChannel,
+      );
+      expect(jwtService.sign).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        accessToken: MockJWT,
+        refreshToken: MockRefreshJWT,
+      });
+    });
+
+    it('should throw an error', async () => {
+      jest
+        .spyOn(authRepository, 'validateChannel')
+        .mockRejectedValueOnce(new Error());
+
+      const originChannel = Channel.WOPHI;
+
+      try {
+        await refreshJwtService.execute(MockUserPayload, originChannel);
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+      }
+    });
+  });
 });
