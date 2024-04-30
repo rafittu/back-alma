@@ -4,6 +4,7 @@ import { SignInService } from '../services/signin.service';
 import { ConfirmAccountEmailService } from '../services/confirm-email.service';
 import { RecoverPasswordService } from '../services/recover-password.service';
 import { ResendAccountTokenEmailService } from '../services/resend-account-token.service';
+import { RefreshJwtService } from '../services/refresh-jwt.service';
 import {
   MockAccessToken,
   MockAuthRequest,
@@ -22,6 +23,7 @@ describe('AuthController', () => {
   let confirmAccountEmailService: ConfirmAccountEmailService;
   let recoverPasswordService: RecoverPasswordService;
   let resendAccountTokenEmailService: ResendAccountTokenEmailService;
+  let refreshJwtService: RefreshJwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -58,6 +60,12 @@ describe('AuthController', () => {
             execute: jest.fn().mockResolvedValueOnce('email sent'),
           },
         },
+        {
+          provide: RefreshJwtService,
+          useValue: {
+            execute: jest.fn().mockResolvedValueOnce(MockAccessToken),
+          },
+        },
       ],
     }).compile();
 
@@ -72,6 +80,7 @@ describe('AuthController', () => {
     resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
       ResendAccountTokenEmailService,
     );
+    refreshJwtService = module.get<RefreshJwtService>(RefreshJwtService);
   });
 
   it('should be defined', () => {
@@ -79,7 +88,7 @@ describe('AuthController', () => {
   });
 
   describe('user signin', () => {
-    it('should return an user access token', async () => {
+    it('should return an user accessToken and refreshToken', async () => {
       const result = await controller.signIn(MockAuthRequest);
 
       expect(signInService.execute).toHaveBeenCalledTimes(1);
