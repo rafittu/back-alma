@@ -13,6 +13,7 @@ import {
   MockExpirationTokenTime,
   MockIpAddress,
   MockJWT,
+  MockRefreshJWT,
   MockResetPassword,
   MockUserCredentials,
   MockUserData,
@@ -22,6 +23,7 @@ import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { EmailService } from '../../../common/services/email.service';
 import { SecurityService } from '../../../common/services/security.service';
 import { Channel } from '@prisma/client';
+import { RefreshJwtService } from '../services/refresh-jwt.service';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -29,6 +31,7 @@ describe('AuthService', () => {
   let confirmAccountEmailService: ConfirmAccountEmailService;
   let recoverPasswordService: RecoverPasswordService;
   let resendAccountTokenEmailService: ResendAccountTokenEmailService;
+  let refreshJwtService: RefreshJwtService;
 
   let authRepository: AuthRepository;
   let emailService: EmailService;
@@ -46,6 +49,7 @@ describe('AuthService', () => {
         RedisCacheService,
         EmailService,
         SecurityService,
+        RefreshJwtService,
         {
           provide: AuthRepository,
           useValue: {
@@ -94,6 +98,7 @@ describe('AuthService', () => {
     resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
       ResendAccountTokenEmailService,
     );
+    refreshJwtService = module.get<RefreshJwtService>(RefreshJwtService);
     emailService = module.get<EmailService>(EmailService);
     redisService = module.get<RedisCacheService>(RedisCacheService);
     securityService = module.get<SecurityService>(SecurityService);
@@ -105,6 +110,7 @@ describe('AuthService', () => {
     expect(confirmAccountEmailService).toBeDefined();
     expect(recoverPasswordService).toBeDefined();
     expect(resendAccountTokenEmailService).toBeDefined();
+    expect(refreshJwtService).toBeDefined();
     expect(emailService).toBeDefined();
     expect(redisService).toBeDefined();
   });
@@ -112,6 +118,7 @@ describe('AuthService', () => {
   describe('signin', () => {
     it('should return a user access token', async () => {
       jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockJWT);
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockRefreshJWT);
 
       const originChannel = Channel.WOPHI;
 
@@ -125,8 +132,11 @@ describe('AuthService', () => {
         MockUserPayload.id,
         originChannel,
       );
-      expect(jwtService.sign).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ accessToken: MockJWT });
+      expect(jwtService.sign).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        accessToken: MockJWT,
+        refreshToken: MockRefreshJWT,
+      });
     });
 
     it('should throw an error', async () => {
