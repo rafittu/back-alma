@@ -27,6 +27,8 @@ import { RecoverPasswordService } from './services/recover-password.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ResendAccountTokenEmailService } from './services/resend-account-token.service';
 import { RecoverPasswordDto } from './dto/recover-password.dto';
+import { RefreshJwtAuthGuard } from './infra/guards/refresh-jwt-auth.guard';
+import { RefreshJwtService } from './services/refresh-jwt.service';
 
 @Controller('auth')
 @UseFilters(new HttpExceptionFilter(new AppError()))
@@ -36,6 +38,7 @@ export class AuthController {
     private readonly confirmAccountEmailService: ConfirmAccountEmailService,
     private readonly recoverPasswordService: RecoverPasswordService,
     private readonly resendAccountTokenEmailService: ResendAccountTokenEmailService,
+    private readonly refreshJwtService: RefreshJwtService,
   ) {}
 
   @isPublic()
@@ -100,5 +103,16 @@ export class AuthController {
   @Get('/me')
   getMe(@CurrentUser() user: IUserPayload) {
     return user;
+  }
+
+  @isPublic()
+  @Post('/refresh')
+  @UseGuards(RefreshJwtAuthGuard)
+  async refreshJwt(@Request() req: IAuthRequest): Promise<IUserToken> {
+    const { user, body } = req;
+    const bodyObject = Object(body);
+    const { origin } = bodyObject;
+
+    return await this.refreshJwtService.execute(user, origin);
   }
 }

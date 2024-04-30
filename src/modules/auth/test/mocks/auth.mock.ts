@@ -83,6 +83,7 @@ export const MockUserData = {
 };
 
 export const MockJWT = faker.string.alphanumeric();
+export const MockRefreshJWT = faker.string.alphanumeric();
 
 export const MockUserPayload: IUserPayload = {
   id: MockUser.id,
@@ -93,6 +94,7 @@ export const MockUserPayload: IUserPayload = {
 
 export const MockAccessToken: IUserToken = {
   accessToken: MockJWT,
+  refreshToken: MockRefreshJWT,
 };
 
 export const MockAuthRequest: IAuthRequest = {
