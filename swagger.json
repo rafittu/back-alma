@@ -1253,9 +1253,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UpdatedUser"
                 },
                 "example": {
+                  "accessToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c",
+                  "refreshToken": "eyJhbTlaOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adRssw6e",
                   "id": "123456",
                   "personal": {
                     "id": "789012",
@@ -1666,6 +1668,45 @@
       "User": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "personal": {
+            "$ref": "#/components/schemas/Personal"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "security": {
+            "$ref": "#/components/schemas/Security"
+          },
+          "allowedChannels": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Channels that user can access"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Date and time of user creation"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Date and time of last user update"
+          }
+        }
+      },
+      "UpdatedUser": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access token used for authentication in subsequent API calls. This token should be included in the 'Authorization' header as a Bearer Token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Token used to refresh user accessToken"
+          },
           "id": {
             "type": "string",
             "description": "User ID"
