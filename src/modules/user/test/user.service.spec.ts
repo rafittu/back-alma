@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
 import { CreateUserService } from '../services/create-user.service';
 import { GetUserByIdService } from '../services/get-user-by-id.service';
 import { UpdateUserService } from '../services/update-user.service';
@@ -8,9 +9,12 @@ import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
   MockCreateUserDto,
+  MockIUpdateUser,
   MockIUser,
   MockIpAddress,
+  MockJWT,
   MockPrismaUser,
+  MockRefreshJWT,
   MockUpdateUserDto,
   MockUser,
   MockUserData,
@@ -37,6 +41,7 @@ describe('User Services', () => {
 
   let mailerService: MailerService;
   let redisCacheService: RedisCacheService;
+  let jwtService: JwtService;
 
   let userRepository: UserRepository;
 
@@ -51,6 +56,7 @@ describe('User Services', () => {
         EmailService,
         SecurityService,
         ScheduledTaskService,
+        JwtService,
         {
           provide: MailerService,
           useValue: {
@@ -95,6 +101,7 @@ describe('User Services', () => {
 
     mailerService = module.get<MailerService>(MailerService);
     redisCacheService = module.get<RedisCacheService>(RedisCacheService);
+    jwtService = module.get<JwtService>(JwtService);
 
     userRepository = module.get<UserRepository>(UserRepository);
   });
@@ -122,6 +129,7 @@ describe('User Services', () => {
     expect(scheduledTaskService).toBeDefined();
     expect(mailerService).toBeDefined();
     expect(redisCacheService).toBeDefined();
+    expect(jwtService).toBeDefined();
   });
 
   describe('create user', () => {
@@ -283,7 +291,10 @@ describe('User Services', () => {
     it('should update user data successfully', async () => {
       jest.spyOn(updateUserService as unknown as never, 'validateIpAddress');
       jest.spyOn(updateUserService as unknown as never, 'validatePassword');
+      jest.spyOn(updateUserService as unknown as never, 'generateUserToken');
       jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockJWT);
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockRefreshJWT);
 
       const result = await updateUserService.execute(
         MockUpdateUserDto,
@@ -293,9 +304,10 @@ describe('User Services', () => {
 
       expect(updateUserService['validateIpAddress']).toHaveBeenCalledTimes(1);
       expect(updateUserService['validatePassword']).toHaveBeenCalledTimes(1);
+      expect(updateUserService['generateUserToken']).toHaveBeenCalledTimes(1);
       expect(userRepository.updateUser).toHaveBeenCalledTimes(1);
       expect(emailService.sendConfirmationEmail).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(MockIUser);
+      expect(result).toEqual(MockIUpdateUser);
     });
 
     it(`should throw an error if 'ipAddress' is invalid`, async () => {

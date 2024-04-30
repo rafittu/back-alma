@@ -20,7 +20,7 @@ import { UpdateUserService } from './services/update-user.service';
 import { CancelUserService } from './services/cancel-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';
-import { IUser, IUserFilter } from './interfaces/user.interface';
+import { IUpdateUser, IUser, IUserFilter } from './interfaces/user.interface';
 import { CurrentUser } from '../auth/infra/decorators/current-user.decorator';
 import { IUserPayload } from '../auth/interfaces/service.interface';
 
@@ -61,7 +61,7 @@ export class UserController {
     @Req() req: Request,
     @CurrentUser() user: IUserPayload,
     @Body() body: UpdateUserDto,
-  ): Promise<IUser> {
+  ): Promise<IUpdateUser> {
     const ipAddress = req.socket.remoteAddress;
 
     return await this.updateUserService.execute(body, user.id, ipAddress);
