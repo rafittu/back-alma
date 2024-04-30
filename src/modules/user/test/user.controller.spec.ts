@@ -8,6 +8,7 @@ import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
   MockCreateUserDto,
   MockFakeRequest,
+  MockIUpdateUser,
   MockIUser,
   MockUpdateUserDto,
   MockUserData,
@@ -41,7 +42,7 @@ describe('UserController', () => {
         {
           provide: UpdateUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(MockIUser),
+            execute: jest.fn().mockResolvedValue(MockIUpdateUser),
           },
         },
         {
@@ -121,7 +122,7 @@ describe('UserController', () => {
       );
 
       expect(updateUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(MockIUser);
+      expect(result).toEqual(MockIUpdateUser);
     });
 
     it('should throw an error', () => {
