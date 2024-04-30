@@ -48,6 +48,11 @@ export interface IUser {
   updatedAt: Date;
 }
 
+export interface IUpdateUser extends IUser {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface IRequestChannelAccess {
   id: string;
   ipAddress: string;
