@@ -162,4 +162,13 @@ describe('AuthController', () => {
       expect(result).toEqual('email sent');
     });
   });
+
+  describe('refresh token', () => {
+    it('should refresh user accessToken and refreshToken', async () => {
+      const result = await controller.refreshJwt(MockAuthRequest);
+
+      expect(refreshJwtService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockAccessToken);
+    });
+  });
 });
