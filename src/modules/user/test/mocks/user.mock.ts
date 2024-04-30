@@ -10,6 +10,7 @@ import {
   ICreateUser,
   IRequestChannelAccess,
   IUpdateSecurityData,
+  IUpdateUser,
   IUser,
 } from '../../interfaces/user.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
@@ -26,6 +27,9 @@ export const MockFakeRequest: Request = {
 } as Request;
 
 export const MockIpAddress = MockFakeRequest.socket.remoteAddress;
+
+export const MockJWT = faker.string.alphanumeric();
+export const MockRefreshJWT = faker.string.alphanumeric();
 
 export const MockCreateUserDto: CreateUserDto = {
   firstName: faker.person.firstName(),
@@ -174,6 +178,12 @@ export const MockIUser: IUser = {
   allowedChannels: MockPrismaUser.allowed_channels,
   createdAt: MockPrismaUser.created_at,
   updatedAt: MockPrismaUser.updated_at,
+};
+
+export const MockIUpdateUser: IUpdateUser = {
+  accessToken: MockJWT,
+  refreshToken: MockRefreshJWT,
+  ...MockIUser,
 };
 
 export const MockUpdateUserDto: UpdateUserDto = {
