@@ -15,6 +15,7 @@ import { RedisCacheService } from '../../common/redis/redis-cache.service';
 import { EmailService } from '../../common/services/email.service';
 import { SecurityService } from '../../common/services/security.service';
 import { RefreshJwtStrategy } from './infra/strategies/refresh-jwt.strategy';
+import { RefreshJwtService } from './services/refresh-jwt.service';
 
 @Module({
   imports: [
@@ -23,7 +24,9 @@ import { RefreshJwtStrategy } from './infra/strategies/refresh-jwt.strategy';
       signOptions: { expiresIn: process.env.JWT_EXPIRATION_TIME },
     }),
   ],
+
   controllers: [AuthController],
+
   providers: [
     PrismaService,
     LocalStrategy,
@@ -38,6 +41,7 @@ import { RefreshJwtStrategy } from './infra/strategies/refresh-jwt.strategy';
     ConfirmAccountEmailService,
     RecoverPasswordService,
     ResendAccountTokenEmailService,
+    RefreshJwtService,
   ],
 })
 export class AuthModule implements NestModule {
