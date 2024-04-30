@@ -420,10 +420,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccessToken"
+                  "$ref": "#/components/schemas/UserToken"
                 },
                 "example": {
-                  "accessToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c"
+                  "accessToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c",
+                  "refreshToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKeta2yJV_add8tw5c"
                 }
               }
             }
@@ -885,6 +886,79 @@
                       "data": {}
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh jwt",
+        "description": "Refresh accessToken and refreshToken",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshToken"
+              },
+              "example": {
+                "refresh": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKeta2yJV_add8tw5c",
+                "origin": "wophi"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserToken"
+                },
+                "example": {
+                  "accessToken": "eyJhbGyhOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c",
+                  "refreshToken": "eyJhbTlaOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adRssw6e"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.refreshJwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Internal Server Error",
+                    "code": "internal.server.error",
+                    "status": true
+                  },
+                  "data": {}
                 }
               }
             }
@@ -1708,12 +1782,30 @@
           }
         }
       },
-      "AccessToken": {
+      "RefreshToken": {
+        "type": "object",
+        "properties": {
+          "refresh": {
+            "type": "string",
+            "description": "Refresh token to generate a new user accessToken"
+          },
+          "origin": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
+          }
+        }
+      },
+      "UserToken": {
         "type": "object",
         "properties": {
           "accessToken": {
             "type": "string",
             "description": "Access token used for authentication in subsequent API calls. This token should be included in the 'Authorization' header as a Bearer Token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Token used to refresh user accessToken"
           }
         }
       },
