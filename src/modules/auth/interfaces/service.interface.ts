@@ -31,7 +31,7 @@ export interface IResendAccToken {
 
 export interface IUserToken {
   accessToken: string;
-  refreshToken?: string;
+  refreshToken: string;
 }
 
 export interface IResetPassword {
