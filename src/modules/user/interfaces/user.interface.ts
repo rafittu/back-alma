@@ -74,3 +74,8 @@ export interface IUpdateSecurityData {
   status?: UserStatus;
   onUpdateIpAddress: string;
 }
+
+export interface IReactivateUserAccount {
+  email: string;
+  originChannel: Channel;
+}
