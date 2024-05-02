@@ -6,6 +6,7 @@ import {
   UserPersonalInfo,
   UserSecurityInfo,
   PrismaUser,
+  reactivateData,
 } from '../interfaces/repository.interface';
 import {
   ICreateUser,
@@ -423,5 +424,32 @@ export class UserRepository implements IUserRepository<User> {
         id: userId,
       },
     });
+  }
+
+  async reactivateAccount(data: reactivateData) {
+    const { id, ipAddress, confirmationToken, tokenExpiresAt } = data;
+
+    try {
+      await this.prisma.user.update({
+        data: {
+          security: {
+            update: {
+              confirmation_token: confirmationToken,
+              token_expires_at: tokenExpiresAt,
+              on_update_ip_address: ipAddress,
+            },
+          },
+        },
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new AppError(
+        'user-repository.reactivateAccount',
+        500,
+        'failed to attach confirmation token',
+      );
+    }
   }
 }
