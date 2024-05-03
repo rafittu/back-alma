@@ -40,6 +40,10 @@ export class ReactivateAccountService {
       }
 
       // update user status
+      const activeStatus = {
+        status: UserStatus.ACTIVE,
+      };
+      await this.userRepository.updateUser(activeStatus, userId, null);
 
       // delete security token
     } catch (error) {}
