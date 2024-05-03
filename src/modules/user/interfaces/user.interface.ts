@@ -78,4 +78,5 @@ export interface IUpdateSecurityData {
 export interface IReactivateUserAccount {
   email: string;
   originChannel: Channel;
+  confirmationToken?: string;
 }
