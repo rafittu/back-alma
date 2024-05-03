@@ -24,7 +24,19 @@ export class ReactivateAccountService {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
   }
 
-  private async confirmReactivateAccount(confirmationToken: string) {}
+  private async confirmReactivateAccount(confirmationToken: string) {
+    try {
+      // find user by token
+      const { userId, tokenExpiresAt } =
+        await this.authRepository.findUserByToken(confirmationToken);
+
+      // validate if token is valid
+
+      // update user status
+
+      // delete security token
+    } catch (error) {}
+  }
 
   async execute(
     data: IReactivateUserAccount,
