@@ -31,6 +31,13 @@ export class ReactivateAccountService {
         await this.authRepository.findUserByToken(confirmationToken);
 
       // validate if token is valid
+      if (!this.securityService.isTokenValid(tokenExpiresAt)) {
+        throw new AppError(
+          'user-service.reactivateAccount',
+          400,
+          'invalid or expired token',
+        );
+      }
 
       // update user status
 
