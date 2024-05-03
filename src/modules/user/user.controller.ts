@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -80,13 +81,18 @@ export class UserController {
   }
 
   @isPublic()
-  @Post('/reactivate-account')
+  @Post('/reactivate-account/:token?')
   async reactivateAccount(
     @Req() req: Request,
     @Body() body: IReactivateUserAccount,
+    @Param('token') confirmationToken?: string,
   ) {
     const ipAddress = req.socket.remoteAddress;
 
-    return await this.reactivateAccountService.execute(body, ipAddress);
+    return await this.reactivateAccountService.execute(
+      body,
+      ipAddress,
+      confirmationToken,
+    );
   }
 }
