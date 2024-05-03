@@ -24,13 +24,14 @@ export class ReactivateAccountService {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
   }
 
-  private async confirmReactivateAccount(confirmationToken: string) {
+  private async confirmReactivateAccount(
+    confirmationToken: string,
+    ipAddress: string,
+  ) {
     try {
-      // find user by token
       const { userId, tokenExpiresAt } =
         await this.authRepository.findUserByToken(confirmationToken);
 
-      // validate if token is valid
       if (!this.securityService.isTokenValid(tokenExpiresAt)) {
         throw new AppError(
           'user-service.reactivateAccount',
@@ -39,15 +40,18 @@ export class ReactivateAccountService {
         );
       }
 
-      // update user status
-      const activeStatus = {
-        status: UserStatus.ACTIVE,
-      };
-      await this.userRepository.updateUser(activeStatus, userId, null);
+      const activeStatus = { status: UserStatus.ACTIVE };
+      const securityData = { onUpdateIpAddress: ipAddress };
+      await this.userRepository.updateUser(activeStatus, userId, securityData);
 
-      // delete security token
       await this.authRepository.deleteSecurityToken(confirmationToken);
-    } catch (error) {}
+
+      return {
+        message: 'Account successfully reactivated.',
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async execute(
@@ -55,12 +59,12 @@ export class ReactivateAccountService {
     ipAddress: string,
     confirmationToken?: string,
   ) {
-    if (confirmationToken) {
-      return await this.confirmReactivateAccount(confirmationToken);
-    }
-
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
+    }
+
+    if (confirmationToken) {
+      return await this.confirmReactivateAccount(confirmationToken, ipAddress);
     }
 
     try {
