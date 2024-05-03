@@ -46,6 +46,7 @@ export class ReactivateAccountService {
       await this.userRepository.updateUser(activeStatus, userId, null);
 
       // delete security token
+      await this.authRepository.deleteSecurityToken(confirmationToken);
     } catch (error) {}
   }
 
