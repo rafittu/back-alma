@@ -3,7 +3,10 @@ import { PrismaService } from '../../../prisma.service';
 import { Channel, Prisma, User } from '@prisma/client';
 import { AppError } from '../../../common/errors/Error';
 import { CredentialsDto } from '../dto/credentials.dto';
-import { IAuthRepository } from '../interfaces/auth-repository.interface';
+import {
+  IAuthRepository,
+  IUserByToken,
+} from '../interfaces/auth-repository.interface';
 import { IResendAccToken, IUserPayload } from '../interfaces/service.interface';
 import { UserStatus } from '../../../modules/user/interfaces/user-status.enum';
 import { SecurityService } from '../../../common/services/security.service';
@@ -237,17 +240,25 @@ export class AuthRepository implements IAuthRepository<User> {
     }
   }
 
-  async findUserByToken(token: string): Promise<Date> {
+  async findUserByToken(token: string): Promise<IUserByToken> {
     try {
-      const { token_expires_at } = await this.prisma.userSecurityInfo.findFirst(
-        {
-          where: {
-            OR: [{ confirmation_token: token }, { recover_token: token }],
+      const data = await this.prisma.userSecurityInfo.findFirst({
+        where: {
+          OR: [{ confirmation_token: token }, { recover_token: token }],
+        },
+        select: {
+          token_expires_at: true,
+          User: {
+            select: {
+              id: true,
+            },
           },
         },
-      );
+      });
 
-      return token_expires_at;
+      const { User, token_expires_at } = data;
+
+      return { userId: User[0].id, tokenExpiresAt: token_expires_at };
     } catch (error) {
       throw new AppError(
         'auth-repository.findUserByToken',
