@@ -39,7 +39,7 @@ export class ConfirmAccountEmailService {
         confirmationToken,
       )) as Channel;
 
-      const tokenExpiresAt =
+      const { tokenExpiresAt } =
         await this.authRepository.findUserByToken(confirmationToken);
 
       if (!this.securityService.isTokenValid(tokenExpiresAt)) {
