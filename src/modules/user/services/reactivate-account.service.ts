@@ -8,12 +8,14 @@ import { IReactivateUserAccount } from '../interfaces/user.interface';
 import { SecurityService } from '../../../common/services/security.service';
 import { EmailService } from '../../../common/services/email.service';
 import { User } from '@prisma/client';
+import { IAuthRepository } from 'src/modules/auth/interfaces/auth-repository.interface';
 
 @Injectable()
 export class ReactivateAccountService {
   constructor(
     @Inject(UserRepository)
     private readonly userRepository: IUserRepository<User>,
+    private authRepository: IAuthRepository<User>,
     private readonly securityService: SecurityService,
     private readonly emailService: EmailService,
   ) {}
@@ -22,7 +24,17 @@ export class ReactivateAccountService {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
   }
 
-  async execute(data: IReactivateUserAccount, ipAddress: string) {
+  private async confirmReactivateAccount(confirmationToken: string) {}
+
+  async execute(
+    data: IReactivateUserAccount,
+    ipAddress: string,
+    confirmationToken?: string,
+  ) {
+    if (confirmationToken) {
+      return await this.confirmReactivateAccount(confirmationToken);
+    }
+
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
     }
@@ -32,17 +44,10 @@ export class ReactivateAccountService {
         email: data.email,
       });
 
-      if (!user) {
-        throw new AppError(
-          'user-service.reactivateAccount',
-          404,
-          'account email not found',
-        );
-      }
-
       if (
-        user.security.status !== UserStatus.CANCELLED ||
-        !user.allowed_channels.includes(data.originChannel)
+        !user ||
+        !user.allowed_channels.includes(data.originChannel) ||
+        user.security.status !== UserStatus.CANCELLED
       ) {
         throw new AppError(
           'user-service.reactivateAccount',
