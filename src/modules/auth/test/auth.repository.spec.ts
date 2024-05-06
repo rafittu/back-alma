@@ -351,4 +351,36 @@ describe('Auth Repository', () => {
       }
     });
   });
+
+  describe('delete security token', () => {
+    it('should delete security token and expiration time successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'deleteMany')
+        .mockResolvedValueOnce(null);
+
+      await authRepository.deleteSecurityToken(
+        MockUserSecurityInfo.confirmation_token,
+      );
+
+      expect(prismaService.userSecurityInfo.deleteMany).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+
+    it('should throw an error if token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'deleteMany')
+        .mockRejectedValueOnce(null);
+
+      try {
+        await authRepository.deleteSecurityToken(
+          MockUserSecurityInfo.confirmation_token,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not delete token');
+      }
+    });
+  });
 });

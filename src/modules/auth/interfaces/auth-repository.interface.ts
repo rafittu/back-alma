@@ -25,4 +25,5 @@ export interface IAuthRepository<User> {
   ): Promise<object>;
   resendAccountToken(id: string, email: string): Promise<IResendAccToken>;
   findUserByToken(token: string): Promise<IUserByToken>;
+  deleteSecurityToken(token: string): Promise<void>;
 }
