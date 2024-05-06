@@ -355,21 +355,21 @@ describe('Auth Repository', () => {
   describe('delete security token', () => {
     it('should delete security token and expiration time successfully', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'deleteMany')
+        .spyOn(prismaService.userSecurityInfo, 'updateMany')
         .mockResolvedValueOnce(null);
 
       await authRepository.deleteSecurityToken(
         MockUserSecurityInfo.confirmation_token,
       );
 
-      expect(prismaService.userSecurityInfo.deleteMany).toHaveBeenCalledTimes(
+      expect(prismaService.userSecurityInfo.updateMany).toHaveBeenCalledTimes(
         1,
       );
     });
 
     it('should throw an error if token is invalid', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'deleteMany')
+        .spyOn(prismaService.userSecurityInfo, 'updateMany')
         .mockRejectedValueOnce(null);
 
       try {
