@@ -66,7 +66,7 @@ export class RecoverPasswordService {
     }
 
     try {
-      const tokenExpiresAt =
+      const { tokenExpiresAt } =
         await this.authRepository.findUserByToken(recoverToken);
 
       if (!this.securityService.isTokenValid(tokenExpiresAt)) {
