@@ -7,7 +7,7 @@ import { UserStatus } from '../interfaces/user-status.enum';
 import { IReactivateUserAccount } from '../interfaces/user.interface';
 import { SecurityService } from '../../../common/services/security.service';
 import { EmailService } from '../../../common/services/email.service';
-import { User } from '@prisma/client';
+import { Channel, User } from '@prisma/client';
 import { AuthRepository } from 'src/modules/auth/repository/auth.repository';
 
 @Injectable()
@@ -44,7 +44,7 @@ export class ReactivateAccountService {
       const securityData = { onUpdateIpAddress: ipAddress };
       await this.userRepository.updateUser(activeStatus, userId, securityData);
 
-      // await this.authRepository.deleteSecurityToken(confirmationToken);
+      await this.authRepository.deleteSecurityToken(confirmationToken);
 
       return {
         message: 'Account successfully reactivated.',
@@ -72,9 +72,10 @@ export class ReactivateAccountService {
         email: data.email,
       });
 
+      const userOriginChannel = data.originChannel.toUpperCase() as Channel;
       if (
         !user ||
-        !user.allowed_channels.includes(data.originChannel) ||
+        !user.allowed_channels.includes(userOriginChannel) ||
         user.security.status !== UserStatus.CANCELLED
       ) {
         throw new AppError(
