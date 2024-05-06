@@ -270,10 +270,14 @@ export class AuthRepository implements IAuthRepository<User> {
 
   async deleteSecurityToken(token: string): Promise<void> {
     try {
-      await this.prisma.userSecurityInfo.deleteMany({
+      await this.prisma.userSecurityInfo.updateMany({
+        data: {
+          confirmation_token: null,
+          recover_token: null,
+          token_expires_at: null,
+        },
         where: {
           OR: [{ confirmation_token: token }, { recover_token: token }],
-          token_expires_at: null,
         },
       });
     } catch (error) {
