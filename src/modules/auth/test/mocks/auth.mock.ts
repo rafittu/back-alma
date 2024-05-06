@@ -15,6 +15,7 @@ import {
   IUserToken,
 } from '../../interfaces/service.interface';
 import { Request } from 'express';
+import { IUserByToken } from '../../interfaces/auth-repository.interface';
 
 export const MockFakeRequest: Request = {
   socket: {
@@ -110,6 +111,20 @@ export const MockAuthRequest: IAuthRequest = {
 
 export const MockConfirmationToken = faker.string.alphanumeric();
 export const MockExpirationTokenTime = faker.date.future();
+
+export const MockPrismaUserByToken = {
+  ...MockUserSecurityInfo,
+  User: [
+    {
+      id: MockUserPayload.id,
+    },
+  ],
+};
+
+export const MockUserByToken: IUserByToken = {
+  userId: MockPrismaUserByToken.User[0].id,
+  tokenExpiresAt: MockPrismaUserByToken.token_expires_at,
+};
 
 export const MockResetPassword: IResetPassword = {
   password: 'faker.internet.password()',

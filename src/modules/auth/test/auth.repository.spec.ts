@@ -7,7 +7,9 @@ import {
   MockConfirmationToken,
   MockExpirationTokenTime,
   MockIpAddress,
+  MockPrismaUserByToken,
   MockUser,
+  MockUserByToken,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
@@ -320,17 +322,17 @@ describe('Auth Repository', () => {
   });
 
   describe('find user by token', () => {
-    it('should return a token expiration time successfully', async () => {
+    it('should return user id and token expiration time successfully', async () => {
       jest
         .spyOn(prismaService.userSecurityInfo, 'findFirst')
-        .mockResolvedValueOnce(MockUserSecurityInfo);
+        .mockResolvedValueOnce(MockPrismaUserByToken);
 
       const result = await authRepository.findUserByToken(
         MockUserSecurityInfo.confirmation_token,
       );
 
       expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(MockUserSecurityInfo.token_expires_at);
+      expect(result).toEqual(MockUserByToken);
     });
 
     it('should throw an error if token is invalid', async () => {
