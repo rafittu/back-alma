@@ -267,4 +267,20 @@ export class AuthRepository implements IAuthRepository<User> {
       );
     }
   }
+
+  async deleteSecurityToken(token: string): Promise<void> {
+    try {
+      await this.prisma.userSecurityInfo.deleteMany({
+        where: {
+          OR: [{ confirmation_token: token }, { recover_token: token }],
+        },
+      });
+    } catch (error) {
+      throw new AppError(
+        'auth-repository.deleteSecurityToken',
+        500,
+        'could not delete token',
+      );
+    }
+  }
 }
