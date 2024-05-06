@@ -273,6 +273,7 @@ export class AuthRepository implements IAuthRepository<User> {
       await this.prisma.userSecurityInfo.deleteMany({
         where: {
           OR: [{ confirmation_token: token }, { recover_token: token }],
+          token_expires_at: null,
         },
       });
     } catch (error) {
