@@ -287,6 +287,7 @@ export class UserRepository implements IUserRepository<User> {
     }
 
     securityInfo = {
+      ...data,
       ...securityInfo,
       on_update_ip_address: securityData.onUpdateIpAddress,
     };
