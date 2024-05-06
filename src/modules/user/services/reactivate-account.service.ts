@@ -8,14 +8,14 @@ import { IReactivateUserAccount } from '../interfaces/user.interface';
 import { SecurityService } from '../../../common/services/security.service';
 import { EmailService } from '../../../common/services/email.service';
 import { User } from '@prisma/client';
-import { IAuthRepository } from 'src/modules/auth/interfaces/auth-repository.interface';
+import { AuthRepository } from 'src/modules/auth/repository/auth.repository';
 
 @Injectable()
 export class ReactivateAccountService {
   constructor(
     @Inject(UserRepository)
     private readonly userRepository: IUserRepository<User>,
-    private authRepository: IAuthRepository<User>,
+    private authRepository: AuthRepository,
     private readonly securityService: SecurityService,
     private readonly emailService: EmailService,
   ) {}
@@ -44,7 +44,7 @@ export class ReactivateAccountService {
       const securityData = { onUpdateIpAddress: ipAddress };
       await this.userRepository.updateUser(activeStatus, userId, securityData);
 
-      await this.authRepository.deleteSecurityToken(confirmationToken);
+      // await this.authRepository.deleteSecurityToken(confirmationToken);
 
       return {
         message: 'Account successfully reactivated.',
