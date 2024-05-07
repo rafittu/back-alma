@@ -11,7 +11,7 @@ import {
 import { SecurityService } from '../../../common/services/security.service';
 import { EmailService } from '../../../common/services/email.service';
 import { Channel, User } from '@prisma/client';
-import { AuthRepository } from 'src/modules/auth/repository/auth.repository';
+import { AuthRepository } from '../../../modules/auth/repository/auth.repository';
 
 @Injectable()
 export class ReactivateAccountService {
