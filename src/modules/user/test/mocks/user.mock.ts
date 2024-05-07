@@ -8,6 +8,8 @@ import {
 } from '@prisma/client';
 import {
   ICreateUser,
+  IDefaultMessage,
+  IReactivateUserAccount,
   IRequestChannelAccess,
   IUpdateSecurityData,
   IUpdateUser,
@@ -207,4 +209,13 @@ export const MockUserFromJwt: IUserPayload = {
   username: MockUserData.contact.username,
   email: MockUserData.contact.email,
   status: MockUserData.security.status,
+};
+
+export const MockDefaultMessage: IDefaultMessage = {
+  message: 'object default message',
+};
+
+export const MockReactivateUserAccount: IReactivateUserAccount = {
+  email: MockUserData.contact.email,
+  originChannel: MockUserData.origin_channel,
 };
