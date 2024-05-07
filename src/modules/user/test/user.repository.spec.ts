@@ -400,5 +400,25 @@ describe('User Repository', () => {
 
       expect(prismaService.user.update).toHaveBeenCalledTimes(1);
     });
+
+    it('should throw an error if reactivation fails', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockRejectedValueOnce(
+          new AppError(
+            'user-repository.reactivateAccount',
+            500,
+            'failed to attach confirmation token',
+          ),
+        );
+
+      try {
+        await userRepository.reactivateAccount(MockReactivateAccountData);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to attach confirmation token');
+      }
+    });
   });
 });
