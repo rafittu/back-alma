@@ -23,6 +23,7 @@ import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';
 import { ReactivateAccountService } from './services/reactivate-account.service';
 import {
+  IDefaultMessage,
   IReactivateUserAccount,
   IUpdateUser,
   IUser,
@@ -86,7 +87,7 @@ export class UserController {
     @Req() req: Request,
     @Body() body: IReactivateUserAccount,
     @Param('token') confirmationToken?: string,
-  ) {
+  ): Promise<IDefaultMessage> {
     const ipAddress = req.socket.remoteAddress;
 
     return await this.reactivateAccountService.execute(

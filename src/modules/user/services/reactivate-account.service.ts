@@ -4,7 +4,10 @@ import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
 import { IUserRepository } from '../interfaces/repository.interface';
 import { UserStatus } from '../interfaces/user-status.enum';
-import { IReactivateUserAccount } from '../interfaces/user.interface';
+import {
+  IDefaultMessage,
+  IReactivateUserAccount,
+} from '../interfaces/user.interface';
 import { SecurityService } from '../../../common/services/security.service';
 import { EmailService } from '../../../common/services/email.service';
 import { Channel, User } from '@prisma/client';
@@ -27,7 +30,7 @@ export class ReactivateAccountService {
   private async confirmReactivateAccount(
     confirmationToken: string,
     ipAddress: string,
-  ) {
+  ): Promise<IDefaultMessage> {
     try {
       const { userId, tokenExpiresAt } =
         await this.authRepository.findUserByToken(confirmationToken);
@@ -58,7 +61,7 @@ export class ReactivateAccountService {
     data: IReactivateUserAccount,
     ipAddress: string,
     confirmationToken?: string,
-  ) {
+  ): Promise<IDefaultMessage> {
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
     }

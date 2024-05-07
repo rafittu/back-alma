@@ -427,7 +427,7 @@ export class UserRepository implements IUserRepository<User> {
     });
   }
 
-  async reactivateAccount(data: reactivateData) {
+  async reactivateAccount(data: reactivateData): Promise<void> {
     const { id, ipAddress, confirmationToken, tokenExpiresAt } = data;
 
     try {
