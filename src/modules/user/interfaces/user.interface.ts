@@ -80,3 +80,7 @@ export interface IReactivateUserAccount {
   originChannel: Channel;
   confirmationToken?: string;
 }
+
+export interface IDefaultMessage {
+  message: string;
+}
