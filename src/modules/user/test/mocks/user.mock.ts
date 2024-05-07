@@ -18,7 +18,10 @@ import {
 import { UserStatus } from '../../interfaces/user-status.enum';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { Request } from 'express';
-import { PrismaUser } from '../../interfaces/repository.interface';
+import {
+  PrismaUser,
+  reactivateData,
+} from '../../interfaces/repository.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 import { IUserPayload } from 'src/modules/auth/interfaces/service.interface';
 
@@ -218,4 +221,11 @@ export const MockDefaultMessage: IDefaultMessage = {
 export const MockReactivateUserAccount: IReactivateUserAccount = {
   email: MockUserData.contact.email,
   originChannel: MockUserData.origin_channel,
+};
+
+export const MockReactivateAccountData: reactivateData = {
+  id: MockUserData.id,
+  ipAddress: MockIpAddress,
+  confirmationToken: faker.string.alphanumeric(),
+  tokenExpiresAt: faker.date.soon(),
 };

@@ -6,6 +6,7 @@ import { UserRepository } from '../repository/user.repository';
 import {
   MockICreateUser,
   MockPrismaUser,
+  MockReactivateAccountData,
   MockRequestChannelAccess,
   MockUpdateSecurityData,
   MockUpdateUserDto,
@@ -388,6 +389,16 @@ describe('User Repository', () => {
       await userRepository.deleteUser(MockUser.id);
 
       expect(prismaService.user.delete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('reactivate user account', () => {
+    it('should reactivate user account successfully', async () => {
+      jest.spyOn(prismaService.user, 'update').mockResolvedValueOnce(null);
+
+      await userRepository.reactivateAccount(MockReactivateAccountData);
+
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
     });
   });
 });
