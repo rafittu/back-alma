@@ -572,6 +572,22 @@ describe('User Services', () => {
       }
     });
 
+    it('should throw an error if confirmation token is invalid', async () => {
+      jest.spyOn(securityService, 'isTokenValid').mockReturnValue(false);
+
+      try {
+        await reactivateAccountService.execute(
+          null,
+          MockIpAddress,
+          MockGenerateRandomToken.token,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('invalid or expired token');
+      }
+    });
+
     it('should throw an error if account is not eligeble to be reactivated', async () => {
       jest.spyOn(userRepository, 'userByFilter').mockResolvedValueOnce(null);
 
