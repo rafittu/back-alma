@@ -35,7 +35,9 @@ export class ReactivateAccountService {
       const { userId, tokenExpiresAt } =
         await this.authRepository.findUserByToken(confirmationToken);
 
-      if (!this.securityService.isTokenValid(tokenExpiresAt)) {
+      const isTokenValid = this.securityService.isTokenValid(tokenExpiresAt);
+
+      if (!isTokenValid) {
         throw new AppError(
           'user-service.reactivateAccount',
           400,
@@ -45,8 +47,8 @@ export class ReactivateAccountService {
 
       const activeStatus = { status: UserStatus.ACTIVE };
       const securityData = { onUpdateIpAddress: ipAddress };
-      await this.userRepository.updateUser(activeStatus, userId, securityData);
 
+      await this.userRepository.updateUser(activeStatus, userId, securityData);
       await this.authRepository.deleteSecurityToken(confirmationToken);
 
       return {
@@ -78,8 +80,8 @@ export class ReactivateAccountService {
       const user = await this.userRepository.userByFilter({
         email: data.email,
       });
-
       const userOriginChannel = data.originChannel.toUpperCase() as Channel;
+
       if (
         !user ||
         !user.allowed_channels.includes(userOriginChannel) ||
