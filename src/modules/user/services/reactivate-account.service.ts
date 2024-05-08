@@ -35,7 +35,9 @@ export class ReactivateAccountService {
       const { userId, tokenExpiresAt } =
         await this.authRepository.findUserByToken(confirmationToken);
 
-      if (!this.securityService.isTokenValid(tokenExpiresAt)) {
+      const isTokenValid = this.securityService.isTokenValid(tokenExpiresAt);
+
+      if (!isTokenValid) {
         throw new AppError(
           'user-service.reactivateAccount',
           400,
@@ -45,8 +47,8 @@ export class ReactivateAccountService {
 
       const activeStatus = { status: UserStatus.ACTIVE };
       const securityData = { onUpdateIpAddress: ipAddress };
-      await this.userRepository.updateUser(activeStatus, userId, securityData);
 
+      await this.userRepository.updateUser(activeStatus, userId, securityData);
       await this.authRepository.deleteSecurityToken(confirmationToken);
 
       return {
@@ -63,7 +65,11 @@ export class ReactivateAccountService {
     confirmationToken?: string,
   ): Promise<IDefaultMessage> {
     if (!this.validateIpAddress(ipAddress)) {
-      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+      throw new AppError(
+        'user-service.reactivateAccount',
+        403,
+        'invalid ip address',
+      );
     }
 
     if (confirmationToken) {
@@ -74,8 +80,8 @@ export class ReactivateAccountService {
       const user = await this.userRepository.userByFilter({
         email: data.email,
       });
-
       const userOriginChannel = data.originChannel.toUpperCase() as Channel;
+
       if (
         !user ||
         !user.allowed_channels.includes(userOriginChannel) ||
@@ -114,7 +120,7 @@ export class ReactivateAccountService {
       throw new AppError(
         'user-service.reactivateAccount',
         500,
-        'failled to reactivate user account',
+        'failed to reactivate user account',
       );
     }
   }
