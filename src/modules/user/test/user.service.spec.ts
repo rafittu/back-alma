@@ -556,5 +556,20 @@ describe('User Services', () => {
       expect(authRepository.deleteSecurityToken).toHaveBeenCalledTimes(1);
       expect(result).toHaveProperty('message');
     });
+
+    it(`should throw an error if 'ipAddress' is invalid`, async () => {
+      const invalidIpAddress = 'invalid_ip_address';
+
+      try {
+        await reactivateAccountService.execute(
+          MockReactivateUserAccount,
+          invalidIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid ip address');
+      }
+    });
   });
 });
