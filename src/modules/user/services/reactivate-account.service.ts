@@ -63,7 +63,11 @@ export class ReactivateAccountService {
     confirmationToken?: string,
   ): Promise<IDefaultMessage> {
     if (!this.validateIpAddress(ipAddress)) {
-      throw new AppError('user-service.createUser', 403, 'invalid ip address');
+      throw new AppError(
+        'user-service.reactivateAccount',
+        403,
+        'invalid ip address',
+      );
     }
 
     if (confirmationToken) {
