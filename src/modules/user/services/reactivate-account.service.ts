@@ -118,7 +118,7 @@ export class ReactivateAccountService {
       throw new AppError(
         'user-service.reactivateAccount',
         500,
-        'failled to reactivate user account',
+        'failed to reactivate user account',
       );
     }
   }
