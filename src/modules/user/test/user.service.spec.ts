@@ -8,15 +8,19 @@ import { UserRepository } from '../repository/user.repository';
 import { AppError } from '../../../common/errors/Error';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
+  MockCancelledAccount,
   MockCreateUserDto,
+  MockGenerateRandomToken,
   MockIUpdateUser,
   MockIUser,
   MockIpAddress,
   MockJWT,
   MockPrismaUser,
+  MockReactivateUserAccount,
   MockRefreshJWT,
   MockUpdateUserDto,
   MockUser,
+  MockUserByToken,
   MockUserData,
 } from './mocks/user.mock';
 import { SecurityService } from '../../../common/services/security.service';
@@ -28,6 +32,8 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import * as schedule from 'node-schedule';
 import { ScheduledTaskService } from '../services/scheduled-task.service';
+import { ReactivateAccountService } from '../services/reactivate-account.service';
+import { AuthRepository } from '../../../modules/auth/repository/auth.repository';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
@@ -38,12 +44,14 @@ describe('User Services', () => {
   let securityService: SecurityService;
   let emailService: EmailService;
   let scheduledTaskService: ScheduledTaskService;
+  let reactivateAccountService: ReactivateAccountService;
 
   let mailerService: MailerService;
   let redisCacheService: RedisCacheService;
   let jwtService: JwtService;
 
   let userRepository: UserRepository;
+  let authRepository: AuthRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +65,7 @@ describe('User Services', () => {
         SecurityService,
         ScheduledTaskService,
         JwtService,
+        ReactivateAccountService,
         {
           provide: MailerService,
           useValue: {
@@ -82,6 +91,14 @@ describe('User Services', () => {
               .fn()
               .mockResolvedValue([MockPrismaUser]),
             deleteUser: jest.fn().mockResolvedValue(null),
+            reactivateAccount: jest.fn().mockResolvedValue(null),
+          },
+        },
+        {
+          provide: AuthRepository,
+          useValue: {
+            findUserByToken: jest.fn().mockResolvedValue(MockUserByToken),
+            deleteSecurityToken: jest.fn().mockResolvedValue(null),
           },
         },
       ],
@@ -94,6 +111,10 @@ describe('User Services', () => {
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
     );
+    reactivateAccountService = module.get<ReactivateAccountService>(
+      ReactivateAccountService,
+    );
+
     securityService = module.get<SecurityService>(SecurityService);
     emailService = module.get<EmailService>(EmailService);
     scheduledTaskService =
@@ -104,6 +125,7 @@ describe('User Services', () => {
     jwtService = module.get<JwtService>(JwtService);
 
     userRepository = module.get<UserRepository>(UserRepository);
+    authRepository = module.get<AuthRepository>(AuthRepository);
   });
 
   afterEach(() => {
@@ -130,6 +152,7 @@ describe('User Services', () => {
     expect(mailerService).toBeDefined();
     expect(redisCacheService).toBeDefined();
     expect(jwtService).toBeDefined();
+    expect(reactivateAccountService).toBeDefined();
   });
 
   describe('create user', () => {
@@ -159,7 +182,7 @@ describe('User Services', () => {
     it('should create access to new channel successfully', async () => {
       jest
         .spyOn(securityService, 'generateRandomToken')
-        .mockResolvedValueOnce('random_token' as never);
+        .mockResolvedValueOnce(MockGenerateRandomToken as never);
 
       jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
 
@@ -478,6 +501,38 @@ describe('User Services', () => {
         expect(error.code).toBe(500);
         expect(error.message).toBe('could not delete users');
       }
+    });
+  });
+
+  describe('reactivate user account', () => {
+    it('should generate a security token and send to user email successfully', async () => {
+      jest.spyOn(
+        reactivateAccountService as unknown as never,
+        'validateIpAddress',
+      );
+      jest
+        .spyOn(userRepository, 'userByFilter')
+        .mockResolvedValueOnce(MockCancelledAccount);
+      jest
+        .spyOn(securityService, 'generateRandomToken')
+        .mockResolvedValueOnce(MockGenerateRandomToken as never);
+      jest
+        .spyOn(emailService, 'sendReactivateAccountEmail')
+        .mockResolvedValueOnce();
+
+      const result = await reactivateAccountService.execute(
+        MockReactivateUserAccount,
+        MockIpAddress,
+      );
+
+      expect(
+        reactivateAccountService['validateIpAddress'],
+      ).toHaveBeenCalledTimes(1);
+      expect(userRepository.userByFilter).toHaveBeenCalledTimes(1);
+      expect(securityService.generateRandomToken).toHaveBeenCalledTimes(1);
+      expect(userRepository.reactivateAccount).toHaveBeenCalledTimes(1);
+      expect(emailService.sendReactivateAccountEmail).toHaveBeenCalledTimes(1);
+      expect(result).toHaveProperty('message');
     });
   });
 });

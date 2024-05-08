@@ -24,6 +24,7 @@ import {
 } from '../../interfaces/repository.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 import { IUserPayload } from 'src/modules/auth/interfaces/service.interface';
+import { IUserByToken } from 'src/modules/auth/interfaces/auth-repository.interface';
 
 export const MockFakeRequest: Request = {
   socket: {
@@ -218,14 +219,32 @@ export const MockDefaultMessage: IDefaultMessage = {
   message: 'object default message',
 };
 
+export const MockCancelledAccount = {
+  ...MockUserData,
+  security: {
+    ...MockUserData.security,
+    status: UserStatus.CANCELLED,
+  },
+};
+
 export const MockReactivateUserAccount: IReactivateUserAccount = {
-  email: MockUserData.contact.email,
-  originChannel: MockUserData.origin_channel,
+  email: MockCancelledAccount.contact.email,
+  originChannel: MockCancelledAccount.origin_channel,
+};
+
+export const MockGenerateRandomToken = {
+  token: faker.string.alphanumeric(),
+  expiresAt: faker.date.soon(),
 };
 
 export const MockReactivateAccountData: reactivateData = {
-  id: MockUserData.id,
+  id: MockCancelledAccount.id,
   ipAddress: MockIpAddress,
-  confirmationToken: faker.string.alphanumeric(),
-  tokenExpiresAt: faker.date.soon(),
+  confirmationToken: MockGenerateRandomToken.token,
+  tokenExpiresAt: MockGenerateRandomToken.expiresAt,
+};
+
+export const MockUserByToken: IUserByToken = {
+  userId: MockReactivateAccountData.id,
+  tokenExpiresAt: MockReactivateAccountData.tokenExpiresAt,
 };
