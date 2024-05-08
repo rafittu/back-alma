@@ -545,7 +545,7 @@ describe('User Services', () => {
         .mockResolvedValueOnce(true as never);
 
       const result = await reactivateAccountService.execute(
-        MockReactivateUserAccount,
+        null,
         MockIpAddress,
         MockGenerateRandomToken.token,
       );
@@ -569,6 +569,21 @@ describe('User Services', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(403);
         expect(error.message).toBe('invalid ip address');
+      }
+    });
+
+    it('should throw an error if account is not eligeble to be reactivated', async () => {
+      jest.spyOn(userRepository, 'userByFilter').mockResolvedValueOnce(null);
+
+      try {
+        await reactivateAccountService.execute(
+          MockReactivateUserAccount,
+          MockIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(400);
+        expect(error.message).toBe('account not eligeble to be reactivated');
       }
     });
   });
