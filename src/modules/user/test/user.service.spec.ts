@@ -505,7 +505,7 @@ describe('User Services', () => {
   });
 
   describe('reactivate user account', () => {
-    it('should generate a security token and send to user email successfully', async () => {
+    it('should send a confirmation token to user email successfully', async () => {
       jest.spyOn(
         reactivateAccountService as unknown as never,
         'validateIpAddress',
@@ -532,6 +532,28 @@ describe('User Services', () => {
       expect(securityService.generateRandomToken).toHaveBeenCalledTimes(1);
       expect(userRepository.reactivateAccount).toHaveBeenCalledTimes(1);
       expect(emailService.sendReactivateAccountEmail).toHaveBeenCalledTimes(1);
+      expect(result).toHaveProperty('message');
+    });
+
+    it('should confirm account reactivated successfully', async () => {
+      jest.spyOn(
+        reactivateAccountService as unknown as never,
+        'validateIpAddress',
+      );
+      jest
+        .spyOn(securityService, 'isTokenValid')
+        .mockResolvedValueOnce(true as never);
+
+      const result = await reactivateAccountService.execute(
+        MockReactivateUserAccount,
+        MockIpAddress,
+        MockGenerateRandomToken.token,
+      );
+
+      expect(authRepository.findUserByToken).toHaveBeenCalledTimes(1);
+      expect(securityService.isTokenValid).toHaveBeenCalledTimes(1);
+      expect(userRepository.updateUser).toHaveBeenCalledTimes(1);
+      expect(authRepository.deleteSecurityToken).toHaveBeenCalledTimes(1);
       expect(result).toHaveProperty('message');
     });
   });
