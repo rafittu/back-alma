@@ -586,5 +586,31 @@ describe('User Services', () => {
         expect(error.message).toBe('account not eligeble to be reactivated');
       }
     });
+
+    it('should throw an error if account not reactivated', async () => {
+      jest
+        .spyOn(userRepository, 'userByFilter')
+        .mockResolvedValueOnce(MockCancelledAccount);
+      jest
+        .spyOn(securityService, 'generateRandomToken')
+        .mockResolvedValueOnce(MockGenerateRandomToken as never);
+
+      jest
+        .spyOn(userRepository, 'reactivateAccount')
+        .mockRejectedValueOnce(
+          new Error('failed to attach confirmation token'),
+        );
+
+      try {
+        await reactivateAccountService.execute(
+          MockReactivateUserAccount,
+          MockIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to reactivate user account');
+      }
+    });
   });
 });
