@@ -18,7 +18,7 @@ async function bootstrap() {
   app.use(helmet.hidePoweredBy());
   app.use(helmet.contentSecurityPolicy());
 
-  app.use('/v2/api-doc', swaggerUi.serve, swaggerUi.setup(SwaggerDoc));
+  app.use('/v3/api-doc', swaggerUi.serve, swaggerUi.setup(SwaggerDoc));
 
   app.useGlobalPipes(
     new ValidationPipe({
