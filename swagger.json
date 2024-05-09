@@ -1705,6 +1705,120 @@
           }
         }
       }
+    },
+    "/user/reactivate-account/{token}": {
+      "post": {
+        "summary": "Confirm account reactivation",
+        "description": "Route to confirm account reactivation after receive the confirmation token by e-mail. This route will validate the provided token and reactivate user account.",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Confirmation token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Token validated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultMessageResponse"
+                },
+                "example": {
+                  "message": "Account successfully reactivated."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid or expired token",
+                    "code": "user-service.reactivateAccount",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "user-service.reactivateAccount",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "sumary": "repository error",
+                    "value": {
+                      "error": {
+                        "message": "user not updated",
+                        "code": "user-repository.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "sumary": "send email error",
+                    "value": {
+                      "error": {
+                        "message": "could not delete token",
+                        "code": "auth-repository.deleteSecurityToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "sumary": "service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to reactivate user account",
+                        "code": "user-service.reactivateAccount",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
 
