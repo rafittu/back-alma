@@ -10,11 +10,11 @@ import { ResendAccountTokenEmailService } from '../services/resend-account-token
 import { UserRepository } from '../../../modules/user/repository/user.repository';
 import {
   MockConfirmationToken,
-  MockExpirationTokenTime,
   MockIpAddress,
   MockJWT,
   MockRefreshJWT,
   MockResetPassword,
+  MockUserByToken,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
@@ -66,9 +66,7 @@ describe('AuthService', () => {
               message: `account confirmation token resent to ${MockUserData.contact.email}`,
             }),
             validateChannel: jest.fn().mockResolvedValueOnce(null),
-            findUserByToken: jest
-              .fn()
-              .mockResolvedValueOnce(MockExpirationTokenTime),
+            findUserByToken: jest.fn().mockResolvedValueOnce(MockUserByToken),
           },
         },
         {

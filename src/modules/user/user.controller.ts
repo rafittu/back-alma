@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -20,7 +21,14 @@ import { UpdateUserService } from './services/update-user.service';
 import { CancelUserService } from './services/cancel-user.service';
 import { isPublic } from '../auth/infra/decorators/is-public.decorator';
 import { GetUserByFilterService } from './services/user-by-filter.service';
-import { IUpdateUser, IUser, IUserFilter } from './interfaces/user.interface';
+import { ReactivateAccountService } from './services/reactivate-account.service';
+import {
+  IDefaultMessage,
+  IReactivateUserAccount,
+  IUpdateUser,
+  IUser,
+  IUserFilter,
+} from './interfaces/user.interface';
 import { CurrentUser } from '../auth/infra/decorators/current-user.decorator';
 import { IUserPayload } from '../auth/interfaces/service.interface';
 
@@ -33,6 +41,7 @@ export class UserController {
     private readonly updateUserService: UpdateUserService,
     private readonly deleteUserService: CancelUserService,
     private readonly getUserByFilterService: GetUserByFilterService,
+    private readonly reactivateAccountService: ReactivateAccountService,
   ) {}
 
   @isPublic()
@@ -70,5 +79,21 @@ export class UserController {
   @Delete('/delete')
   async deleteUser(@CurrentUser() user: IUserPayload): Promise<IUser> {
     return await this.deleteUserService.execute(user.id);
+  }
+
+  @isPublic()
+  @Post('/reactivate-account/:token?')
+  async reactivateAccount(
+    @Req() req: Request,
+    @Body() body: IReactivateUserAccount,
+    @Param('token') confirmationToken?: string,
+  ): Promise<IDefaultMessage> {
+    const ipAddress = req.socket.remoteAddress;
+
+    return await this.reactivateAccountService.execute(
+      body,
+      ipAddress,
+      confirmationToken,
+    );
   }
 }

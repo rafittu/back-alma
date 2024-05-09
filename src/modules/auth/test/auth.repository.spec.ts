@@ -7,7 +7,9 @@ import {
   MockConfirmationToken,
   MockExpirationTokenTime,
   MockIpAddress,
+  MockPrismaUserByToken,
   MockUser,
+  MockUserByToken,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
@@ -320,17 +322,17 @@ describe('Auth Repository', () => {
   });
 
   describe('find user by token', () => {
-    it('should return a token expiration time successfully', async () => {
+    it('should return user id and token expiration time successfully', async () => {
       jest
         .spyOn(prismaService.userSecurityInfo, 'findFirst')
-        .mockResolvedValueOnce(MockUserSecurityInfo);
+        .mockResolvedValueOnce(MockPrismaUserByToken);
 
       const result = await authRepository.findUserByToken(
         MockUserSecurityInfo.confirmation_token,
       );
 
       expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(MockUserSecurityInfo.token_expires_at);
+      expect(result).toEqual(MockUserByToken);
     });
 
     it('should throw an error if token is invalid', async () => {
@@ -346,6 +348,38 @@ describe('Auth Repository', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(500);
         expect(error.message).toBe('could not get user');
+      }
+    });
+  });
+
+  describe('delete security token', () => {
+    it('should delete security token and expiration time successfully', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'updateMany')
+        .mockResolvedValueOnce(null);
+
+      await authRepository.deleteSecurityToken(
+        MockUserSecurityInfo.confirmation_token,
+      );
+
+      expect(prismaService.userSecurityInfo.updateMany).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+
+    it('should throw an error if token is invalid', async () => {
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'updateMany')
+        .mockRejectedValueOnce(null);
+
+      try {
+        await authRepository.deleteSecurityToken(
+          MockUserSecurityInfo.confirmation_token,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('could not delete token');
       }
     });
   });
