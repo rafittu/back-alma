@@ -1589,6 +1589,122 @@
           }
         }
       }
+    },
+    "/user/reactivate-account": {
+      "post": {
+        "summary": "Request account reactivation",
+        "description": "Route to request account reactivation if it's under the dead line defined in delete account endpoint. This route will generate a security token, send it to user email and it's must to be confirmed to reactivate account.",
+        "tags": ["User"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactivateAccountBody"
+              },
+              "example": {
+                "email": "johndoe@example.com",
+                "originChannel": "wophi"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Confirmation token sent to user email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultMessageResponse"
+                },
+                "example": {
+                  "message": "Confirmation token sent to johndoe@example.com. Token expires at 2024-05-09T11:42:34.728Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "account not eligeble to be reactivated",
+                    "code": "user-service.reactivateAccount",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "user-service.reactivateAccount",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "sumary": "repository error",
+                    "value": {
+                      "error": {
+                        "message": "failed to attach confirmation token",
+                        "code": "user-repository.reactivateAccount",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "sumary": "send email error",
+                    "value": {
+                      "error": {
+                        "message": "failed to send email for reactivate account",
+                        "code": "email-service.sendReactivateAccountEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "sumary": "service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to reactivate user account",
+                        "code": "user-service.reactivateAccount",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
 
@@ -1962,6 +2078,29 @@
           "email": {
             "type": "string",
             "description": "Email address to resend confirmation account"
+          }
+        }
+      },
+      "ReactivateAccountBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "E-mail address of the user"
+          },
+          "originChannel": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
+          }
+        }
+      },
+      "DefaultMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Instructions to follow next steps"
           }
         }
       },
