@@ -408,6 +408,32 @@ describe('User Repository', () => {
       expect(prismaService.userContactInfo.delete).toHaveBeenCalledTimes(1);
       expect(prismaService.userSecurityInfo.delete).toHaveBeenCalledTimes(1);
     });
+
+    it('should throw an error if user not deleted', async () => {
+      jest
+        .spyOn(prismaService, '$transaction')
+        .mockImplementation(async (callback) => {
+          await callback(prismaService);
+        });
+
+      jest
+        .spyOn(prismaService.user, 'delete')
+        .mockRejectedValueOnce(
+          new AppError(
+            'user-repository.deleteUser',
+            500,
+            'failed to delete user',
+          ),
+        );
+
+      try {
+        await userRepository.deleteUser(MockUser.id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to delete user');
+      }
+    });
   });
 
   describe('reactivate user account', () => {
