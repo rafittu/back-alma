@@ -1,6 +1,6 @@
 {
   "name": "@wophi/alma-api",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "back-end api to manage users",
   "author": "Rafael Ribeiro",
   "private": true,
