@@ -420,11 +420,29 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await this.prisma.user.delete({
-      where: {
-        id: userId,
-      },
-    });
+    try {
+      await this.prisma.$transaction(async () => {
+        const userData = await this.prisma.user.delete({
+          where: { id: userId },
+        });
+
+        await this.prisma.userPersonalInfo.delete({
+          where: { id: userData.user_personal_info_id },
+        });
+        await this.prisma.userContactInfo.delete({
+          where: { id: userData.user_contact_info_id },
+        });
+        await this.prisma.userSecurityInfo.delete({
+          where: { id: userData.user_security_info_id },
+        });
+      });
+    } catch (error) {
+      throw new AppError(
+        'user-repository.deleteUser',
+        500,
+        'failed to delete user',
+      );
+    }
   }
 
   async reactivateAccount(data: reactivateData): Promise<void> {
