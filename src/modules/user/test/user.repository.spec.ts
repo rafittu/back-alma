@@ -384,11 +384,29 @@ describe('User Repository', () => {
     });
 
     it('should delete users successfully', async () => {
-      jest.spyOn(prismaService.user, 'delete').mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService, '$transaction')
+        .mockImplementation(async (callback) => {
+          await callback(prismaService);
+        });
+
+      jest.spyOn(prismaService.user, 'delete').mockResolvedValueOnce(MockUser);
+      jest
+        .spyOn(prismaService.userPersonalInfo, 'delete')
+        .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userContactInfo, 'delete')
+        .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'delete')
+        .mockResolvedValueOnce(null);
 
       await userRepository.deleteUser(MockUser.id);
 
       expect(prismaService.user.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userPersonalInfo.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userContactInfo.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.delete).toHaveBeenCalledTimes(1);
     });
   });
 
