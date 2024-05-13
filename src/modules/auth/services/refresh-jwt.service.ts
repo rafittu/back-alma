@@ -10,7 +10,7 @@ import { Channel, User } from '@prisma/client';
 import { AuthRepository } from '../repository/auth.repository';
 
 @Injectable()
-export class SignInService {
+export class RefreshJwtService {
   constructor(
     @Inject(AuthRepository)
     private authRepository: IAuthRepository<User>,

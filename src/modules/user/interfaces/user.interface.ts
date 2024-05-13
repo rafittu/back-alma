@@ -48,6 +48,11 @@ export interface IUser {
   updatedAt: Date;
 }
 
+export interface IUpdateUser extends IUser {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface IRequestChannelAccess {
   id: string;
   ipAddress: string;
@@ -68,4 +73,14 @@ export interface IUpdateSecurityData {
   tokenExpiresAt?: Date;
   status?: UserStatus;
   onUpdateIpAddress: string;
+}
+
+export interface IReactivateUserAccount {
+  email: string;
+  originChannel: Channel;
+  confirmationToken?: string;
+}
+
+export interface IDefaultMessage {
+  message: string;
 }

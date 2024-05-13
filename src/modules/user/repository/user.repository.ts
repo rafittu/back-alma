@@ -6,6 +6,7 @@ import {
   UserPersonalInfo,
   UserSecurityInfo,
   PrismaUser,
+  reactivateData,
 } from '../interfaces/repository.interface';
 import {
   ICreateUser,
@@ -286,6 +287,7 @@ export class UserRepository implements IUserRepository<User> {
     }
 
     securityInfo = {
+      ...data,
       ...securityInfo,
       on_update_ip_address: securityData.onUpdateIpAddress,
     };
@@ -418,10 +420,55 @@ export class UserRepository implements IUserRepository<User> {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await this.prisma.user.delete({
-      where: {
-        id: userId,
-      },
-    });
+    try {
+      await this.prisma.$transaction(async () => {
+        const userData = await this.prisma.user.delete({
+          where: { id: userId },
+        });
+
+        await this.prisma.userPersonalInfo.delete({
+          where: { id: userData.user_personal_info_id },
+        });
+        await this.prisma.userContactInfo.delete({
+          where: { id: userData.user_contact_info_id },
+        });
+        await this.prisma.userSecurityInfo.delete({
+          where: { id: userData.user_security_info_id },
+        });
+      });
+    } catch (error) {
+      throw new AppError(
+        'user-repository.deleteUser',
+        500,
+        'failed to delete user',
+      );
+    }
+  }
+
+  async reactivateAccount(data: reactivateData): Promise<void> {
+    const { id, ipAddress, confirmationToken, tokenExpiresAt } = data;
+
+    try {
+      await this.prisma.user.update({
+        data: {
+          security: {
+            update: {
+              confirmation_token: confirmationToken,
+              token_expires_at: tokenExpiresAt,
+              on_update_ip_address: ipAddress,
+            },
+          },
+        },
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new AppError(
+        'user-repository.reactivateAccount',
+        500,
+        'failed to attach confirmation token',
+      );
+    }
   }
 }

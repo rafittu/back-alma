@@ -8,7 +8,7 @@
       "url": "https://www.wophi.be/alma/support",
       "email": "alma@wophi.be"
     },
-    "version": "2.0.0"
+    "version": "3.0.0"
   },
 
   "paths": {
@@ -284,307 +284,34 @@
         }
       }
     },
-
-    "/auth/account/{token}": {
-      "patch": {
-        "summary": "Confirm user account email",
-        "description": "Route to confirm user's account email",
-        "tags": ["Authentication"],
-        "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "description": "Confirmation token for user registration",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Account email confirmed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Success message"
-                    }
-                  }
-                },
-                "example": {
-                  "message": "account email successfully confirmed"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid or expired token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "invalid or expired token",
-                    "code": "auth-service.confirmEmail",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "invalid ip address",
-                    "code": "auth-service.confirmEmail",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "example1": {
-                    "summary": "Internal Error",
-                    "value": {
-                      "error": {
-                        "message": "Account not confirmed",
-                        "code": "auth-repository.confirmAccountEmail",
-                        "status": true
-                      },
-                      "data": {}
-                    }
-                  },
-                  "example2": {
-                    "summary": "Invalid token",
-                    "value": {
-                      "error": {
-                        "message": "could not get user",
-                        "code": "auth-repository.findUserByToken",
-                        "status": true
-                      },
-                      "data": {}
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/signin": {
+    "/user/reactivate-account": {
       "post": {
-        "summary": "User login",
-        "description": "Authenticate a user with the provided credentials",
-        "tags": ["Authentication"],
+        "summary": "Request account reactivation",
+        "description": "Route to request account reactivation if it's under the dead line defined in delete account endpoint. This route will generate a security token, send it to user email and it's must to be confirmed to reactivate account.",
+        "tags": ["User"],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCredentials"
+                "$ref": "#/components/schemas/ReactivateAccountBody"
               },
               "example": {
                 "email": "johndoe@example.com",
-                "password": "password123",
-                "origin": "wophi"
+                "originChannel": "wophi"
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "User authenticated successfully",
+          "201": {
+            "description": "Confirmation token sent to user email",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccessToken"
+                  "$ref": "#/components/schemas/DefaultMessageResponse"
                 },
                 "example": {
-                  "accessToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "email or password is invalid",
-                    "code": "local-auth.guards",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "Internal Server Error",
-                    "code": "internal.server.error",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/send-recover-password-email": {
-      "post": {
-        "summary": "Send recover password email",
-        "description": "Send an email to the user with instructions to recover their password. Recover token has an expiration time of 30 minutes",
-        "tags": ["Authentication"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PasswordRecover"
-              },
-              "example": {
-                "email": "johndoe@example.com",
-                "originChannel": "WOPHI"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Email sent successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Success message"
-                    }
-                  }
-                },
-                "example": {
-                  "message": "recover password email sent"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "user with this email not found",
-                    "code": "auth-repository.sendRecoverPasswordEmail",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "failed to send email for recover password",
-                    "code": "email-service.sendRecoverPasswordEmail",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/reset-password/{token}": {
-      "patch": {
-        "summary": "Reset user password",
-        "description": "Route to reset user password using the recovery token sent by email",
-        "tags": ["Authentication"],
-        "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "description": "Recovery token",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetPassword"
-              },
-              "example": {
-                "password": "newpassword",
-                "passwordConfirmation": "newpassword"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Password reset successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResetPassword"
-                },
-                "example": {
-                  "message": "password reseted"
+                  "message": "Confirmation token sent to johndoe@example.com. Token expires at 2024-05-09T11:42:34.728Z"
                 }
               }
             }
@@ -596,29 +323,13 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {
-                  "example1": {
-                    "summary": "Invalid password",
-                    "value": {
-                      "error": {
-                        "message": "passwords do not match",
-                        "code": "recover-password-service.resetPassword",
-                        "status": true
-                      },
-                      "data": {}
-                    }
+                "example": {
+                  "error": {
+                    "message": "account not eligeble to be reactivated",
+                    "code": "user-service.reactivateAccount",
+                    "status": true
                   },
-                  "example2": {
-                    "summary": "Invalid or expired token",
-                    "value": {
-                      "error": {
-                        "message": "invalid or expired token",
-                        "code": "auth-service.confirmEmail",
-                        "status": true
-                      },
-                      "data": {}
-                    }
-                  }
+                  "data": {}
                 }
               }
             }
@@ -633,25 +344,7 @@
                 "example": {
                   "error": {
                     "message": "invalid ip address",
-                    "code": "auth-service.resetPassword",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "invalid recover token",
-                    "code": "auth-repository.resetPassword",
+                    "code": "user-service.reactivateAccount",
                     "status": true
                   },
                   "data": {}
@@ -668,22 +361,33 @@
                 },
                 "examples": {
                   "example1": {
-                    "summary": "Internal error",
+                    "sumary": "repository error",
                     "value": {
                       "error": {
-                        "message": "password not reseted",
-                        "code": "auth-repository.resetPassword",
+                        "message": "failed to attach confirmation token",
+                        "code": "user-repository.reactivateAccount",
                         "status": true
                       },
                       "data": {}
                     }
                   },
                   "example2": {
-                    "summary": "Invalid token",
+                    "sumary": "send email error",
                     "value": {
                       "error": {
-                        "message": "could not get user",
-                        "code": "auth-repository.findUserByToken",
+                        "message": "failed to send email for reactivate account",
+                        "code": "email-service.sendReactivateAccountEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "sumary": "service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to reactivate user account",
+                        "code": "user-service.reactivateAccount",
                         "status": true
                       },
                       "data": {}
@@ -696,11 +400,125 @@
         }
       }
     },
-    "/auth/me": {
+    "/user/reactivate-account/{token}": {
+      "post": {
+        "summary": "Confirm account reactivation",
+        "description": "Route to confirm account reactivation after receive the confirmation token by e-mail. This route will validate the provided token and reactivate user account.",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Confirmation token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Token validated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultMessageResponse"
+                },
+                "example": {
+                  "message": "Account successfully reactivated."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid or expired token",
+                    "code": "user-service.reactivateAccount",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "user-service.reactivateAccount",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "sumary": "repository error",
+                    "value": {
+                      "error": {
+                        "message": "user not updated",
+                        "code": "user-repository.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "sumary": "send email error",
+                    "value": {
+                      "error": {
+                        "message": "could not delete token",
+                        "code": "auth-repository.deleteSecurityToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example3": {
+                    "sumary": "service error",
+                    "value": {
+                      "error": {
+                        "message": "failed to reactivate user account",
+                        "code": "user-service.reactivateAccount",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user": {
       "get": {
-        "summary": "Get me",
-        "description": "Route to get user by access token",
-        "tags": ["Authentication"],
+        "summary": "Get user by id",
+        "description": "Route to get an user by id",
+        "tags": ["User"],
         "security": [
           {
             "BearerAuth": []
@@ -719,120 +537,38 @@
         ],
         "responses": {
           "200": {
-            "description": "User informations",
+            "description": "User data",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserPayload"
+                  "$ref": "#/components/schemas/User"
                 },
                 "example": {
                   "id": "123456",
-                  "username": "johndoe",
-                  "email": "johndoe@example.com"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "Unauthorized",
-                    "code": "auth-guard.jwtAuth",
-                    "status": true
+                  "personal": {
+                    "id": "789012",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "socialName": "JD",
+                    "bornDate": "1990-01-01",
+                    "motherName": "Jane Doe",
+                    "updatedAt": "2023-05-10T12:00:00Z"
                   },
-                  "data": {}
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/auth/account/resend-token": {
-      "patch": {
-        "summary": "Resend account confirmation token",
-        "description": "Endpoint to resend new account confirmation token. Token has an expiration time of 30 minutes",
-        "tags": ["Authentication"],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserEmail"
-              },
-              "example": {
-                "email": "johndoe@example.com"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Email sent successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "Success message"
-                    }
-                  }
-                },
-                "example": {
-                  "message": "account confirmation token resent to johndoe@example.com"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "example1": {
-                    "summary": "Missing request body parameter",
-                    "value": {
-                      "error": {
-                        "message": "Missing email parameter in request body",
-                        "code": "auth-services.resendAccountToken",
-                        "status": true
-                      },
-                      "data": {}
-                    }
+                  "contact": {
+                    "id": "345678",
+                    "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "phone": "1234567890",
+                    "updatedAt": "2023-05-10T12:00:00Z"
                   },
-                  "example2": {
-                    "summary": "Invalid email",
-                    "value": {
-                      "error": {
-                        "message": "new email provided is already in use",
-                        "code": "auth-services.resendAccountToken",
-                        "status": true
-                      },
-                      "data": {}
-                    }
-                  }
+                  "security": {
+                    "id": "901234",
+                    "status": "ACTIVE",
+                    "updatedAt": "2023-05-11T12:00:00Z"
+                  },
+                  "allowedChannels": ["WOPHI"],
+                  "createdAt": "2023-05-10T12:00:00Z",
+                  "updatedAt": "2023-05-11T12:00:00Z"
                 }
               }
             }
@@ -855,36 +591,20 @@
               }
             }
           },
-          "500": {
-            "description": "Internal server error",
+          "404": {
+            "description": "Not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {
-                  "example1": {
-                    "summary": "Token not generated",
-                    "value": {
-                      "error": {
-                        "message": "Account token not generated",
-                        "code": "auth-repository.resendAccountToken",
-                        "status": true
-                      },
-                      "data": {}
-                    }
+                "example": {
+                  "error": {
+                    "message": "user not found",
+                    "code": "user-repository.getUserById",
+                    "status": true
                   },
-                  "example2": {
-                    "summary": "Email confirmation not resend",
-                    "value": {
-                      "error": {
-                        "message": "failed to resend account confirmation token",
-                        "code": "auth-services.resendAccountToken",
-                        "status": true
-                      },
-                      "data": {}
-                    }
-                  }
+                  "data": {}
                 }
               }
             }
@@ -892,7 +612,6 @@
         }
       }
     },
-
     "/user/filter": {
       "get": {
         "summary": "Get user by filter",
@@ -1027,104 +746,6 @@
         }
       }
     },
-    "/user": {
-      "get": {
-        "summary": "Get user by id",
-        "description": "Route to get an user by id",
-        "tags": ["User"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "description": "Bearer {token}",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                },
-                "example": {
-                  "id": "123456",
-                  "personal": {
-                    "id": "789012",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "socialName": "JD",
-                    "bornDate": "1990-01-01",
-                    "motherName": "Jane Doe",
-                    "updatedAt": "2023-05-10T12:00:00Z"
-                  },
-                  "contact": {
-                    "id": "345678",
-                    "username": "johndoe",
-                    "email": "johndoe@example.com",
-                    "phone": "1234567890",
-                    "updatedAt": "2023-05-10T12:00:00Z"
-                  },
-                  "security": {
-                    "id": "901234",
-                    "status": "ACTIVE",
-                    "updatedAt": "2023-05-11T12:00:00Z"
-                  },
-                  "allowedChannels": ["WOPHI"],
-                  "createdAt": "2023-05-10T12:00:00Z",
-                  "updatedAt": "2023-05-11T12:00:00Z"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "Unauthorized",
-                    "code": "auth-guard.jwtAuth",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "error": {
-                    "message": "user not found",
-                    "code": "user-repository.getUserById",
-                    "status": true
-                  },
-                  "data": {}
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/user/update": {
       "patch": {
         "summary": "Update user",
@@ -1179,9 +800,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UpdatedUser"
                 },
                 "example": {
+                  "accessToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c",
+                  "refreshToken": "eyJhbTlaOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adRssw6e",
                   "id": "123456",
                   "personal": {
                     "id": "789012",
@@ -1513,6 +1136,688 @@
           }
         }
       }
+    },
+
+    "/auth/signin": {
+      "post": {
+        "summary": "User login",
+        "description": "Authenticate a user with the provided credentials",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCredentials"
+              },
+              "example": {
+                "email": "johndoe@example.com",
+                "password": "password123",
+                "origin": "wophi"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User authenticated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserToken"
+                },
+                "example": {
+                  "accessToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c",
+                  "refreshToken": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKeta2yJV_add8tw5c"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "email or password is invalid",
+                    "code": "local-auth.guards",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Internal Server Error",
+                    "code": "internal.server.error",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/send-recover-password-email": {
+      "post": {
+        "summary": "Send recover password email",
+        "description": "Send an email to the user with instructions to recover their password. Recover token has an expiration time of 30 minutes",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordRecover"
+              },
+              "example": {
+                "email": "johndoe@example.com",
+                "originChannel": "WOPHI"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "recover password email sent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "user with this email not found",
+                    "code": "auth-repository.sendRecoverPasswordEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "failed to send email for recover password",
+                    "code": "email-service.sendRecoverPasswordEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh jwt",
+        "description": "Refresh accessToken and refreshToken",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshToken"
+              },
+              "example": {
+                "refresh": "eyJhbGciOiJ.eyJzdW5MDIyfQ.SflKeta2yJV_add8tw5c",
+                "origin": "wophi"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserToken"
+                },
+                "example": {
+                  "accessToken": "eyJhbGyhOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adQssw5c",
+                  "refreshToken": "eyJhbTlaOiJ.eyJzdW5MDIyfQ.SflKxwk6yJV_adRssw6e"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.refreshJwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Internal Server Error",
+                    "code": "internal.server.error",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Get me",
+        "description": "Route to get user by access token",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User informations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPayload"
+                },
+                "example": {
+                  "id": "123456",
+                  "username": "johndoe",
+                  "email": "johndoe@example.com"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/account/{token}": {
+      "patch": {
+        "summary": "Confirm user account email",
+        "description": "Route to confirm user's account email",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Confirmation token for user registration",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account email confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "account email successfully confirmed"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid or expired token",
+                    "code": "auth-service.confirmEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "auth-service.confirmEmail",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "Internal Error",
+                    "value": {
+                      "error": {
+                        "message": "Account not confirmed",
+                        "code": "auth-repository.confirmAccountEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "error": {
+                        "message": "could not get user",
+                        "code": "auth-repository.findUserByToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset-password/{token}": {
+      "patch": {
+        "summary": "Reset user password",
+        "description": "Route to reset user password using the recovery token sent by email",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Recovery token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              },
+              "example": {
+                "password": "newpassword",
+                "passwordConfirmation": "newpassword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPassword"
+                },
+                "example": {
+                  "message": "password reseted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "Invalid password",
+                    "value": {
+                      "error": {
+                        "message": "passwords do not match",
+                        "code": "recover-password-service.resetPassword",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Invalid or expired token",
+                    "value": {
+                      "error": {
+                        "message": "invalid or expired token",
+                        "code": "auth-service.confirmEmail",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid ip address",
+                    "code": "auth-service.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "invalid recover token",
+                    "code": "auth-repository.resetPassword",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "Internal error",
+                    "value": {
+                      "error": {
+                        "message": "password not reseted",
+                        "code": "auth-repository.resetPassword",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "error": {
+                        "message": "could not get user",
+                        "code": "auth-repository.findUserByToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/account/resend-token": {
+      "patch": {
+        "summary": "Resend account confirmation token",
+        "description": "Endpoint to resend new account confirmation token. Token has an expiration time of 30 minutes",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer {token}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserEmail"
+              },
+              "example": {
+                "email": "johndoe@example.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    }
+                  }
+                },
+                "example": {
+                  "message": "account confirmation token resent to johndoe@example.com"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "Missing request body parameter",
+                    "value": {
+                      "error": {
+                        "message": "Missing email parameter in request body",
+                        "code": "auth-services.resendAccountToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Invalid email",
+                    "value": {
+                      "error": {
+                        "message": "new email provided is already in use",
+                        "code": "auth-services.resendAccountToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": {
+                    "message": "Unauthorized",
+                    "code": "auth-guard.jwtAuth",
+                    "status": true
+                  },
+                  "data": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "example1": {
+                    "summary": "Token not generated",
+                    "value": {
+                      "error": {
+                        "message": "Account token not generated",
+                        "code": "auth-repository.resendAccountToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  },
+                  "example2": {
+                    "summary": "Email confirmation not resend",
+                    "value": {
+                      "error": {
+                        "message": "failed to resend account confirmation token",
+                        "code": "auth-services.resendAccountToken",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
 
@@ -1588,10 +1893,48 @@
           "originChannel"
         ]
       },
-
       "User": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "personal": {
+            "$ref": "#/components/schemas/Personal"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "security": {
+            "$ref": "#/components/schemas/Security"
+          },
+          "allowedChannels": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Channels that user can access"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Date and time of user creation"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Date and time of last user update"
+          }
+        }
+      },
+      "UpdatedUser": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access token used for authentication in subsequent API calls. This token should be included in the 'Authorization' header as a Bearer Token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Token used to refresh user accessToken"
+          },
           "id": {
             "type": "string",
             "description": "User ID"
@@ -1708,12 +2051,30 @@
           }
         }
       },
-      "AccessToken": {
+      "RefreshToken": {
+        "type": "object",
+        "properties": {
+          "refresh": {
+            "type": "string",
+            "description": "Refresh token to generate a new user accessToken"
+          },
+          "origin": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
+          }
+        }
+      },
+      "UserToken": {
         "type": "object",
         "properties": {
           "accessToken": {
             "type": "string",
             "description": "Access token used for authentication in subsequent API calls. This token should be included in the 'Authorization' header as a Bearer Token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Token used to refresh user accessToken"
           }
         }
       },
@@ -1832,6 +2193,29 @@
           }
         }
       },
+      "ReactivateAccountBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "E-mail address of the user"
+          },
+          "originChannel": {
+            "type": "string",
+            "enum": ["WOPHI", "LUMIN", "MIAU"],
+            "description": "Origin channel of the user"
+          }
+        }
+      },
+      "DefaultMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Instructions to follow next steps"
+          }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -1859,6 +2243,7 @@
         }
       }
     },
+
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",

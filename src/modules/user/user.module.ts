@@ -11,12 +11,16 @@ import { SecurityService } from '../../common/services/security.service';
 import { EmailService } from '../../common/services/email.service';
 import { RedisCacheService } from '../../common/redis/redis-cache.service';
 import { ScheduledTaskService } from './services/scheduled-task.service';
+import { JwtService } from '@nestjs/jwt';
+import { AuthRepository } from '../auth/repository/auth.repository';
+import { ReactivateAccountService } from './services/reactivate-account.service';
 
 @Module({
   controllers: [UserController],
   providers: [
     PrismaService,
     UserRepository,
+    AuthRepository,
     SecurityService,
     EmailService,
     RedisCacheService,
@@ -26,6 +30,8 @@ import { ScheduledTaskService } from './services/scheduled-task.service';
     CancelUserService,
     GetUserByFilterService,
     ScheduledTaskService,
+    JwtService,
+    ReactivateAccountService,
   ],
 })
 export class UserModule implements OnApplicationBootstrap {

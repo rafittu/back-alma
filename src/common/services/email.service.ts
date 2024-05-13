@@ -75,4 +75,30 @@ export class EmailService {
       );
     }
   }
+
+  async sendReactivateAccountEmail(
+    to: string,
+    token: string,
+    channel: string,
+  ): Promise<void> {
+    try {
+      const emailBody = {
+        to,
+        from: `${channel.toLowerCase()}@wophi.be`,
+        subject: `${channel} - Reativação de conta`,
+        template: `${channel.toLowerCase()}-reactivate-account`,
+        context: {
+          token,
+        },
+      };
+
+      await this.sendMessageToSQS(emailBody);
+    } catch (error) {
+      throw new AppError(
+        'email-service.sendReactivateAccountEmail',
+        500,
+        'failed to send email for reactivate account',
+      );
+    }
+  }
 }

@@ -10,10 +10,11 @@ import { ResendAccountTokenEmailService } from '../services/resend-account-token
 import { UserRepository } from '../../../modules/user/repository/user.repository';
 import {
   MockConfirmationToken,
-  MockExpirationTokenTime,
   MockIpAddress,
   MockJWT,
+  MockRefreshJWT,
   MockResetPassword,
+  MockUserByToken,
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
@@ -22,6 +23,7 @@ import { RedisCacheService } from '../../../common/redis/redis-cache.service';
 import { EmailService } from '../../../common/services/email.service';
 import { SecurityService } from '../../../common/services/security.service';
 import { Channel } from '@prisma/client';
+import { RefreshJwtService } from '../services/refresh-jwt.service';
 
 describe('AuthService', () => {
   let signInService: SignInService;
@@ -29,6 +31,7 @@ describe('AuthService', () => {
   let confirmAccountEmailService: ConfirmAccountEmailService;
   let recoverPasswordService: RecoverPasswordService;
   let resendAccountTokenEmailService: ResendAccountTokenEmailService;
+  let refreshJwtService: RefreshJwtService;
 
   let authRepository: AuthRepository;
   let emailService: EmailService;
@@ -46,6 +49,7 @@ describe('AuthService', () => {
         RedisCacheService,
         EmailService,
         SecurityService,
+        RefreshJwtService,
         {
           provide: AuthRepository,
           useValue: {
@@ -62,9 +66,7 @@ describe('AuthService', () => {
               message: `account confirmation token resent to ${MockUserData.contact.email}`,
             }),
             validateChannel: jest.fn().mockResolvedValueOnce(null),
-            findUserByToken: jest
-              .fn()
-              .mockResolvedValueOnce(MockExpirationTokenTime),
+            findUserByToken: jest.fn().mockResolvedValueOnce(MockUserByToken),
           },
         },
         {
@@ -94,6 +96,7 @@ describe('AuthService', () => {
     resendAccountTokenEmailService = module.get<ResendAccountTokenEmailService>(
       ResendAccountTokenEmailService,
     );
+    refreshJwtService = module.get<RefreshJwtService>(RefreshJwtService);
     emailService = module.get<EmailService>(EmailService);
     redisService = module.get<RedisCacheService>(RedisCacheService);
     securityService = module.get<SecurityService>(SecurityService);
@@ -105,6 +108,7 @@ describe('AuthService', () => {
     expect(confirmAccountEmailService).toBeDefined();
     expect(recoverPasswordService).toBeDefined();
     expect(resendAccountTokenEmailService).toBeDefined();
+    expect(refreshJwtService).toBeDefined();
     expect(emailService).toBeDefined();
     expect(redisService).toBeDefined();
   });
@@ -112,6 +116,7 @@ describe('AuthService', () => {
   describe('signin', () => {
     it('should return a user access token', async () => {
       jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockJWT);
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockRefreshJWT);
 
       const originChannel = Channel.WOPHI;
 
@@ -125,8 +130,11 @@ describe('AuthService', () => {
         MockUserPayload.id,
         originChannel,
       );
-      expect(jwtService.sign).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ accessToken: MockJWT });
+      expect(jwtService.sign).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        accessToken: MockJWT,
+        refreshToken: MockRefreshJWT,
+      });
     });
 
     it('should throw an error', async () => {
@@ -342,6 +350,45 @@ describe('AuthService', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(400);
         expect(error.message).toBe('invalid or expired token');
+      }
+    });
+  });
+
+  describe('refresh token', () => {
+    it('should refresh accessToken and return it', async () => {
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockJWT);
+      jest.spyOn(jwtService, 'sign').mockReturnValueOnce(MockRefreshJWT);
+
+      const originChannel = Channel.WOPHI;
+
+      const result = await refreshJwtService.execute(
+        MockUserPayload,
+        originChannel,
+      );
+
+      expect(authRepository.validateChannel).toHaveBeenCalledTimes(1);
+      expect(authRepository.validateChannel).toHaveBeenCalledWith(
+        MockUserPayload.id,
+        originChannel,
+      );
+      expect(jwtService.sign).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        accessToken: MockJWT,
+        refreshToken: MockRefreshJWT,
+      });
+    });
+
+    it('should throw an error', async () => {
+      jest
+        .spyOn(authRepository, 'validateChannel')
+        .mockRejectedValueOnce(new Error());
+
+      const originChannel = Channel.WOPHI;
+
+      try {
+        await refreshJwtService.execute(MockUserPayload, originChannel);
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
       }
     });
   });

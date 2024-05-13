@@ -8,16 +8,23 @@ import {
 } from '@prisma/client';
 import {
   ICreateUser,
+  IDefaultMessage,
+  IReactivateUserAccount,
   IRequestChannelAccess,
   IUpdateSecurityData,
+  IUpdateUser,
   IUser,
 } from '../../interfaces/user.interface';
 import { UserStatus } from '../../interfaces/user-status.enum';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { Request } from 'express';
-import { PrismaUser } from '../../interfaces/repository.interface';
+import {
+  PrismaUser,
+  reactivateData,
+} from '../../interfaces/repository.interface';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 import { IUserPayload } from 'src/modules/auth/interfaces/service.interface';
+import { IUserByToken } from 'src/modules/auth/interfaces/auth-repository.interface';
 
 export const MockFakeRequest: Request = {
   socket: {
@@ -26,6 +33,9 @@ export const MockFakeRequest: Request = {
 } as Request;
 
 export const MockIpAddress = MockFakeRequest.socket.remoteAddress;
+
+export const MockJWT = faker.string.alphanumeric();
+export const MockRefreshJWT = faker.string.alphanumeric();
 
 export const MockCreateUserDto: CreateUserDto = {
   firstName: faker.person.firstName(),
@@ -176,6 +186,12 @@ export const MockIUser: IUser = {
   updatedAt: MockPrismaUser.updated_at,
 };
 
+export const MockIUpdateUser: IUpdateUser = {
+  accessToken: MockJWT,
+  refreshToken: MockRefreshJWT,
+  ...MockIUser,
+};
+
 export const MockUpdateUserDto: UpdateUserDto = {
   username: faker.internet.userName(),
   email: faker.internet.email(),
@@ -197,4 +213,38 @@ export const MockUserFromJwt: IUserPayload = {
   username: MockUserData.contact.username,
   email: MockUserData.contact.email,
   status: MockUserData.security.status,
+};
+
+export const MockDefaultMessage: IDefaultMessage = {
+  message: 'object default message',
+};
+
+export const MockCancelledAccount = {
+  ...MockUserData,
+  security: {
+    ...MockUserData.security,
+    status: UserStatus.CANCELLED,
+  },
+};
+
+export const MockReactivateUserAccount: IReactivateUserAccount = {
+  email: MockCancelledAccount.contact.email,
+  originChannel: MockCancelledAccount.origin_channel,
+};
+
+export const MockGenerateRandomToken = {
+  token: faker.string.alphanumeric(),
+  expiresAt: faker.date.soon(),
+};
+
+export const MockReactivateAccountData: reactivateData = {
+  id: MockCancelledAccount.id,
+  ipAddress: MockIpAddress,
+  confirmationToken: MockGenerateRandomToken.token,
+  tokenExpiresAt: MockGenerateRandomToken.expiresAt,
+};
+
+export const MockUserByToken: IUserByToken = {
+  userId: MockReactivateAccountData.id,
+  tokenExpiresAt: MockReactivateAccountData.tokenExpiresAt,
 };

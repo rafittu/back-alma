@@ -7,12 +7,16 @@ import { CancelUserService } from '../services/cancel-user.service';
 import { GetUserByFilterService } from '../services/user-by-filter.service';
 import {
   MockCreateUserDto,
+  MockDefaultMessage,
   MockFakeRequest,
+  MockIUpdateUser,
   MockIUser,
+  MockReactivateUserAccount,
   MockUpdateUserDto,
   MockUserData,
   MockUserFromJwt,
 } from './mocks/user.mock';
+import { ReactivateAccountService } from '../services/reactivate-account.service';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -21,6 +25,7 @@ describe('UserController', () => {
   let updateUserService: UpdateUserService;
   let cancelUserService: CancelUserService;
   let getUserByFilterService: GetUserByFilterService;
+  let reactivateAccountService: ReactivateAccountService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,7 +46,7 @@ describe('UserController', () => {
         {
           provide: UpdateUserService,
           useValue: {
-            execute: jest.fn().mockResolvedValue(MockIUser),
+            execute: jest.fn().mockResolvedValue(MockIUpdateUser),
           },
         },
         {
@@ -56,6 +61,12 @@ describe('UserController', () => {
             execute: jest.fn().mockResolvedValue(MockIUser),
           },
         },
+        {
+          provide: ReactivateAccountService,
+          useValue: {
+            execute: jest.fn().mockResolvedValue(MockDefaultMessage),
+          },
+        },
       ],
     }).compile();
 
@@ -66,6 +77,9 @@ describe('UserController', () => {
     cancelUserService = module.get<CancelUserService>(CancelUserService);
     getUserByFilterService = module.get<GetUserByFilterService>(
       GetUserByFilterService,
+    );
+    reactivateAccountService = module.get<ReactivateAccountService>(
+      ReactivateAccountService,
     );
   });
 
@@ -121,7 +135,7 @@ describe('UserController', () => {
       );
 
       expect(updateUserService.execute).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(MockIUser);
+      expect(result).toEqual(MockIUpdateUser);
     });
 
     it('should throw an error', () => {
@@ -176,6 +190,31 @@ describe('UserController', () => {
           email: MockUserData.contact.email,
         }),
       ).rejects.toThrowError();
+    });
+  });
+
+  describe('reactivate user account', () => {
+    it('should reactivate user account successfully', async () => {
+      const result = await controller.reactivateAccount(
+        MockFakeRequest,
+        MockReactivateUserAccount,
+      );
+
+      expect(reactivateAccountService.execute).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(MockDefaultMessage);
+    });
+
+    it('should throw an error', () => {
+      jest
+        .spyOn(reactivateAccountService, 'execute')
+        .mockRejectedValueOnce(new Error());
+
+      expect(
+        controller.reactivateAccount(
+          MockFakeRequest,
+          MockReactivateUserAccount,
+        ),
+      ).rejects.toThrow();
     });
   });
 });

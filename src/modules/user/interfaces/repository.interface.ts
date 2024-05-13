@@ -64,6 +64,13 @@ export interface PrismaUser {
   updated_at: Date;
 }
 
+export interface reactivateData {
+  id: string;
+  ipAddress: string;
+  confirmationToken: string;
+  tokenExpiresAt: Date;
+}
+
 export interface IUserRepository<User> {
   createUser(data: ICreateUser): Promise<User>;
   createAccessToAdditionalChannel(data: IRequestChannelAccess): Promise<void>;
@@ -77,4 +84,5 @@ export interface IUserRepository<User> {
   cancelUser(userId: string, status: UserStatus): Promise<PrismaUser>;
   findCancelledUsersToDelete(dateThreshold: Date): Promise<PrismaUser[]>;
   deleteUser(userId: string): Promise<void>;
+  reactivateAccount(data: reactivateData): Promise<void>;
 }

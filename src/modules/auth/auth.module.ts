@@ -14,19 +14,24 @@ import { UserRepository } from '../user/repository/user.repository';
 import { RedisCacheService } from '../../common/redis/redis-cache.service';
 import { EmailService } from '../../common/services/email.service';
 import { SecurityService } from '../../common/services/security.service';
+import { RefreshJwtStrategy } from './infra/strategies/refresh-jwt.strategy';
+import { RefreshJwtService } from './services/refresh-jwt.service';
 
 @Module({
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION },
+      signOptions: { expiresIn: process.env.JWT_EXPIRATION_TIME },
     }),
   ],
+
   controllers: [AuthController],
+
   providers: [
     PrismaService,
     LocalStrategy,
     JwtStrategy,
+    RefreshJwtStrategy,
     SecurityService,
     AuthRepository,
     UserRepository,
@@ -36,6 +41,7 @@ import { SecurityService } from '../../common/services/security.service';
     ConfirmAccountEmailService,
     RecoverPasswordService,
     ResendAccountTokenEmailService,
+    RefreshJwtService,
   ],
 })
 export class AuthModule implements NestModule {

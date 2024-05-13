@@ -6,6 +6,7 @@ import { UserRepository } from '../repository/user.repository';
 import {
   MockICreateUser,
   MockPrismaUser,
+  MockReactivateAccountData,
   MockRequestChannelAccess,
   MockUpdateSecurityData,
   MockUpdateUserDto,
@@ -383,11 +384,85 @@ describe('User Repository', () => {
     });
 
     it('should delete users successfully', async () => {
-      jest.spyOn(prismaService.user, 'delete').mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService, '$transaction')
+        .mockImplementation(async (callback) => {
+          await callback(prismaService);
+        });
+
+      jest.spyOn(prismaService.user, 'delete').mockResolvedValueOnce(MockUser);
+      jest
+        .spyOn(prismaService.userPersonalInfo, 'delete')
+        .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userContactInfo, 'delete')
+        .mockResolvedValueOnce(null);
+      jest
+        .spyOn(prismaService.userSecurityInfo, 'delete')
+        .mockResolvedValueOnce(null);
 
       await userRepository.deleteUser(MockUser.id);
 
       expect(prismaService.user.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userPersonalInfo.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userContactInfo.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityInfo.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error if user not deleted', async () => {
+      jest
+        .spyOn(prismaService, '$transaction')
+        .mockImplementation(async (callback) => {
+          await callback(prismaService);
+        });
+
+      jest
+        .spyOn(prismaService.user, 'delete')
+        .mockRejectedValueOnce(
+          new AppError(
+            'user-repository.deleteUser',
+            500,
+            'failed to delete user',
+          ),
+        );
+
+      try {
+        await userRepository.deleteUser(MockUser.id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to delete user');
+      }
+    });
+  });
+
+  describe('reactivate user account', () => {
+    it('should reactivate user account successfully', async () => {
+      jest.spyOn(prismaService.user, 'update').mockResolvedValueOnce(null);
+
+      await userRepository.reactivateAccount(MockReactivateAccountData);
+
+      expect(prismaService.user.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error if reactivation fails', async () => {
+      jest
+        .spyOn(prismaService.user, 'update')
+        .mockRejectedValueOnce(
+          new AppError(
+            'user-repository.reactivateAccount',
+            500,
+            'failed to attach confirmation token',
+          ),
+        );
+
+      try {
+        await userRepository.reactivateAccount(MockReactivateAccountData);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(500);
+        expect(error.message).toBe('failed to attach confirmation token');
+      }
     });
   });
 });
