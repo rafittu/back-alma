@@ -23,7 +23,7 @@ Este projeto utiliza as seguintes tecnologias:
 
 - **Docker** como uma ferramenta de containerização;
 
-- **OAuth** e **JWT** para autenticação e autorização de acesso;
+- **JWT** para autenticação e autorização de acesso;
 - **Bcrypt** e **Crypto** como ferramenta de criptografia;
 - **Passport.js** para implementação de estratégias de autenticação;
 
