@@ -53,8 +53,7 @@ model UserSecurityInfo {
   id                   String     @id @default(uuid()) @db.Uuid
   password             String
   salt                 String
-  confirmation_token   String?    @unique @db.VarChar(64)
-  recover_token        String?    @db.VarChar(64)
+  security_token       String?    @db.VarChar(64)
   token_expires_at     DateTime?
   ip_address_origin    String     @db.Inet()
   on_update_ip_address String?    @db.Inet()
