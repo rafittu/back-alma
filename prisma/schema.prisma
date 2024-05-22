@@ -20,8 +20,8 @@ enum UserStatus {
   BANNED
 }
 
-model UserPersonalInfo {
-  id          String   @id @default(uuid()) @db.Uuid
+model UserPersonalData {
+  id          String   @id @unique @default(uuid()) @db.Uuid
   first_name  String   @db.VarChar(125)
   last_name   String   @db.VarChar(125)
   cpf         String   @unique @db.VarChar(11)
@@ -31,29 +31,31 @@ model UserPersonalInfo {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
-  User       User[]
 
-  @@map("users_personal_info")
+  User User[]
+
+  @@map("users_personal_data")
 }
 
-model UserContactInfo {
-  id       String  @id @default(uuid()) @db.Uuid
+model UserContactData {
+  id       String  @id @unique @default(uuid()) @db.Uuid
   username String? @db.VarChar(45)
   email    String  @unique @db.VarChar(250)
   phone    String  @unique @db.VarChar(15)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
-  User       User[]
 
-  @@map("users_contact_info")
+  User User[]
+
+  @@map("users_contact_data")
 }
 
-model UserSecurityInfo {
-  id                   String     @id @default(uuid()) @db.Uuid
-  password             String
+model UserSecurityData {
+  id                   String     @id @unique @default(uuid()) @db.Uuid
+  hashed_password      String
   salt                 String
-  security_token       String?    @db.VarChar(64)
+  security_token       String?    @unique @db.VarChar(64)
   token_expires_at     DateTime?
   ip_address_origin    String     @db.Inet()
   on_update_ip_address String?    @db.Inet()
@@ -61,24 +63,26 @@ model UserSecurityInfo {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
-  User       User[]
 
-  @@map("users_security_info")
+  User User[]
+
+  @@map("users_security_data")
 }
 
 model User {
   id                    String    @id @unique @default(uuid()) @db.Uuid
-  user_personal_info_id String    @db.Uuid
-  user_contact_info_id  String    @db.Uuid
-  user_security_info_id String    @db.Uuid
+  user_personal_data_id String    @db.Uuid
+  user_contact_data_id  String    @db.Uuid
+  user_security_data_id String    @db.Uuid
   origin_channel        Channel
   allowed_channels      Channel[]
 
-  created_at DateTime         @default(now())
-  updated_at DateTime         @updatedAt()
-  personal   UserPersonalInfo @relation(fields: [user_personal_info_id], references: [id])
-  contact    UserContactInfo  @relation(fields: [user_contact_info_id], references: [id])
-  security   UserSecurityInfo @relation(fields: [user_security_info_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  personal UserPersonalData @relation(fields: [user_personal_data_id], references: [id])
+  contact  UserContactData  @relation(fields: [user_contact_data_id], references: [id])
+  security UserSecurityData @relation(fields: [user_security_data_id], references: [id])
 
   @@map("users")
 }
