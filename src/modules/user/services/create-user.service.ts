@@ -53,6 +53,7 @@ export class CreateUserService {
     {
       firstName,
       lastName,
+      cpf,
       socialName,
       bornDate,
       motherName,
@@ -69,6 +70,7 @@ export class CreateUserService {
         id: user.user_personal_info_id,
         firstName,
         lastName,
+        cpf,
         socialName,
         bornDate: new Date(bornDate),
         motherName,

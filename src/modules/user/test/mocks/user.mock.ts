@@ -168,6 +168,7 @@ export const MockIUser: IUser = {
     id: MockPrismaUser.personal.id,
     firstName: MockPrismaUser.personal.first_name,
     lastName: MockPrismaUser.personal.last_name,
+    cpf: MockPrismaUser.personal.cpf,
     socialName: MockPrismaUser.personal.social_name,
     bornDate: MockPrismaUser.personal.born_date,
     motherName: MockPrismaUser.personal.mother_name,

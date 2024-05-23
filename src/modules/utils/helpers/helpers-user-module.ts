@@ -7,7 +7,7 @@ export const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
 
 export function mapUserToReturn(prismaUser: PrismaUser): IUser {
   const { personal, contact, security } = prismaUser;
-  const { first_name, last_name, social_name, born_date, mother_name } =
+  const { first_name, last_name, cpf, social_name, born_date, mother_name } =
     personal;
   const { username, email, phone } = contact;
 
@@ -17,6 +17,7 @@ export function mapUserToReturn(prismaUser: PrismaUser): IUser {
       id: personal.id,
       firstName: first_name,
       lastName: last_name,
+      cpf,
       socialName: social_name,
       bornDate: born_date,
       motherName: mother_name,
