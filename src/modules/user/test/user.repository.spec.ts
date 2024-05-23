@@ -118,8 +118,11 @@ describe('User Repository', () => {
         id: MockUserData.id,
       });
 
+      const formattedResponse = MockPrismaUser;
+      delete formattedResponse.personal.cpf;
+
       expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(MockPrismaUser);
+      expect(result).toEqual(formattedResponse);
     });
 
     it('should get by email successfully', async () => {

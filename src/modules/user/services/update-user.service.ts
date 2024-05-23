@@ -19,6 +19,7 @@ import {
   ipv4Regex,
   ipv6Regex,
   mapUserToReturn,
+  validateCpf,
 } from '../../../modules/utils/helpers/helpers-user-module';
 import { UserStatus } from '../interfaces/user-status.enum';
 import { IJtwPayload } from 'src/modules/auth/interfaces/service.interface';
@@ -35,6 +36,10 @@ export class UpdateUserService {
 
   private validateIpAddress(ip: string): boolean {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  private validateCPF(cpf: string): boolean {
+    return validateCpf(cpf);
   }
 
   private validatePassword(data: UpdateUserDto): void {
@@ -89,6 +94,10 @@ export class UpdateUserService {
     };
 
     try {
+      if (data.cpf && !this.validateCPF(data.cpf)) {
+        throw new AppError('user-service.updateUser', 403, 'invalid user cpf');
+      }
+
       if (data.newPassword) {
         this.validatePassword(data);
 

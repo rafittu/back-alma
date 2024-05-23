@@ -25,6 +25,11 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @IsOptional()
   @IsString()
+  @MaxLength(11)
+  cpf?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(250)
   socialName?: string;
 

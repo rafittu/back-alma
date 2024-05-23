@@ -21,16 +21,18 @@ enum UserStatus {
 }
 
 model UserPersonalInfo {
-  id          String  @id @default(uuid()) @db.Uuid
-  first_name  String  @db.VarChar(125)
-  last_name   String  @db.VarChar(125)
-  social_name String? @db.VarChar(250)
-  born_date   String  @db.VarChar(10)
-  mother_name String  @db.VarChar(250)
+  id          String   @id @default(uuid()) @db.Uuid
+  first_name  String   @db.VarChar(125)
+  last_name   String   @db.VarChar(125)
+  cpf         String   @db.VarChar(11)
+  social_name String?  @db.VarChar(250)
+  born_date   DateTime
+  mother_name String   @db.VarChar(250)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
-  User       User[]
+
+  User User[]
 
   @@map("users_personal_info")
 }

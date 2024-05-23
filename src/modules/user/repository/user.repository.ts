@@ -30,6 +30,7 @@ export class UserRepository implements IUserRepository<User> {
   private formatPersonalInfo({
     firstName,
     lastName,
+    cpf,
     socialName,
     bornDate,
     motherName,
@@ -37,6 +38,7 @@ export class UserRepository implements IUserRepository<User> {
     return {
       first_name: firstName,
       last_name: lastName,
+      cpf,
       social_name: socialName || null,
       born_date: bornDate,
       mother_name: motherName,
@@ -195,6 +197,7 @@ export class UserRepository implements IUserRepository<User> {
         'on_update_ip_address',
         'origin_channel',
         'created_at',
+        'cpf',
       ];
 
       return this.fieldsToDelete(user, fieldsToDelete);
@@ -292,12 +295,17 @@ export class UserRepository implements IUserRepository<User> {
       on_update_ip_address: securityData.onUpdateIpAddress,
     };
 
+    const dataToFormat = {
+      ...data,
+      bornDate: new Date(data.bornDate),
+    };
+
     const userData = {
       personal: {
-        update: this.formatPersonalInfo(data),
+        update: this.formatPersonalInfo(dataToFormat),
       },
       contact: {
-        update: this.formatContactInfo(data),
+        update: this.formatContactInfo(dataToFormat),
       },
       security: {
         update: securityInfo,
@@ -385,6 +393,7 @@ export class UserRepository implements IUserRepository<User> {
         'on_update_ip_address',
         'origin_channel',
         'created_at',
+        'cpf',
       ];
 
       return this.fieldsToDelete(user, fieldsToDelete);

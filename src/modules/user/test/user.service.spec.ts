@@ -34,6 +34,7 @@ import * as schedule from 'node-schedule';
 import { ScheduledTaskService } from '../services/scheduled-task.service';
 import { ReactivateAccountService } from '../services/reactivate-account.service';
 import { AuthRepository } from '../../../modules/auth/repository/auth.repository';
+import { validateCpf } from '../../../modules/utils/helpers/helpers-user-module';
 
 describe('User Services', () => {
   let createUserService: CreateUserService;
@@ -158,6 +159,7 @@ describe('User Services', () => {
   describe('create user', () => {
     it('should create a new user successfully', async () => {
       jest.spyOn(createUserService as unknown as never, 'validateIpAddress');
+      jest.spyOn(createUserService as unknown as never, 'validateCPF');
       jest.spyOn(createUserService as unknown as never, 'formatSecurityInfo');
       jest.spyOn(createUserService as unknown as never, 'mapUserToReturn');
       jest.spyOn(emailService, 'sendConfirmationEmail').mockResolvedValueOnce();
@@ -172,6 +174,7 @@ describe('User Services', () => {
       delete MockIUser.security.updatedAt;
 
       expect(createUserService['validateIpAddress']).toHaveBeenCalledTimes(1);
+      expect(createUserService['validateCPF']).toHaveBeenCalledTimes(1);
       expect(createUserService['formatSecurityInfo']).toHaveBeenCalledTimes(1);
       expect(userRepository.createUser).toHaveBeenCalledTimes(1);
       expect(createUserService['mapUserToReturn']).toHaveBeenCalledTimes(1);
@@ -230,6 +233,21 @@ describe('User Services', () => {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(403);
         expect(error.message).toBe('invalid ip address');
+      }
+    });
+
+    it(`should throw an error if 'cpf' is invalid`, async () => {
+      const bodyWithInvalidCpf = {
+        ...MockCreateUserDto,
+        cpf: '11122233344',
+      };
+
+      try {
+        await createUserService.execute(bodyWithInvalidCpf, MockIpAddress);
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid user cpf');
       }
     });
 
@@ -339,13 +357,32 @@ describe('User Services', () => {
       try {
         await updateUserService.execute(
           MockUpdateUserDto,
-          MockIpAddress,
+          MockUser.id,
           invalidIpAddress,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
         expect(error.code).toBe(403);
         expect(error.message).toBe('invalid ip address');
+      }
+    });
+
+    it(`should throw an error if 'cpf' is invalid`, async () => {
+      const bodyWithInvalidCpf = {
+        ...MockCreateUserDto,
+        cpf: '11122233344',
+      };
+
+      try {
+        await updateUserService.execute(
+          bodyWithInvalidCpf,
+          MockUser.id,
+          MockIpAddress,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(AppError);
+        expect(error.code).toBe(403);
+        expect(error.message).toBe('invalid user cpf');
       }
     });
 
@@ -627,6 +664,28 @@ describe('User Services', () => {
         expect(error.code).toBe(500);
         expect(error.message).toBe('failed to reactivate user account');
       }
+    });
+  });
+
+  describe('validateCpf function', () => {
+    it('should return true for a valid CPF', () => {
+      const validCpf = '34151868810';
+      expect(validateCpf(validCpf)).toBeTruthy();
+    });
+
+    it('should return false if length not 11', () => {
+      const invalidCpf = '123456789';
+      expect(validateCpf(invalidCpf)).toBeFalsy();
+    });
+
+    it('should return false if all digits the same', () => {
+      const invalidCpf = '11111111111';
+      expect(validateCpf(invalidCpf)).toBeFalsy();
+    });
+
+    it('should return false for incorrect digit verifiers', () => {
+      const invalidCpf = '12345678901';
+      expect(validateCpf(invalidCpf)).toBeFalsy();
     });
   });
 });
