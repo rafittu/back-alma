@@ -62,7 +62,7 @@ export class CreateUserService {
         firstName,
         lastName,
         socialName,
-        bornDate,
+        bornDate: new Date(bornDate),
         motherName,
       },
       contact: {
@@ -152,6 +152,7 @@ export class CreateUserService {
       const user = await this.userRepository.createUser({
         ...data,
         ipAddressOrigin: ipAddress,
+        bornDate: new Date(data.bornDate),
         hashedPassword,
         salt,
         confirmationToken,
