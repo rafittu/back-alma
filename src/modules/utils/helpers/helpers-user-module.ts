@@ -39,3 +39,39 @@ export function mapUserToReturn(prismaUser: PrismaUser): IUser {
     updatedAt: prismaUser.updated_at,
   };
 }
+
+export function validateCpf(cpf: string): boolean {
+  cpf = cpf.replace(/\D/g, '');
+
+  if (cpf.length !== 11) {
+    return false;
+  }
+
+  if (/^(\d)(?:\1){10}$/.test(cpf)) {
+    return false;
+  }
+
+  const calculateDigitVerifier = (factor: number): number => {
+    let sum = 0;
+    for (let i = 0; i < factor - 1; i++) {
+      sum += parseInt(cpf.charAt(i)) * (factor - i);
+    }
+    let remainder = sum % 11;
+    if (remainder === 10) {
+      remainder = 0;
+    }
+    return remainder;
+  };
+
+  const firstDigitVerifier = calculateDigitVerifier(10);
+  if (firstDigitVerifier !== parseInt(cpf.charAt(9))) {
+    return false;
+  }
+
+  const secondDigitVerifier = calculateDigitVerifier(11);
+  if (secondDigitVerifier !== parseInt(cpf.charAt(10))) {
+    return false;
+  }
+
+  return true;
+}
