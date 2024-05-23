@@ -11,6 +11,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 export interface UserPersonalInfo {
   first_name: string;
   last_name: string;
+  cpf: string;
   social_name?: string;
   born_date: string;
   mother_name: string;
@@ -42,6 +43,7 @@ export interface PrismaUser {
     id: string;
     first_name: string;
     last_name: string;
+    cpf: string;
     social_name?: string;
     born_date: string;
     mother_name: string;
