@@ -338,7 +338,6 @@ export class UserRepository implements IUserRepository<User> {
         'on_update_ip_address',
         'origin_channel',
         'created_at',
-        'cpf',
       ];
 
       return this.fieldsToDelete(user, fieldsToDelete);
