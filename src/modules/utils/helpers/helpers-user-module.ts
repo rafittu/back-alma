@@ -51,24 +51,21 @@ export function validateCpf(cpf: string): boolean {
     return false;
   }
 
-  const calculateDigitVerifier = (factor: number): number => {
+  const calculateDigitVerifier = (base: number): number => {
     let sum = 0;
-    for (let i = 0; i < factor - 1; i++) {
-      sum += parseInt(cpf.charAt(i)) * (factor - i);
+    for (let i = 0; i < base; i++) {
+      sum += parseInt(cpf.charAt(i)) * (base + 1 - i);
     }
-    let remainder = sum % 11;
-    if (remainder === 10) {
-      remainder = 0;
-    }
-    return remainder;
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
   };
 
-  const firstDigitVerifier = calculateDigitVerifier(10);
+  const firstDigitVerifier = calculateDigitVerifier(9);
   if (firstDigitVerifier !== parseInt(cpf.charAt(9))) {
     return false;
   }
 
-  const secondDigitVerifier = calculateDigitVerifier(11);
+  const secondDigitVerifier = calculateDigitVerifier(10);
   if (secondDigitVerifier !== parseInt(cpf.charAt(10))) {
     return false;
   }
