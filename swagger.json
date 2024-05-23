@@ -2025,7 +2025,6 @@
             "enum": [
               "PENDING_CONFIRMATION",
               "ACTIVE",
-              "BLOCKED",
               "CANCELLED",
               "BANNED"
             ],
@@ -2176,7 +2175,6 @@
             "enum": [
               "PENDING_CONFIRMATION",
               "ACTIVE",
-              "BLOCKED",
               "CANCELLED",
               "BANNED"
             ],

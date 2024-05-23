@@ -16,7 +16,6 @@ enum Channel {
 enum UserStatus {
   PENDING_CONFIRMATION
   ACTIVE
-  BLOCKED
   CANCELLED
   BANNED
 }
