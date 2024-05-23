@@ -1,5 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ipv4Regex, ipv6Regex } from '../../utils/helpers/helpers-user-module';
+import {
+  ipv4Regex,
+  ipv6Regex,
+  validateCpf,
+} from '../../utils/helpers/helpers-user-module';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
 import { IUserRepository } from '../interfaces/repository.interface';
@@ -23,6 +27,10 @@ export class CreateUserService {
 
   private validateIpAddress(ip: string): boolean {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+  }
+
+  private validateCPF(cpf: string): boolean {
+    return validateCpf(cpf);
   }
 
   private async formatSecurityInfo(
@@ -84,6 +92,10 @@ export class CreateUserService {
   async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
+    }
+
+    if (!this.validateCPF(data.cpf)) {
+      throw new AppError('user-service.createUser', 403, 'invalid user cpf');
     }
 
     const user =
