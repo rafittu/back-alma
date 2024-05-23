@@ -6,7 +6,7 @@ export interface ICreateUser {
   lastName: string;
   cpf: string;
   socialName?: string;
-  bornDate: string;
+  bornDate: Date;
   motherName: string;
   username?: string;
   email: string;
@@ -29,7 +29,7 @@ export interface IUser {
     lastName: string;
     cpf?: string;
     socialName?: string;
-    bornDate: string;
+    bornDate: Date;
     motherName: string;
     updatedAt?: Date;
   };
