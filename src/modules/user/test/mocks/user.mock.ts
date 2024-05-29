@@ -2,9 +2,9 @@ import { faker } from '@faker-js/faker';
 import {
   Channel,
   User,
-  UserContactInfo,
-  UserPersonalInfo,
-  UserSecurityInfo,
+  UserContactData,
+  UserPersonalData,
+  UserSecurityData,
 } from '@prisma/client';
 import {
   ICreateUser,
@@ -74,9 +74,9 @@ export const MockICreateUser: ICreateUser = {
 
 export const MockUser: User = {
   id: faker.string.uuid(),
-  user_personal_info_id: faker.string.uuid(),
-  user_contact_info_id: faker.string.uuid(),
-  user_security_info_id: faker.string.uuid(),
+  user_personal_data_id: faker.string.uuid(),
+  user_contact_data_id: faker.string.uuid(),
+  user_security_data_id: faker.string.uuid(),
   origin_channel: Channel.WOPHI,
   allowed_channels: [Channel.WOPHI],
 
@@ -85,14 +85,14 @@ export const MockUser: User = {
 };
 
 export const MockRequestChannelAccess: IRequestChannelAccess = {
-  id: MockUser.user_security_info_id,
+  id: MockUser.user_security_data_id,
   ipAddress: MockIpAddress,
   confirmationToken: faker.string.alphanumeric(),
   tokenExpiresAt: faker.date.future(),
 };
 
-const MockUserPersonalInfo: UserPersonalInfo = {
-  id: MockUser.user_personal_info_id,
+const MockUserPersonalData: UserPersonalData = {
+  id: MockUser.user_personal_data_id,
   first_name: MockICreateUser.firstName,
   last_name: MockICreateUser.lastName,
   cpf: MockICreateUser.cpf,
@@ -103,8 +103,8 @@ const MockUserPersonalInfo: UserPersonalInfo = {
   updated_at: MockUser.updated_at,
 };
 
-const MockUserContactInfo: UserContactInfo = {
-  id: MockUser.user_contact_info_id,
+const MockUserContactData: UserContactData = {
+  id: MockUser.user_contact_data_id,
   username: MockICreateUser.username,
   email: MockICreateUser.email,
   phone: MockICreateUser.phone,
@@ -112,8 +112,8 @@ const MockUserContactInfo: UserContactInfo = {
   updated_at: MockUser.updated_at,
 };
 
-const MockUserSecurityInfo: UserSecurityInfo = {
-  id: MockUser.user_security_info_id,
+const MockUserSecurityData: UserSecurityData = {
+  id: MockUser.user_security_data_id,
   hashed_password: MockICreateUser.hashedPassword,
   salt: MockICreateUser.salt,
   confirmation_token: MockICreateUser.confirmationToken,
@@ -128,9 +128,9 @@ const MockUserSecurityInfo: UserSecurityInfo = {
 
 export const MockUserData = {
   ...MockUser,
-  personal: MockUserPersonalInfo,
-  contact: MockUserContactInfo,
-  security: MockUserSecurityInfo,
+  personal: MockUserPersonalData,
+  contact: MockUserContactData,
+  security: MockUserSecurityData,
 };
 
 export const MockPrismaUser: PrismaUser = {

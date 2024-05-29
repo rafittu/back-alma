@@ -2,9 +2,9 @@ import { faker } from '@faker-js/faker';
 import {
   Channel,
   User,
-  UserContactInfo,
-  UserPersonalInfo,
-  UserSecurityInfo,
+  UserContactData,
+  UserPersonalData,
+  UserSecurityData,
   UserStatus,
 } from '@prisma/client';
 import { CredentialsDto } from '../../dto/credentials.dto';
@@ -32,9 +32,9 @@ export const MockUserCredentials: CredentialsDto = {
 
 export const MockUser: User = {
   id: faker.string.uuid(),
-  user_personal_info_id: faker.string.uuid(),
-  user_contact_info_id: faker.string.uuid(),
-  user_security_info_id: faker.string.uuid(),
+  user_personal_data_id: faker.string.uuid(),
+  user_contact_data_id: faker.string.uuid(),
+  user_security_data_id: faker.string.uuid(),
   origin_channel: Channel.WOPHI,
   allowed_channels: [Channel.WOPHI],
 
@@ -42,8 +42,8 @@ export const MockUser: User = {
   updated_at: new Date(),
 };
 
-const MockUserPersonalInfo: UserPersonalInfo = {
-  id: MockUser.user_personal_info_id,
+const MockUserPersonalData: UserPersonalData = {
+  id: MockUser.user_personal_data_id,
   first_name: faker.person.firstName(),
   last_name: faker.person.lastName(),
   cpf: '34151868810',
@@ -54,8 +54,8 @@ const MockUserPersonalInfo: UserPersonalInfo = {
   updated_at: MockUser.updated_at,
 };
 
-const MockUserContactInfo: UserContactInfo = {
-  id: MockUser.user_contact_info_id,
+const MockUserContactData: UserContactData = {
+  id: MockUser.user_contact_data_id,
   username: faker.internet.userName(),
   email: MockUserCredentials.email,
   phone: faker.phone.number(),
@@ -66,8 +66,8 @@ const MockUserContactInfo: UserContactInfo = {
 export const MockConfirmationToken = faker.string.alphanumeric();
 export const MockExpirationTokenTime = faker.date.future();
 
-export const MockUserSecurityInfo: UserSecurityInfo = {
-  id: MockUser.user_security_info_id,
+export const MockUserSecurityData: UserSecurityData = {
+  id: MockUser.user_security_data_id,
   hashed_password: MockUserCredentials.password,
   salt: faker.string.binary(),
   confirmation_token: MockConfirmationToken,
@@ -82,9 +82,9 @@ export const MockUserSecurityInfo: UserSecurityInfo = {
 
 export const MockUserData = {
   ...MockUser,
-  personal: MockUserPersonalInfo,
-  contact: MockUserContactInfo,
-  security: MockUserSecurityInfo,
+  personal: MockUserPersonalData,
+  contact: MockUserContactData,
+  security: MockUserSecurityData,
 };
 
 export const MockJWT = faker.string.alphanumeric();
@@ -114,7 +114,7 @@ export const MockAuthRequest: IAuthRequest = {
 } as IAuthRequest;
 
 export const MockPrismaUserByToken = {
-  ...MockUserSecurityInfo,
+  ...MockUserSecurityData,
   User: [
     {
       id: MockUserPayload.id,

@@ -73,19 +73,19 @@ describe('User Repository', () => {
 
     it('should create access to additional channel successfully', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockResolvedValueOnce(null);
 
       await userRepository.createAccessToAdditionalChannel(
         MockRequestChannelAccess,
       );
 
-      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.update).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if access to new channel is not created', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockRejectedValueOnce(
           new AppError(
             'user-repository.createAccessToAdditionalChannel',
@@ -395,21 +395,21 @@ describe('User Repository', () => {
 
       jest.spyOn(prismaService.user, 'delete').mockResolvedValueOnce(MockUser);
       jest
-        .spyOn(prismaService.userPersonalInfo, 'delete')
+        .spyOn(prismaService.userPersonalData, 'delete')
         .mockResolvedValueOnce(null);
       jest
-        .spyOn(prismaService.userContactInfo, 'delete')
+        .spyOn(prismaService.userContactData, 'delete')
         .mockResolvedValueOnce(null);
       jest
-        .spyOn(prismaService.userSecurityInfo, 'delete')
+        .spyOn(prismaService.userSecurityData, 'delete')
         .mockResolvedValueOnce(null);
 
       await userRepository.deleteUser(MockUser.id);
 
       expect(prismaService.user.delete).toHaveBeenCalledTimes(1);
-      expect(prismaService.userPersonalInfo.delete).toHaveBeenCalledTimes(1);
-      expect(prismaService.userContactInfo.delete).toHaveBeenCalledTimes(1);
-      expect(prismaService.userSecurityInfo.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userPersonalData.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userContactData.delete).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.delete).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if user not deleted', async () => {
