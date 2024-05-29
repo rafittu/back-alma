@@ -51,11 +51,11 @@ model UserContactInfo {
 }
 
 model UserSecurityInfo {
-  id                   String     @id @default(uuid()) @db.Uuid
-  password             String
+  id                   String     @id @unique @default(uuid()) @db.Uuid
+  hashed_password      String
   salt                 String
   confirmation_token   String?    @unique @db.VarChar(64)
-  recover_token        String?    @db.VarChar(64)
+  recover_token        String?    @unique @db.VarChar(64)
   token_expires_at     DateTime?
   ip_address_origin    String     @db.Inet()
   on_update_ip_address String?    @db.Inet()
@@ -63,7 +63,8 @@ model UserSecurityInfo {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt()
-  User       User[]
+
+  User User[]
 
   @@map("users_security_info")
 }

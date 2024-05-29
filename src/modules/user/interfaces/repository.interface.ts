@@ -26,7 +26,7 @@ export interface UserContactInfo {
 }
 
 export interface UserSecurityInfo {
-  password: string;
+  hashed_password: string;
   salt: string;
   confirmation_token: string;
   recover_token: string;

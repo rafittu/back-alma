@@ -68,7 +68,7 @@ export const MockExpirationTokenTime = faker.date.future();
 
 export const MockUserSecurityInfo: UserSecurityInfo = {
   id: MockUser.user_security_info_id,
-  password: MockUserCredentials.password,
+  hashed_password: MockUserCredentials.password,
   salt: faker.string.binary(),
   confirmation_token: MockConfirmationToken,
   recover_token: faker.string.alphanumeric(),

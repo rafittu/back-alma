@@ -114,7 +114,7 @@ const MockUserContactInfo: UserContactInfo = {
 
 const MockUserSecurityInfo: UserSecurityInfo = {
   id: MockUser.user_security_info_id,
-  password: MockICreateUser.hashedPassword,
+  hashed_password: MockICreateUser.hashedPassword,
   salt: MockICreateUser.salt,
   confirmation_token: MockICreateUser.confirmationToken,
   recover_token: faker.string.alphanumeric(),
