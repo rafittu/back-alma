@@ -34,7 +34,7 @@ export class AuthRepository implements IAuthRepository<User> {
         },
         security: {
           select: {
-            password: true,
+            hashed_password: true,
             status: true,
           },
         },
@@ -44,7 +44,7 @@ export class AuthRepository implements IAuthRepository<User> {
     if (userData) {
       const isPasswordValid = await this.securityService.comparePasswords(
         password,
-        userData.security.password,
+        userData.security.hashed_password,
       );
 
       if (isPasswordValid) {
@@ -94,7 +94,7 @@ export class AuthRepository implements IAuthRepository<User> {
     newChannel?: Channel,
   ): Promise<object> {
     try {
-      const { id } = await this.prisma.userSecurityInfo.update({
+      const { id } = await this.prisma.userSecurityData.update({
         data: {
           confirmation_token: null,
           token_expires_at: null,
@@ -114,7 +114,7 @@ export class AuthRepository implements IAuthRepository<User> {
             },
           },
           where: {
-            user_security_info_id: id,
+            user_security_data_id: id,
           } as Prisma.UserWhereUniqueInput,
         });
       }
@@ -133,16 +133,16 @@ export class AuthRepository implements IAuthRepository<User> {
 
   async sendRecoverPasswordEmail(email: string): Promise<string> {
     try {
-      const { user_security_info_id } = await this.prisma.user.findFirst({
+      const { user_security_data_id } = await this.prisma.user.findFirst({
         where: { contact: { email } },
-        select: { user_security_info_id: true },
+        select: { user_security_data_id: true },
       });
 
       const { token, expiresAt } = this.securityService.generateRandomToken();
 
-      await this.prisma.userSecurityInfo.update({
+      await this.prisma.userSecurityData.update({
         data: { recover_token: token, token_expires_at: expiresAt },
-        where: { id: user_security_info_id },
+        where: { id: user_security_data_id },
       });
 
       return token;
@@ -160,7 +160,7 @@ export class AuthRepository implements IAuthRepository<User> {
     password: string,
     ipAddress: string,
   ): Promise<object> {
-    const user = await this.prisma.userSecurityInfo.findFirst({
+    const user = await this.prisma.userSecurityData.findFirst({
       where: { recover_token: recoverToken },
     });
 
@@ -176,9 +176,9 @@ export class AuthRepository implements IAuthRepository<User> {
       const { hashedPassword, salt } =
         await this.securityService.hashPassword(password);
 
-      await this.prisma.userSecurityInfo.update({
+      await this.prisma.userSecurityData.update({
         data: {
-          password: hashedPassword,
+          hashed_password: hashedPassword,
           salt,
           recover_token: null,
           token_expires_at: null,
@@ -242,7 +242,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
   async findUserByToken(token: string): Promise<IUserByToken> {
     try {
-      const data = await this.prisma.userSecurityInfo.findFirst({
+      const data = await this.prisma.userSecurityData.findFirst({
         where: {
           OR: [{ confirmation_token: token }, { recover_token: token }],
         },
@@ -270,7 +270,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
   async deleteSecurityToken(token: string): Promise<void> {
     try {
-      await this.prisma.userSecurityInfo.updateMany({
+      await this.prisma.userSecurityData.updateMany({
         data: {
           confirmation_token: null,
           recover_token: null,

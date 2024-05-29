@@ -1,5 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ipv4Regex, ipv6Regex } from '../../utils/helpers/helpers-user-module';
+import {
+  ipv4Regex,
+  ipv6Regex,
+  validateCpf,
+} from '../../utils/helpers/helpers-user-module';
 import { AppError } from '../../../common/errors/Error';
 import { UserRepository } from '../repository/user.repository';
 import { IUserRepository } from '../interfaces/repository.interface';
@@ -25,6 +29,10 @@ export class CreateUserService {
     return ipv4Regex.test(ip) || ipv6Regex.test(ip);
   }
 
+  private validateCPF(cpf: string): boolean {
+    return validateCpf(cpf);
+  }
+
   private async formatSecurityInfo(
     createUserDto: CreateUserDto,
   ): Promise<Partial<ICreateUser>> {
@@ -45,6 +53,7 @@ export class CreateUserService {
     {
       firstName,
       lastName,
+      cpf,
       socialName,
       bornDate,
       motherName,
@@ -58,21 +67,22 @@ export class CreateUserService {
     return {
       id: user.id,
       personal: {
-        id: user.user_personal_info_id,
+        id: user.user_personal_data_id,
         firstName,
         lastName,
+        cpf,
         socialName,
-        bornDate,
+        bornDate: new Date(bornDate),
         motherName,
       },
       contact: {
-        id: user.user_contact_info_id,
+        id: user.user_contact_data_id,
         username,
         email,
         phone,
       },
       security: {
-        id: user.user_security_info_id,
+        id: user.user_security_data_id,
         status,
       },
       allowedChannels: user.allowed_channels,
@@ -84,6 +94,10 @@ export class CreateUserService {
   async execute(data: CreateUserDto, ipAddress: string): Promise<IUser> {
     if (!this.validateIpAddress(ipAddress)) {
       throw new AppError('user-service.createUser', 403, 'invalid ip address');
+    }
+
+    if (!this.validateCPF(data.cpf)) {
+      throw new AppError('user-service.createUser', 403, 'invalid user cpf');
     }
 
     const user =
@@ -152,6 +166,7 @@ export class CreateUserService {
       const user = await this.userRepository.createUser({
         ...data,
         ipAddressOrigin: ipAddress,
+        bornDate: new Date(data.bornDate),
         hashedPassword,
         salt,
         confirmationToken,

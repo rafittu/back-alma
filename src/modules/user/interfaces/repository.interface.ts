@@ -8,24 +8,25 @@ import { UserStatus } from './user-status.enum';
 import { Channel } from '@prisma/client';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
-export interface UserPersonalInfo {
+export interface UserPersonalData {
   first_name: string;
   last_name: string;
+  cpf: string;
   social_name?: string;
-  born_date: string;
+  born_date: Date;
   mother_name: string;
   updated_at?: string;
 }
 
-export interface UserContactInfo {
+export interface UserContactData {
   username: string;
   email: string;
   phone: string;
   updated_at?: string;
 }
 
-export interface UserSecurityInfo {
-  password: string;
+export interface UserSecurityData {
+  hashed_password: string;
   salt: string;
   confirmation_token: string;
   recover_token: string;
@@ -42,8 +43,9 @@ export interface PrismaUser {
     id: string;
     first_name: string;
     last_name: string;
+    cpf: string;
     social_name?: string;
-    born_date: string;
+    born_date: Date;
     mother_name: string;
     updated_at: Date;
   };

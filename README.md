@@ -45,6 +45,7 @@ A API ALMA oferece diversas funcionalidades para gerenciamento de usuários, aut
     {
       "firstName": "John",
       "lastName": "Doe",
+      "cpf": "12365478914",
       "socialName": "Joane Eod",
       "username": "jd",
       "bornDate": "1990-01-01",

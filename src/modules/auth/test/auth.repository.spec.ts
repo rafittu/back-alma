@@ -13,7 +13,7 @@ import {
   MockUserCredentials,
   MockUserData,
   MockUserPayload,
-  MockUserSecurityInfo,
+  MockUserSecurityData,
 } from './mocks/auth.mock';
 import { Channel } from '@prisma/client';
 import { SecurityService } from '../../../common/services/security.service';
@@ -152,7 +152,7 @@ describe('Auth Repository', () => {
   describe('confirm account email', () => {
     it('should validate user email account successfully', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockResolvedValueOnce(MockUserData.security);
 
       const result = await authRepository.confirmAccountEmail(
@@ -163,13 +163,13 @@ describe('Auth Repository', () => {
 
       const response = { message: 'account email successfully confirmed' };
 
-      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
     });
 
     it('should add new channel successfully', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockResolvedValueOnce(MockUserData.security);
 
       jest.spyOn(prismaService.user, 'update').mockResolvedValueOnce(null);
@@ -183,14 +183,14 @@ describe('Auth Repository', () => {
 
       const response = { message: 'account email successfully confirmed' };
 
-      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.update).toHaveBeenCalledTimes(1);
       expect(prismaService.user.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
     });
 
     it('should throw an error if account not confirmed', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockRejectedValueOnce('invalid confirmation token');
 
       try {
@@ -219,7 +219,7 @@ describe('Auth Repository', () => {
       });
 
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockResolvedValueOnce(null);
 
       const result = await authRepository.sendRecoverPasswordEmail(
@@ -227,7 +227,7 @@ describe('Auth Repository', () => {
       );
 
       expect(prismaService.user.findFirst).toHaveBeenCalledTimes(1);
-      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockConfirmationToken);
     });
 
@@ -249,8 +249,8 @@ describe('Auth Repository', () => {
   describe('reset password', () => {
     it('should reset user account password', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'findFirst')
-        .mockResolvedValueOnce(MockUserSecurityInfo);
+        .spyOn(prismaService.userSecurityData, 'findFirst')
+        .mockResolvedValueOnce(MockUserSecurityData);
 
       jest.spyOn(securityService, 'hashPassword').mockResolvedValueOnce({
         hashedPassword: 'mockHashedPassword',
@@ -258,7 +258,7 @@ describe('Auth Repository', () => {
       });
 
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockResolvedValueOnce(null);
 
       const result = await authRepository.resetPassword(
@@ -269,15 +269,15 @@ describe('Auth Repository', () => {
 
       const response = { message: 'password reseted' };
 
-      expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.findFirst).toHaveBeenCalledTimes(1);
       expect(securityService.hashPassword).toHaveBeenCalledTimes(1);
-      expect(prismaService.userSecurityInfo.update).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(response);
     });
 
     it('should throw an error if recover token is invalid', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .spyOn(prismaService.userSecurityData, 'findFirst')
         .mockResolvedValueOnce(null);
 
       try {
@@ -295,8 +295,8 @@ describe('Auth Repository', () => {
 
     it('should throw an error if password not reseted', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'findFirst')
-        .mockResolvedValueOnce(MockUserSecurityInfo);
+        .spyOn(prismaService.userSecurityData, 'findFirst')
+        .mockResolvedValueOnce(MockUserSecurityData);
 
       jest.spyOn(securityService, 'hashPassword').mockResolvedValueOnce({
         hashedPassword: 'mockHashedPassword',
@@ -304,7 +304,7 @@ describe('Auth Repository', () => {
       });
 
       jest
-        .spyOn(prismaService.userSecurityInfo, 'update')
+        .spyOn(prismaService.userSecurityData, 'update')
         .mockRejectedValueOnce('user not updated');
 
       try {
@@ -324,25 +324,25 @@ describe('Auth Repository', () => {
   describe('find user by token', () => {
     it('should return user id and token expiration time successfully', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .spyOn(prismaService.userSecurityData, 'findFirst')
         .mockResolvedValueOnce(MockPrismaUserByToken);
 
       const result = await authRepository.findUserByToken(
-        MockUserSecurityInfo.confirmation_token,
+        MockUserSecurityData.confirmation_token,
       );
 
-      expect(prismaService.userSecurityInfo.findFirst).toHaveBeenCalledTimes(1);
+      expect(prismaService.userSecurityData.findFirst).toHaveBeenCalledTimes(1);
       expect(result).toEqual(MockUserByToken);
     });
 
     it('should throw an error if token is invalid', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'findFirst')
+        .spyOn(prismaService.userSecurityData, 'findFirst')
         .mockRejectedValueOnce(null);
 
       try {
         await authRepository.findUserByToken(
-          MockUserSecurityInfo.confirmation_token,
+          MockUserSecurityData.confirmation_token,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);
@@ -355,26 +355,26 @@ describe('Auth Repository', () => {
   describe('delete security token', () => {
     it('should delete security token and expiration time successfully', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'updateMany')
+        .spyOn(prismaService.userSecurityData, 'updateMany')
         .mockResolvedValueOnce(null);
 
       await authRepository.deleteSecurityToken(
-        MockUserSecurityInfo.confirmation_token,
+        MockUserSecurityData.confirmation_token,
       );
 
-      expect(prismaService.userSecurityInfo.updateMany).toHaveBeenCalledTimes(
+      expect(prismaService.userSecurityData.updateMany).toHaveBeenCalledTimes(
         1,
       );
     });
 
     it('should throw an error if token is invalid', async () => {
       jest
-        .spyOn(prismaService.userSecurityInfo, 'updateMany')
+        .spyOn(prismaService.userSecurityData, 'updateMany')
         .mockRejectedValueOnce(null);
 
       try {
         await authRepository.deleteSecurityToken(
-          MockUserSecurityInfo.confirmation_token,
+          MockUserSecurityData.confirmation_token,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(AppError);

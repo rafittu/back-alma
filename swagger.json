@@ -29,6 +29,7 @@
                   "value": {
                     "firstName": "John",
                     "lastName": "Doe",
+                    "cpf": "12365478914",
                     "socialName": "Joane Eod",
                     "username": "jd",
                     "bornDate": "1990-01-01",
@@ -45,6 +46,7 @@
                   "value": {
                     "firstName": "John",
                     "lastName": "Doe",
+                    "cpf": "12365478914",
                     "motherName": "Jane Doe",
                     "phone": "1234567890",
                     "email": "johndoe@example.com",
@@ -72,7 +74,7 @@
                     "firstName": "John",
                     "lastName": "Doe",
                     "socialName": "Joane Oed",
-                    "bornDate": "1990-01-01",
+                    "bornDate": "1990-01-01T00:00:00.000Z",
                     "motherName": "Jane Doe"
                   },
                   "contact": {
@@ -117,13 +119,29 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "invalid ip address",
-                    "code": "user-service.createUser",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "invalid data",
+                    "value": {
+                      "error": {
+                        "message": "invalid ip address",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "invalid user cpf",
+                    "value": {
+                      "error": {
+                        "message": "invalid user cpf",
+                        "code": "user-service.createUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -549,8 +567,9 @@
                     "id": "789012",
                     "firstName": "John",
                     "lastName": "Doe",
+                    "cpf": "12365478914",
                     "socialName": "JD",
-                    "bornDate": "1990-01-01",
+                    "bornDate": "1990-01-01T00:00:00.000Z",
                     "motherName": "Jane Doe",
                     "updatedAt": "2023-05-10T12:00:00Z"
                   },
@@ -678,7 +697,7 @@
                         "firstName": "John",
                         "lastName": "Doe",
                         "socialName": "JD",
-                        "bornDate": "1990-01-01",
+                        "bornDate": "1990-01-01T00:00:00.000Z",
                         "motherName": "Jane Doe",
                         "updatedAt": "2023-05-10T12:00:00Z"
                       },
@@ -811,7 +830,7 @@
                     "firstName": "John",
                     "lastName": "Doe",
                     "socialName": "JD",
-                    "bornDate": "1990-01-01",
+                    "bornDate": "1990-01-01T00:00:00.000Z",
                     "motherName": "Jane Doe",
                     "updatedAt": "2023-05-10T12:00:00Z"
                   },
@@ -895,13 +914,29 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "example": {
-                  "error": {
-                    "message": "invalid ip address",
-                    "code": "user-service.updateUser",
-                    "status": true
+                "examples": {
+                  "example1": {
+                    "summary": "invalid data",
+                    "value": {
+                      "error": {
+                        "message": "invalid ip address",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
                   },
-                  "data": {}
+                  "example2": {
+                    "summary": "invalid user cpf",
+                    "value": {
+                      "error": {
+                        "message": "invalid user cpf",
+                        "code": "user-service.updateUser",
+                        "status": true
+                      },
+                      "data": {}
+                    }
+                  }
                 }
               }
             }
@@ -1075,7 +1110,7 @@
                     "firstName": "John",
                     "lastName": "Doe",
                     "socialName": "JD",
-                    "bornDate": "1990-01-01",
+                    "bornDate": "1990-01-01T00:00:00.000Z",
                     "motherName": "Jane Doe",
                     "updatedAt": "2023-05-10T12:00:00Z"
                   },
@@ -1836,6 +1871,11 @@
             "maxLength": 125,
             "description": "Last name of the user"
           },
+          "cpf": {
+            "type": "string",
+            "maxLength": 11,
+            "description": "User cpf document. Only numbers."
+          },
           "socialName": {
             "type": "string",
             "maxLength": 250,
@@ -1978,6 +2018,10 @@
             "type": "string",
             "description": "Last name of the user"
           },
+          "cpf": {
+            "type": "string",
+            "description": "User cpf document"
+          },
           "socialName": {
             "type": "string",
             "description": "Social name of the user"
@@ -2025,7 +2069,6 @@
             "enum": [
               "PENDING_CONFIRMATION",
               "ACTIVE",
-              "BLOCKED",
               "CANCELLED",
               "BANNED"
             ],
@@ -2176,7 +2219,6 @@
             "enum": [
               "PENDING_CONFIRMATION",
               "ACTIVE",
-              "BLOCKED",
               "CANCELLED",
               "BANNED"
             ],

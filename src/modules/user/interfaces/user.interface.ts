@@ -4,8 +4,9 @@ import { UserStatus } from './user-status.enum';
 export interface ICreateUser {
   firstName: string;
   lastName: string;
+  cpf: string;
   socialName?: string;
-  bornDate: string;
+  bornDate: Date;
   motherName: string;
   username?: string;
   email: string;
@@ -26,8 +27,9 @@ export interface IUser {
     id: string;
     firstName: string;
     lastName: string;
+    cpf?: string;
     socialName?: string;
-    bornDate: string;
+    bornDate: Date;
     motherName: string;
     updatedAt?: Date;
   };

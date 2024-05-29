@@ -2,9 +2,9 @@ import { faker } from '@faker-js/faker';
 import {
   Channel,
   User,
-  UserContactInfo,
-  UserPersonalInfo,
-  UserSecurityInfo,
+  UserContactData,
+  UserPersonalData,
+  UserSecurityData,
 } from '@prisma/client';
 import {
   ICreateUser,
@@ -40,6 +40,7 @@ export const MockRefreshJWT = faker.string.alphanumeric();
 export const MockCreateUserDto: CreateUserDto = {
   firstName: faker.person.firstName(),
   lastName: faker.person.lastName(),
+  cpf: '34151868810',
   socialName: faker.person.fullName(),
   bornDate: faker.date.birthdate().toISOString().split('T')[0],
   motherName: faker.person.fullName({ sex: 'female' }),
@@ -54,8 +55,9 @@ export const MockCreateUserDto: CreateUserDto = {
 export const MockICreateUser: ICreateUser = {
   firstName: MockCreateUserDto.firstName,
   lastName: MockCreateUserDto.lastName,
+  cpf: MockCreateUserDto.cpf,
   socialName: MockCreateUserDto.socialName,
-  bornDate: MockCreateUserDto.bornDate,
+  bornDate: new Date(MockCreateUserDto.bornDate),
   motherName: MockCreateUserDto.motherName,
   username: MockCreateUserDto.username,
   email: MockCreateUserDto.email,
@@ -72,9 +74,9 @@ export const MockICreateUser: ICreateUser = {
 
 export const MockUser: User = {
   id: faker.string.uuid(),
-  user_personal_info_id: faker.string.uuid(),
-  user_contact_info_id: faker.string.uuid(),
-  user_security_info_id: faker.string.uuid(),
+  user_personal_data_id: faker.string.uuid(),
+  user_contact_data_id: faker.string.uuid(),
+  user_security_data_id: faker.string.uuid(),
   origin_channel: Channel.WOPHI,
   allowed_channels: [Channel.WOPHI],
 
@@ -83,16 +85,17 @@ export const MockUser: User = {
 };
 
 export const MockRequestChannelAccess: IRequestChannelAccess = {
-  id: MockUser.user_security_info_id,
+  id: MockUser.user_security_data_id,
   ipAddress: MockIpAddress,
   confirmationToken: faker.string.alphanumeric(),
   tokenExpiresAt: faker.date.future(),
 };
 
-const MockUserPersonalInfo: UserPersonalInfo = {
-  id: MockUser.user_personal_info_id,
+const MockUserPersonalData: UserPersonalData = {
+  id: MockUser.user_personal_data_id,
   first_name: MockICreateUser.firstName,
   last_name: MockICreateUser.lastName,
+  cpf: MockICreateUser.cpf,
   social_name: MockICreateUser.socialName,
   born_date: MockICreateUser.bornDate,
   mother_name: MockICreateUser.motherName,
@@ -100,8 +103,8 @@ const MockUserPersonalInfo: UserPersonalInfo = {
   updated_at: MockUser.updated_at,
 };
 
-const MockUserContactInfo: UserContactInfo = {
-  id: MockUser.user_contact_info_id,
+const MockUserContactData: UserContactData = {
+  id: MockUser.user_contact_data_id,
   username: MockICreateUser.username,
   email: MockICreateUser.email,
   phone: MockICreateUser.phone,
@@ -109,9 +112,9 @@ const MockUserContactInfo: UserContactInfo = {
   updated_at: MockUser.updated_at,
 };
 
-const MockUserSecurityInfo: UserSecurityInfo = {
-  id: MockUser.user_security_info_id,
-  password: MockICreateUser.hashedPassword,
+const MockUserSecurityData: UserSecurityData = {
+  id: MockUser.user_security_data_id,
+  hashed_password: MockICreateUser.hashedPassword,
   salt: MockICreateUser.salt,
   confirmation_token: MockICreateUser.confirmationToken,
   recover_token: faker.string.alphanumeric(),
@@ -125,9 +128,9 @@ const MockUserSecurityInfo: UserSecurityInfo = {
 
 export const MockUserData = {
   ...MockUser,
-  personal: MockUserPersonalInfo,
-  contact: MockUserContactInfo,
-  security: MockUserSecurityInfo,
+  personal: MockUserPersonalData,
+  contact: MockUserContactData,
+  security: MockUserSecurityData,
 };
 
 export const MockPrismaUser: PrismaUser = {
@@ -136,6 +139,7 @@ export const MockPrismaUser: PrismaUser = {
     id: MockUserData.personal.id,
     first_name: MockUserData.personal.first_name,
     last_name: MockUserData.personal.last_name,
+    cpf: MockUserData.personal.cpf,
     social_name: MockUserData.personal.social_name,
     born_date: MockUserData.personal.born_date,
     mother_name: MockUserData.personal.mother_name,
@@ -164,6 +168,7 @@ export const MockIUser: IUser = {
     id: MockPrismaUser.personal.id,
     firstName: MockPrismaUser.personal.first_name,
     lastName: MockPrismaUser.personal.last_name,
+    cpf: MockPrismaUser.personal.cpf,
     socialName: MockPrismaUser.personal.social_name,
     bornDate: MockPrismaUser.personal.born_date,
     motherName: MockPrismaUser.personal.mother_name,

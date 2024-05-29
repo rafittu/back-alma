@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma.service';
 import {
   IUserRepository,
-  UserContactInfo,
-  UserPersonalInfo,
-  UserSecurityInfo,
+  UserContactData,
+  UserPersonalData,
+  UserSecurityData,
   PrismaUser,
   reactivateData,
 } from '../interfaces/repository.interface';
@@ -27,27 +27,29 @@ export class UserRepository implements IUserRepository<User> {
     private readonly securityService: SecurityService,
   ) {}
 
-  private formatPersonalInfo({
+  private formatPersonalData({
     firstName,
     lastName,
+    cpf,
     socialName,
     bornDate,
     motherName,
-  }: Partial<ICreateUser>): UserPersonalInfo {
+  }: Partial<ICreateUser>): UserPersonalData {
     return {
       first_name: firstName,
       last_name: lastName,
+      cpf,
       social_name: socialName || null,
       born_date: bornDate,
       mother_name: motherName,
     };
   }
 
-  private formatContactInfo({
+  private formatContactData({
     username,
     email,
     phone,
-  }: Partial<ICreateUser>): UserContactInfo {
+  }: Partial<ICreateUser>): UserContactData {
     /* istanbul ignore next */
     return {
       username: username || null,
@@ -56,16 +58,16 @@ export class UserRepository implements IUserRepository<User> {
     };
   }
 
-  private async formatSecurityInfo({
+  private async formatSecurityData({
     hashedPassword,
     salt,
     confirmationToken,
     tokenExpiresAt,
     ipAddressOrigin,
     status,
-  }: ICreateUser): Promise<UserSecurityInfo> {
+  }: ICreateUser): Promise<UserSecurityData> {
     return {
-      password: hashedPassword,
+      hashed_password: hashedPassword,
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
@@ -97,13 +99,13 @@ export class UserRepository implements IUserRepository<User> {
   async createUser(data: ICreateUser): Promise<User> {
     const userData = {
       personal: {
-        create: this.formatPersonalInfo(data),
+        create: this.formatPersonalData(data),
       },
       contact: {
-        create: this.formatContactInfo(data),
+        create: this.formatContactData(data),
       },
       security: {
-        create: await this.formatSecurityInfo(data),
+        create: await this.formatSecurityData(data),
       },
       origin_channel: data.originChannel,
       allowed_channels: data.allowedChannels,
@@ -134,7 +136,7 @@ export class UserRepository implements IUserRepository<User> {
     const { id, ipAddress, confirmationToken, tokenExpiresAt } = data;
 
     try {
-      await this.prisma.userSecurityInfo.update({
+      await this.prisma.userSecurityData.update({
         data: {
           confirmation_token: confirmationToken,
           token_expires_at: tokenExpiresAt,
@@ -183,10 +185,10 @@ export class UserRepository implements IUserRepository<User> {
       }
 
       const fieldsToDelete = [
-        'user_personal_info_id',
-        'user_contact_info_id',
-        'user_security_info_id',
-        'password',
+        'user_personal_data_id',
+        'user_contact_data_id',
+        'user_security_data_id',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',
@@ -195,6 +197,7 @@ export class UserRepository implements IUserRepository<User> {
         'on_update_ip_address',
         'origin_channel',
         'created_at',
+        'cpf',
       ];
 
       return this.fieldsToDelete(user, fieldsToDelete);
@@ -219,10 +222,10 @@ export class UserRepository implements IUserRepository<User> {
       });
 
       const fieldsToDelete = [
-        'user_personal_info_id',
-        'user_contact_info_id',
-        'user_security_info_id',
-        'password',
+        'user_personal_data_id',
+        'user_contact_data_id',
+        'user_security_data_id',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',
@@ -252,7 +255,7 @@ export class UserRepository implements IUserRepository<User> {
         include: {
           security: {
             select: {
-              password: true,
+              hashed_password: true,
             },
           },
         },
@@ -260,7 +263,7 @@ export class UserRepository implements IUserRepository<User> {
 
       const isPasswordMatch = await this.securityService.comparePasswords(
         data.oldPassword,
-        security.password,
+        security.hashed_password,
       );
 
       if (isPasswordMatch) {
@@ -292,12 +295,17 @@ export class UserRepository implements IUserRepository<User> {
       on_update_ip_address: securityData.onUpdateIpAddress,
     };
 
+    const dataToFormat = {
+      ...data,
+      bornDate: new Date(data.bornDate),
+    };
+
     const userData = {
       personal: {
-        update: this.formatPersonalInfo(data),
+        update: this.formatPersonalData(dataToFormat),
       },
       contact: {
-        update: this.formatContactInfo(data),
+        update: this.formatContactData(dataToFormat),
       },
       security: {
         update: securityInfo,
@@ -318,10 +326,10 @@ export class UserRepository implements IUserRepository<User> {
       });
 
       const fieldsToDelete = [
-        'user_personal_info_id',
-        'user_contact_info_id',
-        'user_security_info_id',
-        'password',
+        'user_personal_data_id',
+        'user_contact_data_id',
+        'user_security_data_id',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',
@@ -373,10 +381,10 @@ export class UserRepository implements IUserRepository<User> {
       });
 
       const fieldsToDelete = [
-        'user_personal_info_id',
-        'user_contact_info_id',
-        'user_security_info_id',
-        'password',
+        'user_personal_data_id',
+        'user_contact_data_id',
+        'user_security_data_id',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',
@@ -385,6 +393,7 @@ export class UserRepository implements IUserRepository<User> {
         'on_update_ip_address',
         'origin_channel',
         'created_at',
+        'cpf',
       ];
 
       return this.fieldsToDelete(user, fieldsToDelete);
@@ -426,14 +435,14 @@ export class UserRepository implements IUserRepository<User> {
           where: { id: userId },
         });
 
-        await this.prisma.userPersonalInfo.delete({
-          where: { id: userData.user_personal_info_id },
+        await this.prisma.userPersonalData.delete({
+          where: { id: userData.user_personal_data_id },
         });
-        await this.prisma.userContactInfo.delete({
-          where: { id: userData.user_contact_info_id },
+        await this.prisma.userContactData.delete({
+          where: { id: userData.user_contact_data_id },
         });
-        await this.prisma.userSecurityInfo.delete({
-          where: { id: userData.user_security_info_id },
+        await this.prisma.userSecurityData.delete({
+          where: { id: userData.user_security_data_id },
         });
       });
     } catch (error) {
