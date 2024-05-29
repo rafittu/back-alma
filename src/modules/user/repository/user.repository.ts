@@ -67,7 +67,7 @@ export class UserRepository implements IUserRepository<User> {
     status,
   }: ICreateUser): Promise<UserSecurityInfo> {
     return {
-      password: hashedPassword,
+      hashed_password: hashedPassword,
       salt,
       confirmation_token: confirmationToken,
       recover_token: null,
@@ -188,7 +188,7 @@ export class UserRepository implements IUserRepository<User> {
         'user_personal_info_id',
         'user_contact_info_id',
         'user_security_info_id',
-        'password',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',
@@ -225,7 +225,7 @@ export class UserRepository implements IUserRepository<User> {
         'user_personal_info_id',
         'user_contact_info_id',
         'user_security_info_id',
-        'password',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',
@@ -255,7 +255,7 @@ export class UserRepository implements IUserRepository<User> {
         include: {
           security: {
             select: {
-              password: true,
+              hashed_password: true,
             },
           },
         },
@@ -263,7 +263,7 @@ export class UserRepository implements IUserRepository<User> {
 
       const isPasswordMatch = await this.securityService.comparePasswords(
         data.oldPassword,
-        security.password,
+        security.hashed_password,
       );
 
       if (isPasswordMatch) {
@@ -329,7 +329,7 @@ export class UserRepository implements IUserRepository<User> {
         'user_personal_info_id',
         'user_contact_info_id',
         'user_security_info_id',
-        'password',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',
@@ -384,7 +384,7 @@ export class UserRepository implements IUserRepository<User> {
         'user_personal_info_id',
         'user_contact_info_id',
         'user_security_info_id',
-        'password',
+        'hashed_password',
         'salt',
         'confirmation_token',
         'recover_token',

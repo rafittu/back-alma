@@ -34,7 +34,7 @@ export class AuthRepository implements IAuthRepository<User> {
         },
         security: {
           select: {
-            password: true,
+            hashed_password: true,
             status: true,
           },
         },
@@ -44,7 +44,7 @@ export class AuthRepository implements IAuthRepository<User> {
     if (userData) {
       const isPasswordValid = await this.securityService.comparePasswords(
         password,
-        userData.security.password,
+        userData.security.hashed_password,
       );
 
       if (isPasswordValid) {
@@ -178,7 +178,7 @@ export class AuthRepository implements IAuthRepository<User> {
 
       await this.prisma.userSecurityInfo.update({
         data: {
-          password: hashedPassword,
+          hashed_password: hashedPassword,
           salt,
           recover_token: null,
           token_expires_at: null,
