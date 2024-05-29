@@ -67,7 +67,7 @@ export class CreateUserService {
     return {
       id: user.id,
       personal: {
-        id: user.user_personal_info_id,
+        id: user.user_personal_data_id,
         firstName,
         lastName,
         cpf,
@@ -76,13 +76,13 @@ export class CreateUserService {
         motherName,
       },
       contact: {
-        id: user.user_contact_info_id,
+        id: user.user_contact_data_id,
         username,
         email,
         phone,
       },
       security: {
-        id: user.user_security_info_id,
+        id: user.user_security_data_id,
         status,
       },
       allowedChannels: user.allowed_channels,
