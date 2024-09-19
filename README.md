@@ -21,11 +21,13 @@ Este projeto utiliza as seguintes tecnologias:
 - **Redis** para armazenamento em memória
 - **Amazon Simple Queue Service (SQS)** para comunicação assíncrona entre serviços;
 
-- **Docker** como uma ferramenta de containerização;
-
 - **JWT** para autenticação e autorização de acesso;
 - **Bcrypt** e **Crypto** como ferramenta de criptografia;
 - **Passport.js** para implementação de estratégias de autenticação;
+
+- **Helmet** para configuração segura dos cabeçalhos HTTP;
+- **CORS** para controle de acesso à API;
+- **Docker** como uma ferramenta de containerização;
 
 - **Jest** para execução dos testes unitários;
 - **Swagger** para documentação da API;
